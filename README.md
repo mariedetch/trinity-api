@@ -1,73 +1,211 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Stock Management API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Une API RESTful pour la gestion de stock et des ventes.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
+## Table des matières
+- [Installation](#installation)
+- [Usage](#usage)
+- [Documentation de l'API](#documentation-de-lapi)
+- [Tests](#tests)
+- [Structure du projet](#structure-du-projet)
+- [Dépendances](#dépendances)
 ## Installation
 
+### Prérequis
+- [Node.js](https://nodejs.org/) version `20.x` ou supérieure
+- [npm](https://www.npmjs.com/) version `10.7.x` ou supérieure ou [yarn](https://yarnpkg.com/)
+- [PostgreSQL](https://www.postgresql.org/) version `14.x` ou supérieure
+
+### Cloner le dépôt
 ```bash
-$ npm install
+git clone git@t-dev.epitest.eu:COT_1/T-DEV-702-Api.git
+cd T-DEV-702-Api
 ```
 
-## Running the app
-
+### Installation des dépendances
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
 ```
 
-## Test
-
+### Configuration de l'environnement
+Créez un fichier .env à la racine du projet avec les variables suivantes :
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+APP_NAME="Secure Sante"
+APP_PORT=3000
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_PASSWORD=yourpassword
+DB_NAME=mydatabase
+JWT_SECRET=mysecretkey
 ```
 
-## Support
+## Usage
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### Démarrer le serveur
+```bash
+npm run start
+```
 
-## Stay in touch
+L'API sera accessible à http://localhost:3000.
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### Schéma de Réponse de l'API
+Les réponses de l'API suivent un format standard pour assurer la cohérence. Les schémas de réponse sont définis comme suit :
 
-## License
+### 1. Réponse de Succès
 
-Nest is [MIT licensed](LICENSE).
+#### a. Réponse avec un Objet Simple
+Lorsque l'API retourne un seul objet (ex. un utilisateur), la réponse est structurée comme suit :
+
+**Réponse HTTP 200 OK**
+```json
+{
+  "status_code": 200,
+  "timestamp": "2024-08-20T12:34:56Z",
+  "message": "Succès",
+  "data": {
+    "id": 1,
+    "name": "John Doe",
+    "email": "john.doe@example.com"
+  }
+}
+```
+
+#### b. Réponse avec une Liste d'Objets
+Pour les réponses contenant une liste d'objets (ex. liste des utilisateurs), la structure est :
+
+**Réponse HTTP 200 OK**
+
+```json
+{
+  "status_code": 200,
+  "timestamp": "2024-08-20T12:34:56Z",
+  "message": "Succès",
+  "data": [
+    {
+      "id": 1,
+      "name": "John Doe",
+      "email": "john.doe@example.com"
+    },
+    {
+      "id": 2,
+      "name": "Jane Smith",
+      "email": "jane.smith@example.com"
+    }
+  ]
+}
+```
+
+#### c. Réponse avec Pagination
+Lorsque les données sont paginées, la réponse inclut des informations sur la pagination :
+
+**Réponse HTTP 200 OK**
+
+```json
+{
+  "status_code": 200,
+  "timestamp": "2024-08-20T12:34:56Z",
+  "message": "Succès",
+  "data": {
+    "items": [
+      {
+        "id": 1,
+        "name": "John Doe",
+        "email": "john.doe@example.com"
+      },
+      {
+        "id": 2,
+        "name": "Jane Smith",
+        "email": "jane.smith@example.com"
+      }
+    ],
+    "current_page": 1,
+    "last_page": 5,
+    "total_items": 50,
+    "per_page": 10
+  }
+}
+```
+
+### 2. Réponse d'Erreur
+Les erreurs sont renvoyées avec un format standard qui inclut le code d'état HTTP, un message d'erreur, et éventuellement des détails supplémentaires.
+
+```json
+{
+  "status_code": 404,
+  "timestamp": "2024-08-20T12:34:56Z",
+  "message": "Ressource non trouvée",
+  "error": "Not Found"
+}
+```
+
+## Tests
+
+### Exécution des tests
+1. Lancez les tests unitaires :
+```bash
+npm run test
+```
+2. Lancez les tests d'intégration :
+```bash
+npm run test:integration
+```
+3. Lancez les tests unitaires :
+```bash
+npm run test:coverage
+```
+
+## Structure du projet
+```bash
+├── src/
+│   ├── config/           # Configuration de l'application (base de données, environnements, etc.)
+│   │   ├── database.config.ts
+│   │   └── environment.config.ts
+│   ├── core/             # Composants principaux (middlewares, gestion des erreurs, etc.)
+│   │   ├── controllers/
+│   │   ├── middlewares/
+│   │   ├── exceptions/
+│   │   ├── services/
+│   │   └── guards/
+│   ├── database/         # Gestion de la base de données
+│   │   ├── factories/
+│   │   ├── migrations/
+│   │   ├── seeders/
+│   │   └── subscribers/
+│   ├── features/         # Modules fonctionnels (clients, factures, produits, services)
+│   │   └── feature1/     # Exemple de module fonctionnel
+|   │       ├── dto/      # Data Transfer Objects
+|   │       ├── entities/ # Modèles de données
+|   │       ├── enums/    # Énumérations
+|   │       ├── repositories/    # Repositories
+|   │       ├── feature1.container.ts   # Conteneur d'injection de dépendances à l'échelle du module
+|   │       ├── feature1.controller.ts  # Contrôleur (gère les routes et les requêtes HTTP)
+|   │       ├── feature1.routes.ts      # Routes (définit les endpoints et les middlewares associés)
+|   │       └── feature1.service.ts     # Service (logique métier)
+│   ├── shared/            # Code partagé entre différents modules
+│   │   ├── utils/         # Fonctions utilitaires communes
+│   │   ├── constants/     # Constantes globales
+│   │   └── interfaces/    # Interfaces globales
+│   ├── app.container.ts   # Conteneur d'injection de dépendances à l'échelle de l'application
+│   ├── app.ts            # Point d'entrée de l'application
+│   ├── server.ts         # Initialisation du serveur
+├── tests/                # Tests (unitaires, d'intégration, etc.)
+│   ├── unit/             # Tests unitaires
+│   ├── integration/      # Tests d'intégration
+│   └── e2e/              # Tests end-to-end
+├── .env                  # Fichier d'environnement pour la production
+├── .env.development      # Fichier d'environnement pour le développement
+├── .env.production       # Fichier d'environnement pour la production
+├── .env.testing          # Fichier d'environnement pour les tests
+├── .gitignore            # Ignore les fichiers spécifiques dans Git
+├── package.json          # Gestionnaire de packages (npm)
+├── tsconfig.json         # Configuration TypeScript
+└── README.md             # Documentation du projet
+```
+
+## Dépendances
+
+- `express` : Framework web pour Node.js.
+- `typeorm` : ORM pour TypeScript et JavaScript (ES7+).
+- `jsonwebtoken` : Génération et vérification des tokens JWT.
+- `jest` : Framework de test pour JavaScript.
