@@ -1,0 +1,29 @@
+stages:
+  - build
+  - test
+  - validation
+  - preparation
+
+test:
+  stage: test
+  tags:
+    - frontend
+  image: node:20
+  script:
+    - echo "Exécution des tests unitaires"
+    - npm install
+    - npm run test
+  only:
+    - /^feature\/.*/
+
+build:
+  tags:
+      - frontend
+  image: node:20
+  stage: build
+  script:
+    - echo "Compilation et construction du code source"
+    - npm install
+    - npm run build
+  only:
+    - /^feature\/.*/
