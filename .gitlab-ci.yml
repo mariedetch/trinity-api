@@ -55,7 +55,7 @@ test-coverage:
   image: node:20
   script:
     - echo "Analyse de la couverture de code"
-    - npm run test:coverage
+    - npm run test:cov
   artifacts:
     paths:
       - coverage/
@@ -71,27 +71,3 @@ build:
   artifacts:
     paths:
       - dist/
-
-deploy-development:
-  stage: deploy
-  tags:
-    - frontend
-  image:
-    name: amazon/aws-cli
-    entrypoint: [""]
-  before_script: []
-  script:
-    - echo "Déploiement sur l'environnement de développement"
-    - aws s3 sync dist/ s3://$AWS_BUCKET_NAME_DEV --delete
-    - |
-      INVALIDATION_ID=$(aws cloudfront create-invalidation \
-        --distribution-id $AWS_CLOUDFRONT_DIST_ID_DEV \
-        --paths "/*" \
-        --query 'Invalidation.Id' --output text)
-      echo "Cache invalidé avec l'ID : $INVALIDATION_ID"
-  only:
-    - develop
-  variables:
-    AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID_DEV
-    AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY_DEV
-    AWS_DEFAULT_REGION: us-east-2
