@@ -15,7 +15,7 @@ before_script:
 scan-sensitive-informations:
   stage: validation
   tags:
-    - frontend
+    - api
   image: alpine
   before_script:
     - apk add --no-cache git make bash
@@ -28,7 +28,7 @@ scan-sensitive-informations:
 lint:
   stage: validation
   tags:
-    - frontend
+    - api
   image: node:20
   script:
     - echo "Analyse du code source"
@@ -37,7 +37,7 @@ lint:
 test:
   stage: test
   tags:
-    - frontend
+    - api
   image: node:20
   script:
     - echo "Exécution des tests unitaires"
@@ -51,7 +51,7 @@ test:
 test-coverage:
   stage: test
   tags:
-    - frontend
+    - api
   image: node:20
   script:
     - echo "Analyse de la couverture de code"
@@ -63,7 +63,7 @@ test-coverage:
 build:
   stage: build
   tags:
-      - frontend
+      - api
   image: node:20
   script:
     - echo "Compilation et construction du code source"
