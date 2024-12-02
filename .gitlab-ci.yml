@@ -5,6 +5,8 @@ stages:
 
 build_image:
   stage: build
+  tags:
+    - backend
   script:
     - docker info  # Vérifier que Docker est bien configuré
     - docker build -t my-image:latest .  # Construire l'image Docker
