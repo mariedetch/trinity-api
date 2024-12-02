@@ -1,95 +1,11 @@
+image: node:20
+
 stages:
-  - validation
-  - test
   - build
-  - deploy
-
-# cache:
-#   paths:
-#     - node_modules/
-
-# before_script:
-#   - echo "Installation des dépendences"
-#   - npm install
-
-# scan-sensitive-informations:
-#   stage: validation
-#   tags:
-#     - backend
-#   image: alpine
-#   before_script:
-#     - apk add --no-cache git make bash
-#     - git clone https://github.com/awslabs/git-secrets.git
-#     - cd git-secrets && make install && cd ..
-#   script:
-#     - echo "Vérification des infos sensibles"
-#     - git secrets --scan
-
-# lint:
-#   stage: validation
-#   tags:
-#     - backend
-#   image: node:20
-#   script:
-#     - echo "Analyse du code source"
-#     - npm run lint
-
-# test:
-#   stage: test
-#   tags:
-#     - backend
-#   image: node:20
-#   script:
-#     - echo "Exécution des tests unitaires"
-#     - npm run test
-#   artifacts:
-#     paths:
-#       - test-results/test-report.xml
-#     reports:
-#       junit: test-results/test-report.xml
-
-# test-coverage:
-#   stage: test
-#   tags:
-#     - backend
-#   image: node:20
-#   script:
-#     - echo "Analyse de la couverture de code"
-#     - npm run test:cov
-#   artifacts:
-#     paths:
-#       - coverage/
-
-# build:
-#   stage: build
-#   tags:
-#       - backend
-#   image: node:20
-#   script:
-#     - echo "Compilation et construction du code source"
-#     - npm run build
-#   artifacts:
-#     paths:
-#       - dist/
 
 build_image:
-  stage: deploy
-  tags:
-    - backend
+  stage: build
   script:
-    - docker build -t $IMAGE_NAME .
-
-tag_image:
-  stage: deploy
-  tags:
-    - backend
-  script:
-    - docker tag $IMAGE_NAME $ECR_URI/$IMAGE_NAME:latest
-
-push_image:
-  stage: deploy
-  tags:
-    - backend
-  script:
-    - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URI
-    - docker push $ECR_URI/$IMAGE_NAME:latest
+    - docker info  # Vérifier que Docker est bien configuré
+    - docker build -t my-image:latest .  # Construire l'image Docker
+    - docker run my-image:latest  # Exécuter l'image construite
