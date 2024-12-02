@@ -84,7 +84,7 @@ tag_image:
   tags:
     - backend
   script:
-    - docker tag $IMAGE_NAME $ECR_URI/$IMAGE_NAME:latest
+    - docker tag $IMAGE_NAME $ECR_URI:latest
 
 push_image:
   stage: deploy
@@ -92,4 +92,4 @@ push_image:
     - backend
   script:
     - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URI
-    - docker push $ECR_URI/$IMAGE_NAME:latest
+    - docker push $ECR_URI:latest
