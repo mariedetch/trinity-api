@@ -74,7 +74,8 @@ stages:
 
 
 before_script:
-  - apk add --no-cache aws-cli docker
+  - yum update -y
+  - yum install -y aws-cli docker
   - service docker start
 
 build_image:
