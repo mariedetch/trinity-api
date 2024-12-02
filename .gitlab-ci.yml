@@ -76,7 +76,6 @@ build_image:
   stage: deploy
   tags:
     - backend
-  image: docker:latest
   script:
     - docker build -t $IMAGE_NAME .
 
@@ -84,7 +83,6 @@ tag_image:
   stage: deploy
   tags:
     - backend
-  image: docker:latest
   script:
     - docker tag $IMAGE_NAME $ECR_URI/$IMAGE_NAME:latest
 
