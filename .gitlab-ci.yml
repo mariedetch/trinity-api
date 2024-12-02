@@ -72,11 +72,15 @@ stages:
 #     paths:
 #       - dist/
 
+
+before_script:
+  - apk add --no-cache aws-cli docker
+  - service docker start
+
 build_image:
   stage: deploy
   tags:
     - backend
-  before_script: []
   script:
     - docker build -t $IMAGE_NAME .
 
@@ -84,7 +88,6 @@ tag_image:
   stage: deploy
   tags:
     - backend
-  before_script: []
   script:
     - docker tag $IMAGE_NAME $ECR_URI/$IMAGE_NAME:latest
 
@@ -92,7 +95,6 @@ push_image:
   stage: deploy
   tags:
     - backend
-  before_script: []
   script:
     - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URI
     - docker push $ECR_URI/$IMAGE_NAME:latest
