@@ -15,7 +15,7 @@ before_script:
 scan-sensitive-informations:
   stage: validation
   tags:
-    - api
+    - backend
   image: alpine
   before_script:
     - apk add --no-cache git make bash
@@ -28,7 +28,7 @@ scan-sensitive-informations:
 lint:
   stage: validation
   tags:
-    - api
+    - backend
   image: node:20
   script:
     - echo "Analyse du code source"
@@ -37,7 +37,7 @@ lint:
 test:
   stage: test
   tags:
-    - api
+    - backend
   image: node:20
   script:
     - echo "Exécution des tests unitaires"
@@ -51,7 +51,7 @@ test:
 test-coverage:
   stage: test
   tags:
-    - api
+    - backend
   image: node:20
   script:
     - echo "Analyse de la couverture de code"
@@ -63,7 +63,7 @@ test-coverage:
 build:
   stage: build
   tags:
-      - api
+      - backend
   image: node:20
   script:
     - echo "Compilation et construction du code source"
@@ -71,3 +71,35 @@ build:
   artifacts:
     paths:
       - dist/
+  only:
+    - /^feature\/.*/
+    - /^bugfix\/.*/
+    - /^hotfix\/.*/
+
+build-image:
+  stage: build
+  tags:
+    - backend
+  script:
+    - docker build -t $IMAGE_NAME .
+  only:
+    - develop
+
+tag-image:
+  stage: build
+  tags:
+    - backend
+  script:
+    - docker tag $IMAGE_NAME $ECR_URI:latest
+  only:
+    - develop
+
+push-image:
+  stage: build
+  tags:
+    - backend
+  script:
+    - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URI
+    - docker push $ECR_URI:latest
+  only:
+    - develop
