@@ -34,13 +34,7 @@ lint:
   script:
     - echo "Analyse du code source"
     - npm run lint
-  cache:
-    key: "$CI_COMMIT_REF_SLUG-lint"
-    paths:
-      - node_modules/
-  after_script:
-    - echo "Nettoyage des caches inutiles"
-    - rm -rf node_modules
+
 test:
   stage: test
   tags:
