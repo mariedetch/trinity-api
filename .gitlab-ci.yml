@@ -30,6 +30,7 @@ lint:
   tags:
     - api
   image: node:20
+  before_script: []
   script:
     - echo "Analyse du code source"
     - npm run lint
