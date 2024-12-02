@@ -8,4 +8,5 @@ build_image:
   tags:
     - backend
   script:
-    - sudo docker info
+    - whoami
+    - docker info
