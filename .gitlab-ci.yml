@@ -72,12 +72,6 @@ stages:
 #     paths:
 #       - dist/
 
-
-before_script:
-  - yum update -y
-  - yum install -y aws-cli docker
-  - service docker start
-
 build_image:
   stage: deploy
   tags:
