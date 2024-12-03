@@ -15,10 +15,10 @@ before_script:
 scan-sensitive-informations:
   stage: validation
   tags:
-    - backend
+    - backend-docker
   image: alpine
   before_script:
-    - yum install -y git make bash
+    - apk add --no-cache git make bash
     - git clone https://github.com/awslabs/git-secrets.git
     - cd git-secrets && make install && cd ..
   script:
@@ -28,7 +28,7 @@ scan-sensitive-informations:
 lint:
   stage: validation
   tags:
-    - backend
+    - backend-docker
   image: node:20
   script:
     - echo "Analyse du code source"
@@ -37,7 +37,7 @@ lint:
 test:
   stage: test
   tags:
-    - backend
+    - backend-docker
   image: node:20
   script:
     - echo "Exécution des tests unitaires"
@@ -51,7 +51,7 @@ test:
 test-coverage:
   stage: test
   tags:
-    - backend
+    - backend-docker
   image: node:20
   script:
     - echo "Analyse de la couverture de code"
