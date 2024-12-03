@@ -80,6 +80,7 @@ build-image:
   stage: build
   tags:
     - backend
+  before_script: []
   script:
     - docker build -t $IMAGE_NAME .
   only:
@@ -89,6 +90,7 @@ tag-image:
   stage: build
   tags:
     - backend
+  before_script: []
   script:
     - docker tag $IMAGE_NAME $ECR_URI:latest
   only:
@@ -98,6 +100,7 @@ push-image:
   stage: build
   tags:
     - backend
+  before_script: []
   script:
     - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URI
     - docker push $ECR_URI:latest
