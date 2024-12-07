@@ -1,97 +1,108 @@
 stages:
-  - setup
   - validation
   - test
   - build
   - deploy
 
 cache:
-  key: ${CI_COMMIT_REF_SLUG}
   paths:
-    - .pub-cache/
-    - /sdks/flutter/bin/cache/
-    - build/
-    - coverage/
+    - node_modules/
 
-setup:
-  stage: setup
-  tags:
-    - mobile-app
-  image: ghcr.io/cirruslabs/flutter:3.24.5
-  script:
-    - echo "Configuration initiale"
-    - flutter doctor
-    - flutter pub get
+before_script:
+  - echo "Installation des dépendences"
+  - npm install
 
 scan-sensitive-informations:
   stage: validation
   tags:
-    - mobile-app
-  image: dart:stable
+    - backend-docker
+  image: alpine
   before_script:
-    - apt-get update && apt-get install -y git make bash
+    - apk add --no-cache git make bash
     - git clone https://github.com/awslabs/git-secrets.git
     - cd git-secrets && make install && cd ..
   script:
     - echo "Vérification des infos sensibles"
     - git secrets --scan
-  except:
-    - main
+
+lint:
+  stage: validation
+  tags:
+    - backend-docker
+  image: node:20
+  script:
+    - echo "Analyse du code source"
+    - npm run lint
 
 test:
   stage: test
   tags:
-    - mobile-app
-  image: ghcr.io/cirruslabs/flutter:3.24.5
+    - backend-docker
+  image: node:20
   script:
     - echo "Exécution des tests unitaires"
-    - flutter test
-  except:
-    - main
+    - npm run test
+  artifacts:
+    paths:
+      - test-results/test-report.xml
+    reports:
+      junit: test-results/test-report.xml
 
 test-coverage:
   stage: test
   tags:
-    - mobile-app
-  image: ghcr.io/cirruslabs/flutter:3.24.5
+    - backend-docker
+  image: node:20
   script:
     - echo "Analyse de la couverture de code"
-    - flutter test --coverage
+    - npm run test:cov
   artifacts:
     paths:
       - coverage/
-  needs:
-    - test
-  except:
-    - main
 
 build:
   stage: build
   tags:
-    - mobile-app
-  image: ghcr.io/cirruslabs/flutter:3.24.5
+      - backend
+  image: node:20
   script:
-    - echo "Compilation et construction de la version $CI_COMMIT_TAG"
-    - flutter build apk --release
+    - echo "Compilation et construction du code source"
+    - npm run build
   artifacts:
     paths:
-      - build/app/outputs/flutter-apk/app-release.apk
+      - dist/
   only:
-    - tags
-    - /^v\d+\.\d+\.\d+$/
+    - /^feature\/.*/
+    - /^bugfix\/.*/
+    - /^hotfix\/.*/
 
-deploy:
-  stage: deploy
+build-image:
+  stage: build
   tags:
-    - mobile-app
-  image:
-    name: amazon/aws-cli
-    entrypoint: [""]
+    - backend
   before_script: []
   script:
-    - echo "Déploiement de l'APK"
-    - echo "Vérification que le fichier APK existe..."
-    - aws s3 cp build/app/outputs/flutter-apk/app-release.apk s3://$AWS_BUCKET_NAME/trinity-app-$CI_COMMIT_TAG.apk
+    - docker build -t $IMAGE_NAME .
   only:
-    - tags
-    - /^v\d+\.\d+\.\d+$/
+    - develop
+
+tag-image:
+  stage: build
+  tags:
+    - backend
+  before_script: []
+  script:
+    - docker tag $IMAGE_NAME $ECR_URI:latest
+  only:
+    - develop
+
+push-image:
+  stage: build
+  tags:
+    - backend
+  before_script: []
+  script:
+    - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URI
+    - docker push $ECR_URI:latest
+  only:
+    - develop
