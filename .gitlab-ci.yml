@@ -1,16 +1,24 @@
 stages:
+  - setup
   - validation
   - test
   - build
   - deploy
 
-cache:
-  paths:
-    - node_modules/
+default:
+  tags:
+    - backend-docker
+  image: node:20
 
-before_script:
-  - echo "Installation des dépendences"
-  - npm install
+setup:
+  stage: setup
+  script:
+    - echo "Installation des dépendances"
+    - npm ci
+  artifacts:
+    paths:
+      - node_modules/
+    expire_in: 1h
 
 scan-sensitive-informations:
   stage: validation
@@ -27,18 +35,16 @@ scan-sensitive-informations:
 
 lint:
   stage: validation
-  tags:
-    - backend-docker
-  image: node:20
+  dependencies:
+    - setup
   script:
     - echo "Analyse du code source"
     - npm run lint
 
 test:
   stage: test
-  tags:
-    - backend-docker
-  image: node:20
+  dependencies:
+    - setup
   script:
     - echo "Exécution des tests unitaires"
     - npm run test
@@ -50,9 +56,8 @@ test:
 
 test-coverage:
   stage: test
-  tags:
-    - backend-docker
-  image: node:20
+  dependencies:
+    - setup
   script:
     - echo "Analyse de la couverture de code"
     - npm run test:cov
@@ -62,19 +67,14 @@ test-coverage:
 
 build:
   stage: build
-  tags:
-      - backend
-  image: node:20
+  dependencies:
+    - setup
   script:
     - echo "Compilation et construction du code source"
     - npm run build
   artifacts:
     paths:
       - dist/
-  only:
-    - /^feature\/.*/
-    - /^bugfix\/.*/
-    - /^hotfix\/.*/
 
 build-image:
   stage: build
