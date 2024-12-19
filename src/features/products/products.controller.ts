@@ -8,6 +8,7 @@ import {
   Delete,
   Query,
   ParseUUIDPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -18,6 +19,7 @@ import { ApiSuccessResponse } from 'src/common/decorators/responses/api-success-
 import { ProductDto } from './dto/product.dto';
 import { JsonResponse } from 'src/common/helpers/json-response.helper';
 import { PaginationResource } from 'src/core/interfaces/pagination-resource.interface';
+import { AuthGuard } from '../auth/guards/auth.guard';
 
 @Controller({ path: 'products', version: '1' })
 @ApiTags('products')
@@ -52,6 +54,7 @@ export class ProductsController {
   }
 
   @Get(':id')
+  @UseGuards(AuthGuard)
   @ApiDefaultErrorResponse()
   @ApiSuccessResponse({
     model: ProductDto,
