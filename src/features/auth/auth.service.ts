@@ -60,7 +60,6 @@ export class AuthService {
       const accessToken = this.jwtService.sign(
         { userId: user.data.id, role: user.data.role },
         {
-          secret: this.configService.get<string>('ACCESS_TOKEN_SECRET'),
           expiresIn: '1h',
         },
       );
