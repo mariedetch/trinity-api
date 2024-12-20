@@ -47,12 +47,11 @@ export class AuthService {
 
   async refreshToken(refreshToken: string) {
     try {
-      // 1. Vérifie la validité du refresh token
       const payload = this.jwtService.verify(refreshToken, {
         secret: this.configService.get<string>('REFRESH_TOKEN_SECRET'),
       });
 
-      const user = await this.usersService.findOne(payload.userId); // Remplace avec ta méthode de récupération
+      const user = await this.usersService.findOne(payload.userId);
 
       if (!user) {
         throw new UnauthorizedException('User not found');
