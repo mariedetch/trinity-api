@@ -8,6 +8,10 @@ import { AbstractCrudService } from 'src/core/services/abstract-crud.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserDto } from './dto/user.dto';
+import {
+  JsonResponse,
+  successResponse,
+} from 'src/common/helpers/json-response.helper';
 
 @Injectable()
 export class UsersService
@@ -35,8 +39,11 @@ export class UsersService
     super(userRepository);
   }
 
-  async findByEmail(email: string): Promise<UserDto> {
+  async findByEmail(email: string): Promise<JsonResponse<UserDto>> {
     const entity = await this.repository.findOne({ where: { email } as any });
-    return this.convertToDto(entity);
+    return successResponse(
+      this.convertToDto(entity),
+      `${this.entityName} retrieved successfully`,
+    );
   }
 }
