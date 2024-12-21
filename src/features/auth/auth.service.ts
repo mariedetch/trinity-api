@@ -32,7 +32,10 @@ export class AuthService {
     };
 
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token: this.jwtService.sign(payload, {
+        secret: process.env.JWT_SECRET,
+        expiresIn: '1h',
+      }),
       token_type: 'Bearer',
       expired_in: 3600,
       user: {
