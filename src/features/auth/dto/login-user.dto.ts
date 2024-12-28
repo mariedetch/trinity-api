@@ -7,7 +7,7 @@ export class LoginUserDto {
   email: string;
 
   @IsString()
-  @MinLength(4)
+  @MinLength(8)
   @MaxLength(20)
   @ApiProperty()
   password: string;

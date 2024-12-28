@@ -1,60 +1,46 @@
 import {
   IsEnum,
-  IsNumber,
-  IsOptional,
   IsPhoneNumber,
   IsString,
   IsEmail,
   MinLength,
   MaxLength,
   Matches,
+  IsOptional,
   ValidateNested,
   IsNotEmpty,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { Role } from '../enums/role.enum';
-
-class PaymentMethod {
-  @IsString()
-  @ApiProperty({ example: '1234567812345678', description: 'Card number' })
-  card_number: string;
-
-  @IsString()
-  @ApiProperty({ example: '12/25', description: 'Expiry date in MM/YY format' })
-  expiry_date: string;
-
-  @IsString()
-  @ApiProperty({ example: 'John Doe', description: 'Name on the card' })
-  name_on_card: string;
-
-  @IsString()
-  @MinLength(3)
-  @MaxLength(4)
-  @ApiProperty({ example: '123', description: 'Card security code (CVV)' })
-  security_code: string;
-}
+import { PaymentMethod } from './payment-methods.dto';
+import { Addresses } from './addresses.dto';
 
 export class CreateUserDto {
   @IsString()
   @ApiProperty()
+  @IsNotEmpty()
   first_name: string;
 
   @IsString()
+  @IsNotEmpty()
   @ApiProperty()
   last_name: string;
 
   @IsEnum(Role)
+  @IsNotEmpty()
   @ApiProperty({
     enum: [Role.CUSTOMER, Role.MANAGER],
   })
   role: Role;
 
   @IsPhoneNumber('BJ')
+  @IsNotEmpty()
   @ApiProperty()
   phonenumber: string;
 
   @IsEmail()
+  @IsNotEmpty()
   @ApiProperty()
   email: string;
 
@@ -62,6 +48,7 @@ export class CreateUserDto {
   @MinLength(4)
   @MaxLength(20)
   @ApiProperty()
+  @IsNotEmpty()
   @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
     message: 'password too weak',
   })
@@ -73,7 +60,15 @@ export class CreateUserDto {
   @ApiProperty({
     type: PaymentMethod,
     isArray: true,
-    description: 'List of payment methods',
   })
   payment_methods: PaymentMethod[];
+
+  @ValidateNested({ each: true })
+  @IsOptional()
+  @Type(() => Addresses)
+  @ApiProperty({
+    type: Addresses,
+    isArray: true,
+  })
+  addresses: Addresses[];
 }

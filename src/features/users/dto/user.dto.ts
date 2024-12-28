@@ -1,6 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Role } from '../enums/role.enum';
 import { Exclude, Expose } from 'class-transformer';
+import { Type } from 'class-transformer';
+import { PaymentMethod } from './payment-methods.dto';
+import { Addresses } from './addresses.dto';
 
 @Exclude()
 export class UserDto {
@@ -36,24 +39,17 @@ export class UserDto {
 
   @Expose()
   @ApiProperty({
-    type: [Object],
+    type: PaymentMethod,
+    isArray: true,
   })
-  paymentMethods: {
-    card_number: string;
-    expiry_date: string;
-    name_on_card: string;
-    security_code: string;
-  }[];
+  @Type(() => PaymentMethod)
+  payment_methods: PaymentMethod[];
 
   @Expose()
   @ApiProperty({
-    type: [Object],
+    type: Addresses,
+    isArray: true,
   })
-  addresses: {
-    full_name: string;
-    country: string;
-    address: string;
-    city: string;
-    lot: string;
-  }[];
+  @Type(() => Addresses)
+  addresses: Addresses[];
 }

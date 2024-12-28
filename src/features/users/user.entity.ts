@@ -1,6 +1,6 @@
 import { Column, Entity } from 'typeorm';
 import { Role } from './enums/role.enum';
-import { BaseEntity } from 'src/core/entities/base.entity';
+import { BaseEntity } from '../../../src/core/entities/base.entity';
 
 @Entity('users')
 export class User extends BaseEntity {
@@ -23,19 +23,21 @@ export class User extends BaseEntity {
   password: string;
 
   @Column({ type: 'json', nullable: true })
-  paymentMethods: {
+  payment_methods: {
     card_number: string;
     expiry_date: string;
-    name_on_card: string;
+    holder_name: string;
     security_code: string;
   }[];
 
   @Column({ type: 'json', nullable: true })
   addresses: {
-    full_name: string;
     country: string;
     address: string;
     city: string;
-    lot: string;
+    state: string;
+    postal_code: string;
+    phone: string;
+    email: string;
   }[];
 }

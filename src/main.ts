@@ -34,14 +34,6 @@ async function bootstrap() {
     }),
   );
   app.use(helmet());
-  app.use(
-    session({
-      secret: configService.get<string>('SESSION_SECRET'),
-      resave: false,
-      saveUninitialized: false,
-      cookie: { secure: false },
-    }),
-  );
 
   const {
     invalidCsrfTokenError,

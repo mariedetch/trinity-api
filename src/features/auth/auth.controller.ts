@@ -1,43 +1,41 @@
-import {
-  Controller,
-  Post,
-  Body,
-  Req,
-  UseGuards,
-  Headers,
-} from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Headers } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginUserDto } from './dto/login-user.dto';
-import { Request } from 'express';
-import { AuthGuard } from 'src/core/guards/auth.guard';
+import { AuthGuard } from '../../../src/core/guards/auth.guard';
+import { JsonResponse } from '../../../src/common/helpers/json-response.helper';
+import { LoginResponseDto } from './dto/login-response.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
-  async login(@Body() loginUserDto: LoginUserDto, @Req() req: Request) {
+  async login(
+    @Body() loginUserDto: LoginUserDto,
+  ): Promise<JsonResponse<LoginResponseDto>> {
     const { email, password } = loginUserDto;
-    return await this.authService.login(email, password, req);
+    return this.authService.login({ email, password });
   }
 
   @Post('refresh')
   @UseGuards(AuthGuard)
-  async refreshToken(@Headers('authorization') refreshToken: string) {
+  async refreshToken(
+    @Headers('authorization') refreshToken: string,
+  ): Promise<JsonResponse<LoginResponseDto>> {
     return this.authService.refreshToken(refreshToken);
   }
 
-  @Post('me')
+  @Post('user')
   @UseGuards(AuthGuard)
-  async getAuthUser(@Req() req: Request) {
-    const token = req.headers.authorization.split(' ')[1];
+  async getAuthUser(@Headers('authorization') authHeader: string) {
+    const token = authHeader?.split(' ')[1];
     return await this.authService.getAuthUser(token);
   }
 
   @Post('logout')
   @UseGuards(AuthGuard)
-  async logout(@Req() req: Request) {
-    const token = req.headers.authorization.split(' ')[1];
-    return this.authService.logout(token, req);
+  async logout(@Headers('authorization') authHeader: string) {
+    const token = authHeader?.split(' ')[1];
+    return this.authService.logout(token);
   }
 }

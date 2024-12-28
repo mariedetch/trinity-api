@@ -5,7 +5,7 @@ import { CrudService } from './crud-service.interface';
 import {
   JsonResponse,
   successResponse,
-} from 'src/common/helpers/json-response.helper';
+} from '../../../src/common/helpers/json-response.helper';
 
 @Injectable()
 export abstract class AbstractCrudService<
