@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -9,14 +13,16 @@ import {
 } from '../../../src/common/helpers/json-response.helper';
 import { plainToClass } from 'class-transformer';
 import { UserDto } from '../users/dto/user.dto';
-import { CsrfConfigService } from '../../core/services/config/csrf-config.service';
-import { JwtConfigService } from '../../../src/core/services/config/jwt-config.service';
+import { CsrfConfigService } from 'src/config/csrf/config.service';
+import { JwtConfigService } from 'src/config/jwt/config.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
   private revokedTokens: Set<string> = new Set();
 
   constructor(
+    private jwtService: JwtService,
     private readonly usersService: UsersService,
     private csrfConfigService: CsrfConfigService,
     private jwtConfigService: JwtConfigService,
@@ -25,7 +31,7 @@ export class AuthService {
   async validateUser(email: string, password: string) {
     const user = await this.usersService.findByEmail(email);
 
-    if (!user || !(await bcrypt.compare(password, user.data.password))) {
+    if (!user || !(await bcrypt.compare(password, user.password))) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -40,7 +46,10 @@ export class AuthService {
     };
 
     const data: LoginResponseDto = {
-      access_token: this.jwtConfigService.sign(payload),
+      access_token: this.jwtService.sign(payload, {
+        secret: this.jwtConfigService.secret,
+        expiresIn: this.jwtConfigService.expiresIn,
+      }),
       csrf_token: csrf_token,
       token_type: 'Bearer',
       expired_in: 3600,
@@ -48,6 +57,19 @@ export class AuthService {
     };
 
     return data;
+  }
+
+  getTokenFromHeader(authHeader: string): string {
+    if (!authHeader) {
+      throw new Error('Authorization header is missing');
+    }
+
+    const parts = authHeader.split(' ');
+    if (parts.length !== 2 || parts[0] !== 'Bearer') {
+      throw new Error('Invalid authorization header format');
+    }
+
+    return parts[1];
   }
 
   async login({
@@ -58,20 +80,22 @@ export class AuthService {
 
     const csrf_token = this.csrfConfigService.generateToken();
 
-    const data = this.generateAccessToken(user.data, csrf_token);
+    const data = this.generateAccessToken(user, csrf_token);
 
-    return successResponse(data, `User successfully logged in`, 201);
+    return successResponse(data, `User successfully logged in`, 200);
   }
 
   async refreshToken(
     refreshToken: string,
   ): Promise<JsonResponse<LoginResponseDto>> {
     try {
-      const payload = this.jwtConfigService.verify(refreshToken);
+      const payload = this.jwtService.verify(refreshToken, {
+        secret: this.jwtConfigService.secret,
+      });
       const user = await this.usersService.findOne(payload.sub);
 
       if (!user) {
-        throw new UnauthorizedException('User not found');
+        throw new NotFoundException('User not found');
       }
 
       const csrf_token = this.csrfConfigService.generateToken();
@@ -80,7 +104,7 @@ export class AuthService {
       return successResponse(
         plainToClass(LoginResponseDto, data),
         `Token successfully refreshed`,
-        201,
+        200,
       );
     } catch (error) {
       throw new UnauthorizedException('Invalid refresh token');
@@ -89,17 +113,19 @@ export class AuthService {
 
   async getAuthUser(token: string): Promise<JsonResponse<UserDto>> {
     try {
-      const payload = await this.jwtConfigService.verifyAsync(token);
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: this.jwtConfigService.secret,
+      });
 
       const user = await this.usersService.findOne(payload.sub);
       if (!user) {
-        throw new UnauthorizedException('User not found');
+        throw new UnauthorizedException('Not found');
       }
 
       return successResponse(
         plainToClass(UserDto, user),
         `User successfully gotten`,
-        201,
+        200,
       );
     } catch (error) {
       throw new UnauthorizedException('Invalid or expired token');
@@ -128,7 +154,9 @@ export class AuthService {
     const now = new Date();
     for (const token of this.revokedTokens) {
       try {
-        const payload = this.jwtConfigService.verify(token);
+        const payload = this.jwtService.verify(token, {
+          secret: this.jwtConfigService.secret,
+        });
         if (payload.exp * 1000 < now.getTime()) {
           this.revokedTokens.delete(token);
         }

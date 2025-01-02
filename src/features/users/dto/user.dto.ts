@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Role } from '../enums/role.enum';
+import { Role } from '../enum';
 import { Exclude, Expose } from 'class-transformer';
 import { Type } from 'class-transformer';
 import { PaymentMethod } from './payment-methods.dto';

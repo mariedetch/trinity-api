@@ -8,8 +8,10 @@ export class CsrfConfigService {
 
   constructor(private configService: ConfigService) {
     const { generateToken } = doubleCsrf({
-      getSecret: () => this.configService.get<string>('CSRF_SECRET'),
-      cookieName: '__Host-psifi.x-csrf-token',
+      getSecret: () => this.configService.get<string>('csrf.secret'),
+      cookieName:
+        this.configService.get<string>('csrf.cookieName') ||
+        '__Host-psifi.x-csrf-token',
       cookieOptions: {
         sameSite: 'lax',
         path: '/',
@@ -19,7 +21,7 @@ export class CsrfConfigService {
     this.tokenGenerator = generateToken;
   }
 
-  generateToken() {
+  generateToken(): string {
     return this.tokenGenerator();
   }
 }

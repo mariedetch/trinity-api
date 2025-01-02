@@ -12,7 +12,7 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { Role } from '../enums/role.enum';
+import { Role } from '../enum';
 import { PaymentMethod } from './payment-methods.dto';
 import { Addresses } from './addresses.dto';
 

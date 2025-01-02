@@ -22,20 +22,21 @@ export class AuthController {
   async refreshToken(
     @Headers('authorization') refreshToken: string,
   ): Promise<JsonResponse<LoginResponseDto>> {
-    return this.authService.refreshToken(refreshToken);
+    const token = this.authService.getTokenFromHeader(refreshToken);
+    return this.authService.refreshToken(token);
   }
 
   @Post('user')
   @UseGuards(AuthGuard)
   async getAuthUser(@Headers('authorization') authHeader: string) {
-    const token = authHeader?.split(' ')[1];
+    const token = this.authService.getTokenFromHeader(authHeader);
     return await this.authService.getAuthUser(token);
   }
 
   @Post('logout')
   @UseGuards(AuthGuard)
   async logout(@Headers('authorization') authHeader: string) {
-    const token = authHeader?.split(' ')[1];
+    const token = this.authService.getTokenFromHeader(authHeader);
     return this.authService.logout(token);
   }
 }
