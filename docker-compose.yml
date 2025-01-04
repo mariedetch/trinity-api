@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   api:
-    image: trinity-api:dev
+    image: ${IMAGE_NAME}
     restart: always
     container_name: trinity-api
     volumes:
