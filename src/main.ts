@@ -15,6 +15,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableVersioning({ type: VersioningType.URI });
+  app.setGlobalPrefix('api');
   app.useGlobalFilters(new TypeOrmexceptionFilter(), new HttpExceptionFilter());
   app.useGlobalPipes(
     new ValidationPipe({
@@ -45,7 +46,7 @@ export function configOpenApiDoc(app: INestApplication) {
     )
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('api/docs', app, document);
 }
 
 bootstrap();
