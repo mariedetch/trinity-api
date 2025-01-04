@@ -70,7 +70,7 @@ test-coverage:
 download-secrets:
   stage: build
   variables:
-    SECURE_FILES_DOWNLOAD_PATH: '/tmp/.secure_files'
+    SECURE_FILES_DOWNLOAD_PATH: '/tmp/.secure_files/'
   script:
     - curl -s https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer | bash
     - ls -lah /tmp/.secure_files
