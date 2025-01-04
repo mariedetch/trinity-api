@@ -28,7 +28,6 @@ build:
   stage: build
   dependencies:
     - install-dependencies
-    - download-secrets
   variables:
     SECURE_FILES_DOWNLOAD_PATH: '/tmp/.secure_files/'
   before_script:
@@ -48,8 +47,6 @@ build:
 
 deploy:
   stage: deploy
-  dependencies:
-    - download-secrets
   variables:
     SECURE_FILES_DOWNLOAD_PATH: '/tmp/.secure_files/'
   before_script:
