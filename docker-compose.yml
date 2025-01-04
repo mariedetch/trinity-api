@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   api:
-    image: ${IMAGE_NAME}
+    image: 650251706762.dkr.ecr.us-east-2.amazonaws.com/trinity-api:dev
     restart: always
     container_name: trinity-api
     volumes:
