@@ -9,23 +9,8 @@ variables:
   DEV_IMAGE: "$ECR_URI:dev"
   PROD_IMAGE: "$ECR_URI:$CI_COMMIT_TAG"
 
-install-dependencies:
-  stage: setup
-  image: node:20
-  script:
-    - echo "Installation des dépendances"
-    - npm ci
-  tags:
-    - backend
-  artifacts:
-    paths:
-      - node_modules/
-    expire_in: 1h
-
 build:
   stage: build
-  dependencies:
-    - install-dependencies
   before_script:
       - curl -s https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer | bash
       - ls -lah .secure_files
@@ -47,7 +32,7 @@ deploy:
   stage: deploy
   before_script:
       - curl -s https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer | bash
-      - chmod 600 .secure_files/trinity-dev-key.pem
+      - chmod 600 .secure_files/trinity-dev-key-pair.pem
   script:
     - chmod +x deploy.sh
     - ./deploy.sh
