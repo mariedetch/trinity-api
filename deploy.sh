@@ -4,7 +4,7 @@
 echo "Connexion à EC2 et déploiement..."
 
 # Sauvegarder l'image de développement dans le fichier env
-echo IMAGE_NAME=$DEV_IMAGE >> env
+echo IMAGE_NAME=$DEV_IMAGE >> .secure_files/env.dev
 
 # Copier les fichiers nécessaires sur l'instance EC2
 scp -i .secure_files/trinity-dev-key-pair.pem .secure_files/env.dev ubuntu@$EC2_PUBLIC_IP:/home/ubuntu/.env
