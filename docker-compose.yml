@@ -2,15 +2,13 @@ version: '3.8'
 
 services:
   api:
-    image: 650251706762.dkr.ecr.us-east-2.amazonaws.com/trinity-api:dev
+    image: ${IMAGE_NAME}
     restart: always
     container_name: trinity-api
     volumes:
       - .:/usr/src/app
     env_file:
       - .env
-    ports:
-      - 3000:3000
     depends_on:
       - db
     networks:
