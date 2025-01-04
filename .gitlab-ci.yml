@@ -9,16 +9,14 @@ variables:
   DEV_IMAGE: "$ECR_URI:dev"
   PROD_IMAGE: "$ECR_URI:$CI_COMMIT_TAG"
 
-default:
-  tags:
-    - backend
-
 install-dependencies:
   stage: setup
   image: node:20
   script:
     - echo "Installation des dépendances"
     - npm ci
+  tags:
+    - backend
   artifacts:
     paths:
       - node_modules/
@@ -38,6 +36,8 @@ build:
     - docker tag $IMAGE_NAME $DEV_IMAGE
     - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URI
     - docker push $DEV_IMAGE
+  tags:
+    - shell-executor
   only:
     - develop
   environment:
@@ -51,6 +51,8 @@ deploy:
   script:
     - chmod +x deploy.sh
     - ./deploy.sh
+  tags:
+    - shell-executor
   only:
     - develop
   environment:
