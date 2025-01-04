@@ -1,0 +1,16 @@
+.husky
+node_modules
+coverage
+dist
+npm-debug.log
+Dockerfile
+README.md
+RUNNER_START.md
+.dockerignore
+.git
+.gitignore
+tests
+.env.dev
+.env.prod
+.env.example
+.gitlab-ci.yml
