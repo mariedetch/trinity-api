@@ -30,10 +30,10 @@ build:
     - install-dependencies
   before_script:
       - curl -s https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer | bash
-      - ls -lah /.secure_files
+      - ls -lah .secure_files
   script:
     - echo "Compilation et construction de l'image docker"
-    - cp /.secure_files/env.dev .env
+    - cp .secure_files/env.dev .env
     - docker build -t $IMAGE_NAME .
     - docker tag $IMAGE_NAME $DEV_IMAGE
     - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URI
