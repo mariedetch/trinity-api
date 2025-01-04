@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  api:
+    image: trinity-api:dev
+    restart: always
+    container_name: trinity-api
+    volumes:
+      - .:/usr/src/app
+    env_file:
+      - .env
+    ports:
+      - 3000:3000
+    depends_on:
+      - db
+    networks:
+      - trinity-network
+
+  db:
+    image: postgres:15
+    restart: unless-stopped
+    container_name: db
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - trinity-network
+
+networks:
+  trinity-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
