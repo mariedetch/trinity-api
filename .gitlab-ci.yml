@@ -67,13 +67,27 @@ test-coverage:
     paths:
       - coverage/
 
+download-secrets:
+  stage: build
+  variables:
+    SECURE_FILES_DOWNLOAD_PATH: '/tmp/.secure_files'
+  script:
+    - curl -s https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer | bash
+    - ls -lah /tmp/.secure_files
+  only:
+    - develop
+    - main
+    - tags
+    - /^v\d+\.\d+\.\d+$/
+
 build:
   stage: build
   dependencies:
     - install-dependencies
+    - download-secrets
   script:
     - echo "Compilation et construction de l'image docker"
-    - gitlab-ci env.dev download --file .env
+    - cp /tmp/.secure_files/env.dev .env
     - docker build -t $IMAGE_NAME .
     - docker tag $IMAGE_NAME $DEV_IMAGE
     - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URI
@@ -85,9 +99,10 @@ build:
 
 deploy:
   stage: deploy
+  dependencies:
+    - download-secrets
   before_script:
-    - gitlab-ci trinity-dev-key-pair.pem download --file /tmp/trinity-dev-key.pem
-    - chmod 600 /tmp/trinity-dev-key.pem
+    - chmod 600 /tmp/.secure_files/trinity-dev-key.pem
   script:
     - chmod +x deploy.sh
     - ./deploy.sh
