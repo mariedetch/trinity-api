@@ -9,30 +9,12 @@ variables:
   DEV_IMAGE: "$ECR_URI:dev"
   PROD_IMAGE: "$ECR_URI:$CI_COMMIT_TAG"
 
-build:
-  stage: build
-  before_script:
-      - curl -s https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer | bash
-      - ls -lah .secure_files
-  script:
-    - echo "Compilation et construction de l'image docker"
-    - cp .secure_files/env.dev .env
-    - docker build -t $IMAGE_NAME .
-    - docker tag $IMAGE_NAME $DEV_IMAGE
-    - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URI
-    - docker push $DEV_IMAGE
-  tags:
-    - shell-executor
-  only:
-    - develop
-  environment:
-    name: Dev
-
 deploy:
   stage: deploy
   before_script:
       - curl -s https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer | bash
       - chmod 600 .secure_files/trinity-dev-key-pair.pem
+      - ssh-keyscan -H $EC2_PUBLIC_IP >> ~/.ssh/known_hosts
   script:
     - chmod +x deploy.sh
     - ./deploy.sh
