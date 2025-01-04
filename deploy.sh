@@ -10,11 +10,11 @@ gitlab-ci env.dev download --file .env
 echo IMAGE_NAME=$DEV_IMAGE >> env
 
 # Copier les fichiers nécessaires sur l'instance EC2
-scp -i /tmp/.secure_files/trinity-dev-key.pem .env ubuntu@$EC2_PUBLIC_IP:/home/ubuntu/.env
-scp -i /tmp/.secure_files/trinity-dev-key.pem docker-compose.yml ubuntu@$EC2_PUBLIC_IP:/home/ubuntu/docker-compose.yml
+scp -i .secure_files/trinity-dev-key.pem .env ubuntu@$EC2_PUBLIC_IP:/home/ubuntu/.env
+scp -i .secure_files/trinity-dev-key.pem docker-compose.yml ubuntu@$EC2_PUBLIC_IP:/home/ubuntu/docker-compose.yml
 
 # Exécution des commandes à distance via SSH
-ssh -i /tmp/.secure_files/trinity-dev-key.pem ubuntu@$EC2_PUBLIC_IP << 'EOF'
+ssh -i .secure_files/trinity-dev-key.pem ubuntu@$EC2_PUBLIC_IP << 'EOF'
   source /home/ubuntu/.env
   docker-compose -f /home/ubuntu/docker-compose.yml down
   docker-compose -f /home/ubuntu/docker-compose.yml pull
