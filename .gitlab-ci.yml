@@ -13,8 +13,11 @@ deploy:
   stage: deploy
   before_script:
       - curl -s https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer | bash
-      - chmod 600 .secure_files/trinity-dev-key-pair.pem
+      - mkdir -p ~/.ssh
+      - chmod 700 ~/.ssh
       - ssh-keyscan -H $EC2_PUBLIC_IP >> ~/.ssh/known_hosts
+      - chmod 600 ~/.ssh/known_hosts
+      - chmod 600 .secure_files/trinity-dev-key-pair.pem
   script:
     - chmod +x deploy.sh
     - ./deploy.sh
