@@ -6,9 +6,11 @@ services:
     restart: always
     container_name: trinity-api
     volumes:
-      - .:/usr/src/app
+      - /var/log/trinity:/logs
     env_file:
       - .env
+    ports:
+      - 3000:3000
     depends_on:
       - db
     networks:
