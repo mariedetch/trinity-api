@@ -55,6 +55,8 @@ test:
       - test-results/test-report.xml
     reports:
       junit: test-results/test-report.xml
+  after_script:
+    - rm -rf test-results/
 
 test-coverage:
   stage: test
@@ -70,37 +72,62 @@ test-coverage:
 build:
   stage: build
   before_script:
-      - curl -s https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer | bash
-      - ls -lah .secure_files
+    - curl -s https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer | bash
+    - cp .secure_files/env.$ENVIRONMENT .env
+    - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URI
   script:
     - echo "Compilation et construction de l'image docker"
-    - cp .secure_files/env.dev .env
     - docker build -t $IMAGE_NAME .
-    - docker tag $IMAGE_NAME $DEV_IMAGE
-    - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URI
-    - docker push $DEV_IMAGE
+    - docker tag $IMAGE_NAME $TARGET_IMAGE
+    - docker push $TARGET_IMAGE
+  after_script:
+    - echo "Nettoyage des ressources après la construction de l'image Docker"
+    - docker system prune -af --volumes
+    - rm -rf .secure_files/ && rm -rf .env
   tags:
     - shell-executor
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+      variables:
+        ENVIRONMENT: "dev"
+        TARGET_IMAGE: $DEV_IMAGE
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/'
+      variables:
+        ENVIRONMENT: "prod"
+        TARGET_IMAGE: $PROD_IMAGE
   only:
+    - tags
     - develop
-  environment:
-    name: Dev
+    - /^v\d+\.\d+\.\d+$/
 
 deploy:
   stage: deploy
   before_script:
-      - curl -s https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer | bash
-      - mkdir -p ~/.ssh
-      - chmod 700 ~/.ssh
-      - ssh-keyscan -H $EC2_PUBLIC_IP >> ~/.ssh/known_hosts
-      - chmod 600 ~/.ssh/known_hosts
-      - chmod 600 .secure_files/trinity-dev-key-pair.pem
+    - curl -s https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer | bash
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan -H $EC2_PUBLIC_IP >> ~/.ssh/known_hosts
+    - chmod 600 ~/.ssh/known_hosts
+    - chmod 600 .secure_files/$DEPLOY_KEY
   script:
-    - chmod +x deploy.sh
-    - ./deploy.sh
+    - chmod +x deployment/application/$DEPLOY_SCRIPT
+    - ./deployment/application/$DEPLOY_SCRIPT
+  after_script:
+    - echo "Nettoyage des clés SSH et fichiers de secrets"
+    - rm -rf ~/.ssh/
+    - rm -rf .secure_files/
   tags:
     - shell-executor
-  only:
-    - develop
   environment:
-    name: Dev
+    name: $ENVIRONMENT_NAME
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+      variables:
+        ENVIRONMENT_NAME: "Dev"
+        DEPLOY_KEY: "trinity-dev-key-pair.pem"
+        DEPLOY_SCRIPT: "deploy-dev.sh"
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/'
+      variables:
+        ENVIRONMENT_NAME: "Prod"
+        DEPLOY_KEY: "trinity-prod-key-pair.pem"
+        DEPLOY_SCRIPT: "deploy-prod.sh"

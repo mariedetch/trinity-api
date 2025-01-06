@@ -157,50 +157,51 @@ npm run test:coverage
 
 ## Structure du projet
 ```bash
-├── src/
-│   ├── config/           # Configuration de l'application (base de données, environnements, etc.)
-│   │   ├── database.config.ts
-│   │   └── environment.config.ts
-│   ├── core/             # Composants principaux (middlewares, gestion des erreurs, etc.)
-│   │   ├── controllers/
-│   │   ├── middlewares/
-│   │   ├── exceptions/
-│   │   ├── services/
-│   │   └── guards/
-│   ├── database/         # Gestion de la base de données
-│   │   ├── factories/
-│   │   ├── migrations/
-│   │   ├── seeders/
-│   │   └── subscribers/
-│   ├── features/         # Modules fonctionnels (clients, factures, produits, services)
-│   │   └── feature1/     # Exemple de module fonctionnel
-|   │       ├── dto/      # Data Transfer Objects
-|   │       ├── entities/ # Modèles de données
-|   │       ├── enums/    # Énumérations
-|   │       ├── repositories/    # Repositories
-|   │       ├── feature1.container.ts   # Conteneur d'injection de dépendances à l'échelle du module
-|   │       ├── feature1.controller.ts  # Contrôleur (gère les routes et les requêtes HTTP)
-|   │       ├── feature1.routes.ts      # Routes (définit les endpoints et les middlewares associés)
-|   │       └── feature1.service.ts     # Service (logique métier)
-│   ├── shared/            # Code partagé entre différents modules
-│   │   ├── utils/         # Fonctions utilitaires communes
-│   │   ├── constants/     # Constantes globales
-│   │   └── interfaces/    # Interfaces globales
-│   ├── app.container.ts   # Conteneur d'injection de dépendances à l'échelle de l'application
-│   ├── app.ts            # Point d'entrée de l'application
-│   ├── server.ts         # Initialisation du serveur
-├── tests/                # Tests (unitaires, d'intégration, etc.)
-│   ├── unit/             # Tests unitaires
-│   ├── integration/      # Tests d'intégration
-│   └── e2e/              # Tests end-to-end
-├── .env                  # Fichier d'environnement pour la production
-├── .env.development      # Fichier d'environnement pour le développement
-├── .env.production       # Fichier d'environnement pour la production
-├── .env.testing          # Fichier d'environnement pour les tests
-├── .gitignore            # Ignore les fichiers spécifiques dans Git
-├── package.json          # Gestionnaire de packages (npm)
-├── tsconfig.json         # Configuration TypeScript
-└── README.md             # Documentation du projet
+src/
+├── common/                    # Modules et utilitaires communs
+│   ├── decorators/            # Décorateurs personnalisés
+│   ├── dto/                   # Objets de transfert de données
+│   ├── exceptions/            # Gestion des exceptions
+│   ├── filters/               # Filtres globaux pour les erreurs
+│   ├── guards/                # Gardes pour la sécurité et l'accès
+│   ├── interceptors/          # Intercepteurs pour les réponses et les logs
+│   ├── interfaces/            # Interfaces pour les types partagés
+│   ├── middleware/            # Middlewares pour les requêtes HTTP
+│   ├── pipes/                 # Pipes pour la transformation et la validation
+│   └── utils/                 # Utilitaires généraux
+├── config/                    # Configuration de l'application
+│   ├── configuration.module.ts
+│   ├── configuration.service.ts
+│   └── configurations/        # Différentes configurations d'environnement
+│       ├── development.ts
+│       ├── production.ts
+│       └── test.ts
+├── core/                      # Services et modules essentiels
+│   ├── logger/                # Service de journalisation
+│   ├── database/              # Configuration de la base de données
+│   ├── cache/                 # Gestion du cache
+│   └── core.module.ts
+├── features/                   # Modules fonctionnels
+│   ├── auth/                  # Module d'authentification
+│   │   ├── dto/               # DTOs pour l'authentification
+│   │   ├── entities/          # Entités pour la persistance
+│   │   ├── auth.controller.ts
+│   │   ├── auth.module.ts
+│   │   ├── auth.service.ts
+│   ├── users/                 # Module utilisateur
+│   │   ├── dto/
+│   │   ├── entities/
+│   │   ├── users.controller.ts
+│   │   ├── users.module.ts
+│   │   ├── users.service.ts
+│   │   └── repositories/
+│   └── ...                    # Autres modules fonctionnels
+├── main.ts                    # Fichier principal pour démarrer l'application
+├── app.module.ts              # Module racine de l'application
+└── test/                      # Tests unitaires et d'intégration
+    ├── e2e/                   # Tests end-to-end
+    └── unit/                  # Tests unitaires
+
 ```
 
 ## Dépendances

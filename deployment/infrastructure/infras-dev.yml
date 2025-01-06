@@ -1,0 +1,92 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Infrastructure pour l'environnement de développement"
+
+Resources:
+  TrinityDevEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      KeyName: trinity-dev-key-pair
+      ImageId: ami-00eb69d236edcfaf8
+      SecurityGroupIds:
+        - !Ref TrinityDevSecurityGroup
+      UserData:
+        Fn::Base64: |
+          #!/bin/bash
+          # Mise à jour et installation de dépendances
+          apt update -y
+          apt upgrade -y
+          apt install -y nginx awscli
+
+          # Redémarrer Nginx
+          systemctl restart nginx
+          systemctl enable nginx
+      Tags:
+        - Key: Name
+          Value: Dev-Instance
+        - Key: Environment
+          Value: Dev
+        - Key: Application
+          Value: Trinity
+
+  TrinityDevSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Security group for the development"
+      VpcId: vpc-077f46e482c9c81d0
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+
+  # Rôle IAM pour EC2
+  EC2Role:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: ECRAccessPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ecr:GetAuthorizationToken
+                  - ecr:BatchCheckLayerAvailability
+                  - ecr:GetDownloadUrlForLayer
+                  - ecr:BatchGetImage
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - ecs:PullImage
+                Resource: "*"
+
+  # Instance Profile pour associer le rôle IAM à EC2
+  EC2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref EC2Role
+
+Outputs:
+  InstanceId:
+    Description: "ID de l'instance EC2"
+    Value: !Ref TrinityDevEC2Instance
+
+  InstancePublicIP:
+    Description: "IP publique de l'instance EC2"
+    Value: !GetAtt TrinityDevEC2Instance.PublicIp

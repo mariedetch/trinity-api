@@ -6,3 +6,5 @@ coverage
 env.dev
 env.prod
 RUNNER_START.md
+
+logs

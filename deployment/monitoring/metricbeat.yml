@@ -1,0 +1,10 @@
+metricbeat.modules:
+  - module: docker
+    enabled: true
+    hosts: ["unix:///var/run/docker.sock"]
+
+output.elasticsearch:
+  hosts: ["http://elasticsearch:9200"]
+
+setup.kibana:
+  host: "http://kibana:5601"

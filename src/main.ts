@@ -10,9 +10,15 @@ import { TypeOrmexceptionFilter } from './common/exceptions/filters/type-orm-exc
 import { HttpExceptionFilter } from './common/exceptions/filters/http-exception.filter';
 import { useContainer } from 'class-validator';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { WinstonModule } from 'nest-winston';
+import { logger } from './core/logger/winston.logger';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    logger: WinstonModule.createLogger({
+      instance: logger,
+    }),
+  });
 
   app.enableVersioning({ type: VersioningType.URI });
   app.setGlobalPrefix('api');
