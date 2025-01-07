@@ -4,7 +4,7 @@ import { BaseEntity } from 'src/core/entities/base.entity';
 
 @Entity('products')
 export class Product extends BaseEntity {
-  @Column()
+  @Column({nullable:true})
   name: string;
 
   @Column({ name: 'nb_per_batch', default: 1 })
