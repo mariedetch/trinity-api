@@ -1,0 +1,2141 @@
+openapi: '3.0.3'
+info:
+  title: Trinity API documentation
+  description: >
+    Bienvenue dans la documentation API de Trinity,
+    une application de gestion de stock conçue pour
+    offrir une expérience fluide et intuitive
+    aux gérants et aux clients.
+    Cette API permet de gérer efficacement les stocks,
+    les commandes, et les interactions entre les
+    utilisateurs des deux plateformes (web et mobile).
+  version: '1.0'
+servers:
+  - url: https://localhost:3000/api/v1
+
+paths:
+  /auth/login:
+    post:
+      summary: "User login"
+      description: "Logs in a user by validating their credentials and returns an access token."
+      operationId: "loginUser"
+      tags:
+        - Auth
+      requestBody:
+        $ref: "#/components/requestBodies/LoginRequest"
+      responses:
+        '200':
+          description: "Successful login"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: "Unauthorized – Authentication failed"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                application/json:
+                  value:
+                    success: false
+                    status: "UNAUTHORIZED"
+                    code: -401
+                    message: "Authentication failed. Invalid credentials."
+                    error: "User authentication failed due to invalid email or password."
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/BaseHeaders/properties/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/BaseHeaders/properties/X-RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/BaseHeaders/properties/X-RateLimit-Reset'
+        '422':
+          description: "Unprocessable Entity – Validation errors"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+              example:
+                success: false
+                status: "INVALID_CREDENTIALS"
+                code: -1000
+                message: "Validation error occurred."
+                errors: {
+                  email: [
+                    "The email is required",
+                    "The email should be ..."
+                  ],
+                  password: [
+                    "The password is required",
+                    "The password should be ..."
+                  ]
+                }
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/BaseHeaders/properties/X-RateLimit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/BaseHeaders/properties/X-RateLimit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/BaseHeaders/properties/X-RateLimit-Reset'
+        '500':
+          $ref: "#/components/responses/InternalServerError"
+  /auth/logout:
+    post:
+      summary: "User logout"
+      description: "Logs out a user by invalidating their current session or access token."
+      operationId: "logoutUser"
+      tags:
+        - Auth
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: "Successful logout"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                success: true
+                status: 'OK'
+                code: 2000
+                message: "User has been successfully logged out."
+                data: {}
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /auth/refresh-token:
+    post:
+      summary: "Refresh Access Token"
+      description: "Generates a new access token using a valid refresh token."
+      tags:
+        - Auth
+      operationId: "refreshToken"
+      security:
+        - BearerAuth: []
+      requestBody:
+        description: "Refresh token required to generate a new access token."
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh_token:
+                  type: string
+                  description: "The refresh token provided during login."
+                  example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+      responses:
+        '200':
+          description: "Successful token refresh"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /auth/user:
+    get:
+      summary: "Fetch Authenticated User"
+      description: "Retrieves the details of the currently authenticated user."
+      operationId: "getAuthenticatedUser"
+      tags:
+        - Auth
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: "Successful retrieval of user details"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/User"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /users/profile:
+    get:
+      summary: "Get User Profile"
+      description: "Retrieve the profile information of the currently authenticated user."
+      operationId: "getUserProfile"
+      tags:
+        - User Profile
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: "Successfully retrieved user profile"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/User"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      summary: "Update User Profile"
+      description: "Update the profile information of the currently authenticated user."
+      operationId: "updateUserProfile"
+      tags:
+        - User Profile
+      security:
+        - BearerAuth: []
+      requestBody:
+        description: "Profile fields to be updated"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserProfileUpdateRequest'
+      responses:
+        '200':
+          description: "Successfully updated user profile"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/User"
+        '422':
+          description: "Unprocessable Entity – Validation errors"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+              example:
+                success: false
+                status: "INVALID_CREDENTIALS"
+                code: -1000
+                message: "Validation error occurred."
+                errors: {
+                  firstname: [
+                    "The firstname is required",
+                    "The firstname should be ..."
+                  ],
+                }
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /users/profile/update-password:
+    put:
+      summary: "Update Password"
+      description: "Allows the authenticated user to update their account password."
+      operationId: "updateUserPassword"
+      tags:
+        - User Profile
+      security:
+        - BearerAuth: []
+      requestBody:
+        description: "Current and new password details."
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePasswordRequest'
+      responses:
+        '200':
+          description: "Password updated successfully"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BaseResponse"
+              example:
+                success: true
+                status: 'OK'
+                code: 2000
+                message: "Password updated successfully."
+                data: {}
+        '400':
+          description: "Bad Request – Invalid input (e.g., incorrect current password or weak new password)."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+              example:
+                success: false
+                status: "INVALID_CREDENTIALS"
+                code: -1000
+                message: "Validation error occurred."
+                errors: {
+                  current_password: [
+                    "The current_password is required",
+                    "The current_password should be ..."
+                  ],
+                }
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /users/profile/addresses:
+    get:
+      summary: "Get User Addresses"
+      description: "Retrieve the list of addresses associated with the authenticated user."
+      operationId: "getUserAddresses"
+      tags:
+        - User Profile
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: "Successfully updated user profile"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          allOf:
+                            - type: object
+                              properties:
+                                id:
+                                  $ref: '#/components/schemas/BaseId'
+                            - $ref: "#/components/schemas/Address"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      summary: "Add a New Address"
+      description: "Allows the authenticated user to add a new address to their profile."
+      operationId: "addUserAddress"
+      tags:
+        - User Profile
+      security:
+        - BearerAuth: []
+      requestBody:
+        description: "Details of the new address."
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Address"
+      responses:
+        '201':
+          description: "Address successfully added."
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        allOf:
+                          - type: object
+                            properties:
+                              id:
+                                $ref: '#/components/schemas/BaseId'
+                          - $ref: "#/components/schemas/Address"
+        '422':
+          description: "Unprocessable Entity – Validation errors"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+              example:
+                success: false
+                status: "INVALID_CREDENTIALS"
+                code: -1000
+                message: "Validation error occurred."
+                errors: {
+                  country: [
+                    "The country is required",
+                    "The country should be ..."
+                  ],
+                }
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /users/profile/addresses/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: "The unique identifier of the address."
+        schema:
+          $ref: "#/components/schemas/BaseId"
+
+    put:
+      summary: "Update an Address"
+      description: "Allows the authenticated user to update an existing address by ID."
+      operationId: "updateUserAddress"
+      tags:
+        - User Profile
+      security:
+        - BearerAuth: []
+      requestBody:
+        description: "Updated address details."
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Address'
+      responses:
+        '200':
+          description: "Address updated successfully."
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        allOf:
+                          - type: object
+                            properties:
+                              id:
+                                $ref: '#/components/schemas/BaseId'
+                          - $ref: "#/components/schemas/Address"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          description: "Unprocessable Entity – Validation errors"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+              example:
+                success: false
+                status: "INVALID_CREDENTIALS"
+                code: -1000
+                message: "Validation error occurred."
+                errors: {
+                  country: [
+                    "The country is required",
+                    "The country should be ..."
+                  ],
+                }
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      summary: "Delete a an Address"
+      description: "Allows the authenticated user to delete an existing address by ID."
+      tags:
+        - User Profile
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: "Address deleted successfully."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                success: true
+                status: 'OK'
+                code: 2000
+                message: "Address deleted successfully."
+                data: {}
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /users/profile/payment-methods:
+    get:
+      summary: "Get User Payment Methods"
+      description: "Retrieve the list of payment methods associated with the authenticated user."
+      operationId: "getUserPaymentMethods"
+      tags:
+        - User Profile
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: "List of user payment methods."
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          allOf:
+                            - type: object
+                              properties:
+                                id:
+                                  $ref: '#/components/schemas/BaseId'
+                            - $ref: "#/components/schemas/PaymentMethod"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      summary: "Add a New Payment Method"
+      description: "Allows the authenticated user to add a new payment method to their profile."
+      operationId: "addUserPaymentMethod"
+      tags:
+        - User Profile
+      security:
+        - BearerAuth: []
+      requestBody:
+        description: "Details of the new payment method."
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentMethod'
+      responses:
+        '201':
+          description: "Payment method successfully added."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Indicates if the request was successful."
+                    example: true
+                  message:
+                    type: string
+                    description: "Success message."
+                    example: "Payment method added successfully."
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          description: "Unprocessable Entity – Validation errors"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+              example:
+                success: false
+                status: "INVALID_CREDENTIALS"
+                code: -1000
+                message: "Validation error occurred."
+                errors: {
+                  card_number: [
+                    "The card_number is required",
+                    "The card_number should be ..."
+                  ],
+                }
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /users/profile/payment-methods/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: "The unique identifier of the payment method."
+        schema:
+          $ref: "#/components/schemas/BaseId"
+
+    put:
+      summary: "Update a Payment Method"
+      description: "Allows the authenticated user to update an existing payment method by ID."
+      operationId: "updateUserPaymentMethod"
+      tags:
+        - User Profile
+      security:
+        - BearerAuth: []
+      requestBody:
+        description: "Updated payment method details."
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentMethod'
+      responses:
+        '200':
+          description: "Payment method updated successfully."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: "Indicates if the request was successful."
+                    example: true
+                  message:
+                    type: string
+                    description: "Success message."
+                    example: "Payment method updated successfully."
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: "Unprocessable Entity – Validation errors"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+              example:
+                success: false
+                status: "INVALID_CREDENTIALS"
+                code: -1000
+                message: "Validation error occurred."
+                errors: {
+                  card_number: [
+                    "The card_number is required",
+                    "The card_number should be ..."
+                  ],
+                }
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      summary: "Delete a Payment Method"
+      description: "Allows the authenticated user to delete an existing payment method by ID."
+      operationId: "deleteUserPaymentMethod"
+      tags:
+        - User Profile
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: "Payment method deleted successfully."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                success: true
+                status: 'OK'
+                code: 2000
+                message: "Payment method deleted successfully."
+                data: {}
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /users/customers:
+    get:
+      summary: "Get Paginated List of Customers"
+      description: "Retrieve a paginated list of customers with query parameters for pagination."
+      operationId: "getPaginatedCustomers"
+      tags:
+        - Customers
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/perPage"
+      responses:
+        '200':
+          description: "Successful response with paginated customers."
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                          allOf:
+                            - $ref: '#/components/schemas/PaginationResource'
+                            - type: object
+                              properties:
+                                items:
+                                  $ref: "#/components/schemas/User"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /users/customers/{id}:
+    get:
+      summary: "Get Customer by ID"
+      description: "Retrieve detailed information about a specific customer."
+      operationId: "getCustomerById"
+      tags:
+        - Customers
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "The unique identifier of the customer."
+          schema:
+            $ref: "#/components/schemas/BaseId"
+      responses:
+        '200':
+          description: "Successful response with customer details."
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/User"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /products:
+    get:
+      summary: "Get Paginated List of Products"
+      description: "Retrieve a paginated list of products."
+      operationId: "getPaginatedProducts"
+      tags:
+        - Products
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/perPage"
+        - name: keyword
+          in: query
+          description: "Search for products by name or description."
+          required: false
+          schema:
+            type: string
+            example: "milk"
+        - name: min_price
+          in: query
+          description: "Filter products with a minimum selling price."
+          required: false
+          schema:
+            type: number
+            format: float
+            example: 10.00
+        - name: max_price
+          in: query
+          description: "Filter products with a maximum selling price."
+          required: false
+          schema:
+            type: number
+            format: float
+            example: 100.00
+        - name: stock_status
+          in: query
+          description: |
+            Filter products based on stock status:
+            - `out_of_stock`: Products with zero stock.
+            - `low_stock`: Products with low stock levels.
+          required: false
+          schema:
+            type: string
+            enum: [out_of_stock, low_stock]
+            example: "out_of_stock"
+      responses:
+        '200':
+          description: "Successful response with paginated products."
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        allOf:
+                          - $ref: "#/components/schemas/PaginationResource"
+                          - type: object
+                            properties:
+                              items:
+                                type: array
+                                items:
+                                  $ref: "#/components/schemas/Product"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '500':
+          $ref: "#/components/responses/InternalServerError"
+
+    post:
+      summary: "Create a New Product"
+      description: "Create a new product by providing the necessary details."
+      operationId: "createProduct"
+      tags:
+        - Products
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProduct"
+      responses:
+        '201':
+          description: "Product created successfully."
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Product"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '422':
+          description: "Unprocessable Entity – Validation errors"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+              example:
+                success: false
+                status: "INVALID_CREDENTIALS"
+                code: -1000
+                message: "Validation error occurred."
+                errors: {
+                  name: [
+                    "The name is required",
+                    "The name should be ..."
+                  ],
+                }
+        '500':
+          $ref: "#/components/responses/InternalServerError"
+  /products/g/stats:
+    get:
+      summary: Get the statistics about Products
+      description: Retreive the statistics about product
+      operationId: "getProductsStats"
+      tags:
+        - Products
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: "Successful response with product's statistics."
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/ProductStats"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '500':
+          $ref: "#/components/responses/InternalServerError"
+  /products/{id}:
+    parameters:
+      - $ref: "#/components/parameters/productId"
+    get:
+      summary: "Get Product by ID"
+      description: "Retrieve detailed information about a specific product."
+      operationId: "getProductById"
+      tags:
+        - Products
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: "Successful response with product details."
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Product"
+        '404':
+          $ref: "#/components/responses/NotFound"
+        '500':
+          $ref: "#/components/responses/InternalServerError"
+
+    put:
+      summary: "Update Product by ID"
+      description: "Update details of an existing product."
+      operationId: "updateProduct"
+      tags:
+        - Products
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProduct"
+      responses:
+        '200':
+          description: "Product updated successfully."
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Product"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '404':
+          $ref: "#/components/responses/NotFound"
+        '422':
+          description: "Unprocessable Entity – Validation errors"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+              example:
+                success: false
+                status: "INVALID_CREDENTIALS"
+                code: -1000
+                message: "Validation error occurred."
+                errors: {
+                  name: [
+                    "The name is required",
+                    "The name should be ..."
+                  ],
+                }
+        '500':
+          $ref: "#/components/responses/InternalServerError"
+
+    delete:
+      summary: "Delete Product by ID"
+      description: "Delete a product by its unique identifier."
+      operationId: "deleteProductById"
+      tags:
+        - Products
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: "Product deleted successfully."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BaseResponse"
+              examples:
+                example:
+                  value:
+                    success: true
+                    status: "SUCCESS"
+                    code: 200
+                    message: "Product deleted successfully."
+        '404':
+          $ref: "#/components/responses/NotFound"
+        '500':
+          $ref: "#/components/responses/InternalServerError"
+  /products/{id}/prices:
+    get:
+      tags:
+        - "Products"
+      summary: "Get the last 10 price history records for a product"
+      operationId: "getPriceHistory"
+      parameters:
+        - $ref: "#/components/parameters/productId"
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: "Last 10 price history records for the product."
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/PriceItem"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '404':
+          $ref: "#/components/responses/NotFound"
+        '500':
+          $ref: "#/components/responses/InternalServerError"
+  /products/{id}/orders:
+    get:
+      tags:
+        - "Products"
+      summary: "Get the last 10 order history records for a product"
+      operationId: "getOrderHistory"
+      parameters:
+        - $ref: "#/components/parameters/productId"
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: "Last 10 order history records for the product."
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/OrderItem"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '404':
+          $ref: "#/components/responses/NotFound"
+        '500':
+          $ref: "#/components/responses/InternalServerError"
+  /products/{id}/supplies:
+    get:
+      tags:
+        - "Products"
+      summary: "Get the last 10 supply history records for a product"
+      operationId: "getSupplyHistory"
+      parameters:
+        - $ref: "#/components/parameters/productId"
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: "Last 10 supply history records for the product."
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/SupplyItem"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '404':
+          $ref: "#/components/responses/NotFound"
+        '500':
+          $ref: "#/components/responses/InternalServerError"
+
+  /carts:
+    get:
+      summary: Retreive the authenticated user cart details
+      description: Retreive the authenticated user cart details
+      tags:
+        - User Cart
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: "Successful response with auth user cart details."
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/CartItem"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      summary: Add a new product to the authenticated user cart
+      description: Add a new product to the authenticated user cart
+      tags:
+        - User Cart
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                product_id:
+                  description: The id of product to Add
+                  $ref: "#/components/schemas/BaseId"
+                quantity:
+                  description: "The quantity of the product to Add min: 1"
+                  type: number
+                  default: 1
+                  minimum: 1
+      responses:
+        '201':
+          description: "Product added to cart successfully."
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/CartItem"
+        '401':
+          $ref: "#/components/responses/Unauthorized"
+        '422':
+          description: "Unprocessable Entity – Validation errors"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+              example:
+                success: false
+                status: "INVALID_CREDENTIALS"
+                code: -1000
+                message: "Validation error occurred."
+                errors: {
+                  product_id: [
+                    "The product_id is required",
+                    "Any product with the given id is not found..."
+                  ],
+                }
+        '500':
+          $ref: "#/components/responses/InternalServerError"
+  /carts/item/{id}:
+    put:
+      summary: "Update an existing cart item"
+      description: "Update an existing cart item. If the quantity is zero, the product is deleted from the cart"
+      tags:
+        - User Cart
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                quantity:
+                  description: "The quantity of the product to Add min: 1"
+                  type: number
+                  default: 1
+                  minimum: 0
+      responses:
+        '201':
+          description: "Cart item updatd successfully."
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/CartItem"
+        '401':
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: "#/components/responses/Forbidden"
+        '404':
+          $ref: "#/components/responses/NotFound"
+        '422':
+          description: "Unprocessable Entity – Validation errors"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+              example:
+                success: false
+                status: "INVALID_CREDENTIALS"
+                code: -1000
+                message: "Validation error occurred."
+                errors: {
+                  quantity: [
+                    "The quantity is required",
+                    "The quantity should be..."
+                  ],
+                }
+        '500':
+          $ref: "#/components/responses/InternalServerError"
+
+    delete:
+      summary: "Delete a cart item by ID"
+      description: "Delete a cart item by its unique identifier."
+      tags:
+        - User Cart
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: "Cart item deleted successfully."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BaseResponse"
+              examples:
+                example:
+                  value:
+                    success: true
+                    status: "SUCCESS"
+                    code: 200
+                    message: "Cart item deleted successfully."
+        '401':
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: "#/components/responses/Forbidden"
+        '404':
+          $ref: "#/components/responses/NotFound"
+        '500':
+          $ref: "#/components/responses/InternalServerError"
+
+  /commands:
+    get:
+      summary: Retreive the paginated list of commands
+      description: Returns a paginated list of commands, returns all commands if the user is admin or not return only owned commands
+      tags:
+        - Commands
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/perPage"
+        - name: status
+          in: query
+          description: "The status of command to filtred for."
+          required: false
+          schema:
+            $ref: "#/components/schemas/CommandStatus"
+        - name: customer
+          in: query
+          description: "Filter commands for a customer (can be the name, phonenumber or email of the customer)"
+          required: false
+          schema:
+            type: string
+            example: "John|Doe|john.doe@example.com|229637417"
+        - name: start_date
+          in: query
+          description: "The status of command to filtred for."
+          required: false
+          schema:
+            $ref: "#/components/schemas/CommandStatus"
+        - name: end_date
+          in: query
+          description: "The status of command to filtred for."
+          required: false
+          schema:
+            $ref: "#/components/schemas/CommandStatus"
+      responses:
+        '200':
+          description: "Successful response with paginated customers."
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        allOf:
+                          - $ref: '#/components/schemas/PaginationResource'
+                          - type: object
+                            properties:
+                              items:
+                                $ref: "#/components/schemas/Command"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /commands/g/stats:
+    get:
+      summary: Get the statistics about Commands
+      description: Retreive the statistics about command
+      operationId: "getCommandsStats"
+      tags:
+        - Commands
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: "Successful response with command's statistics."
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/CommandStats"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '500':
+          $ref: "#/components/responses/InternalServerError"
+  /commands/{id}:
+    parameters:
+      - $ref: "#/components/parameters/commandId"
+    get:
+      summary: "Get Command by ID"
+      description: "Retrieve detailed information about a specific command."
+      operationId: "getCommandById"
+      tags:
+        - Commands
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: "Successful response with command details."
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Command"
+        '404':
+          $ref: "#/components/responses/NotFound"
+        '500':
+          $ref: "#/components/responses/InternalServerError"
+  /commands/{id}/paiements:
+    parameters:
+      - $ref: "#/components/parameters/commandId"
+    get:
+      summary: Retreive paiement detail of a specific command
+      description: Retreive paiement detail of a specific command
+      tags:
+        - Commands
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: "Successful response with command details."
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/PaiementItem"
+        '404':
+          $ref: "#/components/responses/NotFound"
+        '500':
+          $ref: "#/components/responses/InternalServerError"
+
+  #invoices
+  #supplies
+  #inventory
+  #cart validation, piement
+  #stats
+components:
+  schemas:
+    BaseHeaders:
+      type: object
+      properties:
+        X-RateLimit-Limit:
+          type: integer
+          description: "The maximum number of requests allowed in the current window."
+        X-RateLimit-Remaining:
+          type: integer
+          description: "The number of requests remaining in the current window."
+        X-RateLimit-Reset:
+          type: integer
+          description: "The time when the rate limit will reset, in UTC epoch seconds."
+    BaseId:
+      type: string
+      format: uuid
+      description: "A unique identifier in UUID format."
+      example: "123e4567-e89b-12d3-a456-426614174000"
+    UserRole:
+      type: string
+      description: "Defines the role of a user in the system."
+      enum:
+        - MANAGER
+        - CUSTOMER
+      example: "MANAGER"
+    CommandStatus:
+      type: string
+      description: Defines the different states that a command can be throug
+      enum:
+        - CREATED
+        - PAID
+        - IN_PROGRESSS
+        - SHIPPED
+        - DELIVERED
+        - CANCELLED
+        - RETURNED
+        - REFUNDED*
+      default: CREATED
+      example: CREATED
+    PaymentStatus:
+      type: string
+      description: Defines the different states that a payment can be
+      enum:
+        - INITIATED
+        - APPROVED
+        - COMPLETED
+        - FAILED
+        - CANCELLED
+        - REFUNDED
+    Address:
+      type: object
+      properties:
+        country:
+          type: string
+          example: "Bénin"
+        city:
+          type: string
+          example: "Cotonou"
+        state:
+          type: string
+          example: "Littoral"
+        postal_code:
+          type: string
+          example: "BP270"
+        phone:
+          type: string
+          example: "2290167156863"
+        email:
+          type: string
+          format: email
+          example: "john.doe@example.com"
+    PaymentMethod:
+      type: object
+      properties:
+        card_number:
+          type: string
+          description: "The credit card number."
+          example: "4111111111111111"
+          minLength: 13
+          maxLength: 19
+        expiry_date:
+          type: string
+          description: "The expiration date of the card in MM/YY format."
+          example: "12/26"
+          pattern: "^(0[1-9]|1[0-2])/[0-9]{2}$"
+        holder_name:
+          type: string
+          description: "The name of the cardholder as printed on the card."
+          example: "John Doe"
+          minLength: 3
+          maxLength: 50
+        security_code:
+          type: string
+          description: "The card's CVV or CVC security code."
+          example: "123"
+          minLength: 3
+          maxLength: 4
+    User:
+      type: object
+      required:
+        - id
+        - firstname
+        - lastname
+        - phonenumber
+        - email
+        - role
+      properties:
+        id:
+          $ref: '#/components/schemas/BaseId'
+        firstname:
+          type: string
+          example: "John"
+        lastname:
+          type: string
+          example: "Doe"
+        phonenumber:
+          type: string
+          example: "2290167266867"
+        email:
+          type: string
+          format: email
+          example: "john.doe@example.com"
+        address:
+          $ref: "#/components/schemas/Address"
+        payment_method:
+          $ref: "#/components/schemas/PaymentMethod"
+        role:
+          $ref: "#/components/schemas/UserRole"
+    UserProfileUpdateRequest:
+      type: object
+      properties:
+        firstname:
+          $ref: "#/components/schemas/User/properties/firstname"
+        lastname:
+          $ref: "#/components/schemas/User/properties/lastname"
+        phonenumber:
+          $ref: "#/components/schemas/User/properties/phonenumber"
+        address:
+          $ref: "#/components/schemas/User/properties/address"
+        payment_method:
+          $ref: "#/components/schemas/User/properties/payment_method"
+    UpdatePasswordRequest:
+      type: object
+      properties:
+        current_password:
+          type: string
+          description: "The user's current password."
+          example: "oldPassword123"
+        new_password:
+          type: string
+          description: "The new password that the user wants to set."
+          example: "NewStrongPassword456"
+        confirm_password:
+          type: string
+          description: "Confirmation of the new password for validation."
+          example: "NewStrongPassword456"
+      required:
+        - current_password
+        - new_password
+        - confirm_password
+    BaseResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: "Indicates whether the request was successful (true) or failed (false)."
+        status:
+          type: string
+          description: "Custom status of the system, e.g., 'OK'."
+        code:
+          type: integer
+          description: "Code associated with the status, positive for success and negative for failure. Example: 0909 for success, -1002 for failure."
+        message:
+          type: string
+          description: "Message detailing the result of the request."
+        data:
+          type: object
+          description: "The data of the response. Can be null if no data is returned."
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: "Indicates whether the request was successful (true) or failed (false)."
+        status:
+          type: string
+          description: "Custom status of the system, e.g., 'INVALID_REQUEST'."
+        code:
+          type: integer
+          description: "Code associated with the status"
+        message:
+          type: string
+          description: "Message detailing the result of the request."
+        error:
+          type: object
+          description: "Additional error details if the status is a failure. Contains error code and explanation."
+    ValidationErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: "Indicates whether the request was successful (true) or failed (false)."
+        status:
+          type: string
+          description: "Custom status of the system, e.g., 'INVALID_REQUEST'."
+        code:
+          type: integer
+          description: "Code associated with the status"
+        message:
+          type: string
+          description: "Message detailing the result of the request."
+        errors:
+          type: array
+          items:
+            type: array
+            description: "The field that caused the validation failure."
+            items:
+              type: string
+              description: "The error message describing the validation failure for the field."
+          description: "An array of validation errors, detailing which fields failed validation and why."
+    PaginationResource:
+      type: object
+      properties:
+        current_page:
+          type: integer
+          description: "The current page number being viewed."
+          example: 1
+        per_page:
+          type: integer
+          description: "The number of items displayed per page."
+          example: 10
+        total:
+          type: integer
+          description: "The total number of items across all pages."
+          example: 100
+        items:
+          type: array
+          description: "The list of items on the current page."
+          items:
+            type: object
+            description: "A generic object representing an item. Replace this with a specific schema reference for your use case."
+      required:
+        - current_page
+        - per_page
+        - total
+        - items
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+          description: "The email address of the user."
+        password:
+          type: string
+          example: "password123"
+          minLength: 0
+          description: "The password for the user."
+      required:
+        - email
+        - password
+    LoginResponse:
+      type: object
+      allOf:
+        - $ref: "#components/schemas/BaseResponse"
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                access_token:
+                  type: string
+                  example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJp...."
+                  description: "The JWT access token issued after a successful login."
+                refresh_token:
+                  type: string
+                  example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJp...."
+                  description: "The JWT refresh token issued after a successful login."
+                token_type:
+                  type: string
+                  enum:
+                    - bearer
+                  example: "bearer"
+                  description: "The type of the token, typically 'bearer'."
+                expire_in:
+                  type: integer
+                  example: 3600
+                  description: "The expiration time of the access token in seconds."
+                user:
+                  $ref: "#/components/schemas/User"
+                  description: "Information about the logged-in user."
+              required:
+                - access_token
+                - token_type
+                - expire_in
+                - user
+    Product:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/BaseId"
+        correlation_id:
+          type: number
+          description: "Unique identifier that links this product to the Open Food Facts API."
+          example: "0737628064502"
+        slug:
+          type: string
+          description: "A URL-friendly version of the product name, typically used in URLs."
+          example: "organic-apple"
+          pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        category:
+          type: string
+          description: "The product's category (e.g., fruit, beverage)."
+          example: "Fruit"
+        name:
+          type: string
+          description: "Name of the product."
+          example: "Organic Apple"
+        description:
+          type: string
+          description: "A detailed description of the product."
+          example: "Fresh organic apples grown without pesticides."
+        nutrients:
+          type: array
+          items:
+            type: string
+          description: "Nutrient information of the product. A list of key-value pairs."
+          example: ["Calories: 52 kcal", "Fat: 0.2g", "Carbohydrates: 14g"]
+        ingredients:
+          type: array
+          items:
+            type: string
+          description: "List of ingredients contained in the product."
+          example: ["Organic apples", "Water"]
+        initial_cost:
+          type: number
+          format: float
+          description: "The cost price of the product when it was acquired."
+          example: 1.50
+        selling_price:
+          type: number
+          format: float
+          description: "The price at which the product is sold to customers."
+          example: 2.99
+        quantity:
+          type: integer
+          description: "The number of units available in stock."
+          example: 100
+        picture:
+          type: string
+          description: "URL for the product image."
+          example: "https://example.com/images/organic-apple.jpg"
+    CreateProduct:
+      type: object
+      properties:
+        correlation_id:
+          $ref: "#/components/schemas/Product/properties/correlation_id"
+        category:
+          $ref: "#/components/schemas/Product/properties/category"
+        name:
+          $ref: "#/components/schemas/Product/properties/name"
+        description:
+          $ref: "#/components/schemas/Product/properties/description"
+        nutrients:
+          $ref: "#/components/schemas/Product/properties/nutrients"
+        ingredients:
+          $ref: "#/components/schemas/Product/properties/ingredients"
+        initial_cost:
+          $ref: "#/components/schemas/Product/properties/initial_cost"
+        selling_price:
+          $ref: "#/components/schemas/Product/properties/selling_price"
+        quantity:
+          $ref: "#/components/schemas/Product/properties/quantity"
+        picture:
+          $ref: "#/components/schemas/Product/properties/picture"
+      required:
+        - correlation_id
+        - category
+        - name
+        - description
+        - nutrients
+        - ingredients
+        - initial_cost
+        - selling_price
+        - quantity
+        - picture
+    UpdateProduct:
+      type: object
+      properties:
+        category:
+          $ref: "#/components/schemas/Product/properties/category"
+        name:
+          $ref: "#/components/schemas/Product/properties/name"
+        description:
+          $ref: "#/components/schemas/Product/properties/description"
+        initial_cost:
+          $ref: "#/components/schemas/Product/properties/initial_cost"
+        selling_price:
+          $ref: "#/components/schemas/Product/properties/selling_price"
+    ProductStats:
+      type: object
+      properties:
+        total_product:
+          type: number
+          description: The total number of product
+          example: 256
+        available_products:
+          type: number
+          description: The total number of available product
+          example: 121
+        products_out_of_stock:
+          type: number
+          description: The total number of product that out of stock
+          example: 10
+        soon_to_be_out_of_stock:
+          type: number
+          description: The total number of product that are going to be out of stock
+          example: 125
+    PriceItem:
+      type: object
+      properties:
+        initial_cost:
+          $ref: "#/components/schemas/Product/properties/initial_cost"
+        selling_price:
+          $ref: "#/components/schemas/Product/properties/selling_price"
+        start_date:
+          type: string
+          format: datetime
+          description: "The start date when the price change became effective."
+          example: "2023-01-01T00:00:00Z"
+        end_date:
+          type: string
+          format: datetime
+          description: "The end date when the price change was no longer applicable."
+          example: "2023-12-31T23:59:59Z"
+      required:
+        - initial_cost
+        - selling_price
+        - start_date
+    OrderItem:
+      type: object
+      properties:
+        customer:
+          type: string
+          description: "The name or ID of the customer associated with the order item."
+          example: "john_doe"
+        created_at:
+          type: string
+          format: datetime
+          description: "The timestamp when the order item was created."
+          example: "2024-01-01T12:00:00Z"
+        quantity:
+          type: integer
+          description: "The quantity of items in the order."
+          example: 3
+        status:
+          type: string
+          description: "The status of the order item (e.g., 'pending', 'shipped', 'delivered')."
+          example: "pending"
+      required:
+        - customer
+        - created_at
+        - quantity
+        - status
+    SupplyItem:
+      type: object
+      properties:
+        created_at:
+          type: string
+          format: datetime
+          description: "The timestamp when the supply item was created."
+          example: "2024-01-01T12:00:00Z"
+        quantity:
+          type: integer
+          description: "The current quantity of the supply item."
+          example: 100
+        old_quantity:
+          type: integer
+          description: "The previous quantity before the change."
+          example: 80
+        new_quantity:
+          type: integer
+          description: "The new quantity after the change."
+          example: 120
+      required:
+        - created_at
+        - quantity
+        - old_quantity
+        - new_quantity
+    CartProductItem:
+      type: object
+      description: Represent a unique product in the cart
+      properties:
+        id:
+          $ref: "#/components/schemas/BaseId"
+        name:
+          $ref: "#/components/schemas/Product/properties/name"
+        picture:
+          $ref: "#/components/schemas/Product/properties/picture"
+    CartItem:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/BaseId"
+        product:
+          $ref: "#/components/schemas/CartProductItem"
+        quantity:
+          description: The quantity of the product in the cart
+          type: number
+          example: 4
+    CustomerItem:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/BaseId"
+        firstname:
+          $ref: "#/components/schemas/User/properties/firstname"
+        lastname:
+          $ref: "#/components/schemas/User/properties/lastname"
+        phonenumber:
+          $ref: "#/components/schemas/User/properties/phonenumber"
+        email:
+          $ref: "#/components/schemas/User/properties/email"
+    CommandMetaData:
+      type: object
+      properties:
+        paid_at:
+          type: string
+          format: datetime
+          description: "The date that user paid the command."
+          example: "2023-12-31T23:59:59Z"
+        validated_at:
+          type: string
+          format: datetime
+          description: "The date that the command is validated by the store manager."
+          example: "2023-12-31T23:59:59Z"
+        shipped_at:
+          type: string
+          format: datetime
+          description: "The date the command is shipped"
+          example: "2023-12-31T23:59:59Z"
+        delivered_at:
+          type: string
+          format: datetime
+          description: "The date that the command is received by the customer"
+          example: "2023-12-31T23:59:59Z"
+    Command:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/BaseId"
+        reference:
+          type: string
+          description: The unique reference of the command
+        customer:
+          description: Represent the user that oder the command, only present for manager
+          $ref: "#/components/schemas/CustomerItem"
+        total_price_incl:
+          type: number
+          format: double
+          description: Total price of product in the command taxe includ
+        total_price_excl:
+          type: number
+          format: double
+          description: Total price of product in the command taxe exclud
+        shipping_charge:
+          type: number
+          format: double
+          description: Total price of the command taxe includ
+        meta_data:
+          $ref: "#/components/schemas/CommandMetaData"
+        shipping_address:
+          $ref: "#/components/schemas/Address"
+        status:
+          $ref: "#/components/schemas/CommandStatus"
+    CommandStats:
+      type: object
+      properties:
+        total_commands:
+          type: integer
+          example: 145
+          description: Total ordered command
+        waiting_commands:
+          type: integer
+          example: 15
+          description: Total command waiting for admin approval
+        shipped_commands:
+          type: integer
+          example: 15
+          description: Total command that are shipped
+        delivered_commands:
+          type: integer
+          example: 15
+          description: Total command that are delivered
+    PaiementItem:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/BaseId"
+        reference:
+          type: string
+          description: The unique paiement reference
+        external_id:
+          type: string
+          description: The unique transaction id from the external provider
+        amount:
+          type: number
+          format: double
+          description: The amount paid
+        status:
+          $ref: "#/components/schemas/PaymentStatus"
+        meta_data:
+          type: object
+          properties:
+            approved_at:
+              type: string
+              format: datetime
+              description: "The timestamp when the payment was approved"
+              example: "2024-01-01T12:00:00Z"
+            completed_at:
+              type: string
+              format: datetime
+              description: "The timestamp when the payment was completed"
+              example: "2024-01-01T12:00:00Z"
+            failed_at:
+              type: string
+              format: datetime
+              description: "The timestamp when the payment was failed"
+              example: "2024-01-01T12:00:00Z"
+            cancelled_at:
+              type: string
+              format: datetime
+              description: "The timestamp when the payment was cancelled"
+              example: "2024-01-01T12:00:00Z"
+            refunded_at:
+              type: string
+              format: datetime
+              description: "The timestamp when the payment was refunded"
+              example: "2024-01-01T12:00:00Z"
+        created_at:
+          type: string
+          format: datetime
+          description: "The timestamp when the payment was initiated."
+          example: "2024-01-01T12:00:00Z"
+
+
+
+
+  responses:
+    BadRequest:
+      description: "The request was invalid due to incorrect parameters."
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            application/json:
+              value:
+                success: false
+                status: "INVALID_PARAMS"
+                code: -400
+                message: "The request was invalid due to incorrect parameters."
+                error: "The 'email' field is required and cannot be empty."
+    Unauthorized:
+      description: "Authentication failed or missing."
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            application/json:
+              value:
+                success: false
+                status: "MISSING_TOKEN"
+                code: -401
+                message: "Authentication failed or missing."
+                error: "Please provide a valid token in the Authorization header."
+    Forbidden:
+      description: "You do not have permission to access this resource."
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            application/json:
+              value:
+                success: false
+                status: "ACCESS_DENIED"
+                code: -403
+                message: "You do not have permission to access this resource."
+                error: "You are not authorized to perform this action."
+    NotFound:
+      description: "The requested resource could not be found."
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            application/json:
+              value:
+                success: false
+                status: "RESOURCE_NOT_FOUND"
+                code: -404
+                message: "The requested resource could not be found."
+                error: "The requested user could not be found."
+    InternalServerError:
+      description: "The server encountered an unexpected condition that prevented it from fulfilling the request."
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            application/json:
+              value:
+                success: false
+                status: "SERVER_CRASH"
+                code: -500
+                message: "The server encountered an unexpected condition."
+                error: "The database connection failed unexpectedly."
+  parameters:
+    page:
+      name: page
+      in: query
+      description: "The page number to retrieve."
+      required: false
+      schema:
+        type: integer
+        default: 1
+        minimum: 1
+    perPage:
+      name: per_page
+      in: query
+      description: "The number of items to retrieve per page."
+      required: false
+      schema:
+        type: integer
+        default: 10
+        minimum: 1
+        maximum: 100
+    productId:
+      name: id
+      in: path
+      description: "The ID of the product to retrieve price history for."
+      required: true
+      schema:
+          $ref: "#/components/schemas/BaseId"
+    cartItemId:
+      name: id
+      in: path
+      description: "The ID of the item in the cart."
+      required: true
+      schema:
+          $ref: "#/components/schemas/BaseId"
+    commandId:
+      name: id
+      in: path
+      description: "The ID of the command to retrieve price history for."
+      required: true
+      schema:
+          $ref: "#/components/schemas/BaseId"
+  requestBodies:
+    LoginRequest:
+      description: "Login credentials required to authenticate the user."
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LoginRequest'
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
