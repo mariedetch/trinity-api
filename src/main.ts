@@ -43,7 +43,7 @@ async function bootstrap() {
 
 export function configOpenApiDoc(app: INestApplication) {
   const config = new DocumentBuilder()
-    .setTitle('Trinity API')
+    .setTitle('Trinity API Documentation')
     .setDescription('Trinity API')
     .setVersion('1.0')
     .addBearerAuth(
