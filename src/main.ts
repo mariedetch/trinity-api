@@ -11,7 +11,6 @@ import { HttpExceptionFilter } from './common/exceptions/filters/http-exception.
 import { useContainer } from 'class-validator';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
-import session from 'express-session';
 import { doubleCsrf } from 'csrf-csrf';
 import { ConfigService } from '@nestjs/config';
 import * as cookieParser from 'cookie-parser';
@@ -33,28 +32,45 @@ async function bootstrap() {
       },
     }),
   );
+  app.use(
+    cookieParser({
+      sameSite: 'lax',
+      secure: false,
+    }),
+  );
   app.use(helmet());
 
-  const {
-    invalidCsrfTokenError,
-    doubleCsrfProtection,
-    validateRequest,
-    generateToken,
-  } = doubleCsrf({
-    getSecret: () => configService.get<string>('CSRF_SECRET'),
-    cookieName: '__Host-psifi.x-csrf-token',
-    cookieOptions: {
-      sameSite: 'lax',
-      path: '/',
-      secure: true,
-    },
-  });
-
-  app.use(doubleCsrfProtection);
-  app.use(cookieParser());
-  app.use((req, res, next) => {
-    req.csrfToken = () => generateToken(req, res);
-    next();
+  // const { doubleCsrfProtection, generateToken } = doubleCsrf({
+  //   getSecret: () => configService.get<string>('CSRF_SECRET'),
+  //   cookieName: '__Host-psifi.x-csrf-token',
+  //   cookieOptions: {
+  //     sameSite: 'lax',
+  //     path: '/',
+  //     secure: false,
+  //   },
+  // });
+  // app.use((req, res, next) => {
+  //   const csrfToken = generateToken(req, res);
+  //   req.csrfToken = () => csrfToken;
+  //   res.cookie('__Host-psifi.x-csrf-token', csrfToken, {
+  //     sameSite: 'lax',
+  //     path: '/',
+  //     secure: false,
+  //   });
+  //   next();
+  // });
+  // app.use((req, res, next) => {
+  //   if (req.url === '/auth/login') {
+  //     return next();
+  //   }
+  //   return doubleCsrfProtection(req, res, next);
+  // });
+  app.enableCors({
+    origin: 'http://localhost:3000',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
+    exposedHeaders: ['Authorization'],
+    allowedHeaders: ['Authorization', 'Content-Type'],
   });
   configOpenApiDoc(app);
   useContainer(app.select(AppModule), { fallbackOnErrors: true });

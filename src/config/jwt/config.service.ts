@@ -10,6 +10,6 @@ export class JwtConfigService {
   }
 
   get expiresIn(): string {
-    return this.configService.get<string>('jwt.expiresIn');
+    return this.configService.get<string>('jwt.expiresIn') || '15m';
   }
 }

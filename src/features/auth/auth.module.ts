@@ -6,9 +6,11 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersService } from '../users/users.service';
-import { User } from '../users/user.entity';
-import { CsrfConfigService } from '../../core/services/config/csrf-config.service';
-import { JwtConfigService } from 'src/core/services/config/jwt-config.service';
+import { User } from 'src/features/users/user.entity';
+import { CsrfConfigService } from 'src/config/csrf/config.service';
+import { JwtConfigService } from 'src/config/jwt/config.service';
+import { JwtConfigModule } from 'src/config/jwt/config.module';
+import { CsrfConfigModule } from 'src/config/csrf/config.module';
 
 @Module({
   imports: [
@@ -16,6 +18,8 @@ import { JwtConfigService } from 'src/core/services/config/jwt-config.service';
     PassportModule,
     TypeOrmModule.forFeature([User]),
     JwtModule.register({}),
+    JwtConfigModule,
+    CsrfConfigModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, UsersService, CsrfConfigService, JwtConfigService],

@@ -9,6 +9,10 @@ export class LoginResponseDto {
 
   @Expose()
   @ApiProperty()
+  refresh_token: string;
+
+  @Expose()
+  @ApiProperty()
   csrf_token: string;
 
   @Expose()

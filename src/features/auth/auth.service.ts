@@ -10,12 +10,13 @@ import { LoginResponseDto } from './dto/login-response.dto';
 import {
   successResponse,
   JsonResponse,
-} from '../../../src/common/helpers/json-response.helper';
+} from 'src/common/helpers/json-response.helper';
 import { plainToClass } from 'class-transformer';
 import { UserDto } from '../users/dto/user.dto';
 import { CsrfConfigService } from 'src/config/csrf/config.service';
 import { JwtConfigService } from 'src/config/jwt/config.service';
 import { JwtService } from '@nestjs/jwt';
+import { Request as ExpressRequest, Response } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -50,6 +51,10 @@ export class AuthService {
         secret: this.jwtConfigService.secret,
         expiresIn: this.jwtConfigService.expiresIn,
       }),
+      refresh_token: this.jwtService.sign(payload, {
+        secret: this.jwtConfigService.secret,
+        expiresIn: '7d', // plus long
+      }),
       csrf_token: csrf_token,
       token_type: 'Bearer',
       expired_in: 3600,
@@ -72,13 +77,14 @@ export class AuthService {
     return parts[1];
   }
 
-  async login({
-    email,
-    password,
-  }: LoginUserDto): Promise<JsonResponse<LoginResponseDto>> {
+  async login(
+    req: ExpressRequest,
+    res: Response,
+    { email, password }: LoginUserDto,
+  ): Promise<JsonResponse<LoginResponseDto>> {
     const user = await this.validateUser(email, password);
 
-    const csrf_token = this.csrfConfigService.generateToken();
+    const csrf_token = this.csrfConfigService.generateToken(req, res);
 
     const data = this.generateAccessToken(user, csrf_token);
 
@@ -86,6 +92,8 @@ export class AuthService {
   }
 
   async refreshToken(
+    req: ExpressRequest,
+    res: Response,
     refreshToken: string,
   ): Promise<JsonResponse<LoginResponseDto>> {
     try {
@@ -98,7 +106,7 @@ export class AuthService {
         throw new NotFoundException('User not found');
       }
 
-      const csrf_token = this.csrfConfigService.generateToken();
+      const csrf_token = this.csrfConfigService.generateToken(req, res);
       const data = this.generateAccessToken(user.data, csrf_token);
 
       return successResponse(
