@@ -62,10 +62,8 @@ export abstract class AbstractCrudService<
    * @param perPage The number of resources per page.
    * @returns A promise containing the JSON response with the paginated list of resources.
    */
-  async findAll(
-    page: number,
-    perPage: number,
-  ): Promise<JsonResponse<PaginationResource<ReadDto>>> {
+  async findAll( page: number, perPage: number): Promise<JsonResponse<PaginationResource<ReadDto>>> 
+  {
     const [entities, total] = await this.repository.findAndCount({
       skip: ((page <= 0 ? 1 : page) - 1) * perPage,
       take: perPage,
@@ -104,10 +102,8 @@ export abstract class AbstractCrudService<
    * @param updateDto The data required to update the resource.
    * @returns A promise containing the JSON response with the details of the updated resource.
    */
-  async update(
-    id: string,
-    updateDto: UpdateDto,
-  ): Promise<JsonResponse<ReadDto>> {
+  async update(id: string, updateDto: UpdateDto): Promise<JsonResponse<ReadDto>> 
+  {
     const entity = await this.repository.preload({
       id: id,
       ...updateDto,

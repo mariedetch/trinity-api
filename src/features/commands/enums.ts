@@ -1,0 +1,10 @@
+export enum CommandStatus {
+    CREATED = 'CREATED',
+    PAID = 'PAID',
+    IN_PROGRESS = 'IN_PROGRESS',
+    SHIPPED = 'SHIPPED',
+    DELIVERED = 'DELIVERED',
+    CANCELLED = 'CANCELLED',
+    RETURNED = 'RETURNED',
+    REFUNDED = 'REFUNDED'
+  }
