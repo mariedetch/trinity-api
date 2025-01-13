@@ -1,40 +1,63 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Category } from '../enums/category.enum';
-import { Exclude, Expose } from 'class-transformer';
+import { Exclude, Expose, Type } from 'class-transformer';
+import { PriceJsonItem } from 'src/core/interfaces/price-json.interface';
 
 @Exclude()
 export class ProductDto {
   @Expose()
   @ApiProperty()
-  id: string;
+  id: string; // Identifiant unique du produit
 
   @Expose()
   @ApiProperty()
-  name: string;
-
-  @Expose()
-  @ApiProperty({
-    enum: [Category.NOTEBOOK, Category.BOOK, Category.IN_BOX, Category.UNITARY],
-  })
-  category: Category;
+  bar_code: number; // Code barre du produit
 
   @Expose()
   @ApiProperty()
-  nbPerBatch: number;
+  name: string; // Nom du produit
 
   @Expose()
   @ApiProperty()
-  currentStock: number;
+  category: string; // Catégorie du produit
 
   @Expose()
   @ApiProperty()
-  warningStock: number;
+  nutriments: any; // Informations sur les nutriments du produit
 
   @Expose()
   @ApiProperty()
-  alertStock: number;
+  ingredients: string[]; // Liste des ingrédients du produit
 
   @Expose()
   @ApiProperty()
-  createdAt: Date;
+  picture: string; // URL de l'image du produit
+
+  @Expose()
+  @ApiProperty()
+  initial_cost: number; // Coût initial du produit
+
+  @Expose()
+  @ApiProperty()
+  selling_price: number; // Prix de vente du produit
+
+  @Expose()
+  @ApiProperty()
+  prices?: any; // Historique des prix du produit //
+
+  @Expose()
+  @ApiProperty()
+  quantity_in_stock: number; // Quantité actuelle en stock
+
+  @Expose()
+  @ApiProperty()
+  alert_threshold: number; // Seuil d'alerte du stock
+
+  @Expose()
+  @ApiProperty()
+  createdAt: Date; // Date de création du produit
+
+  // @Expose()
+  // @ApiProperty()
+  // updatedAt: Date; // Date de dernière mise à jour
+
 }
