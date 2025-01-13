@@ -14,7 +14,9 @@ export class CommandsController {
   @Post()
   @ApiDefaultErrorResponse()
   @ApiOperation({ summary: 'Create a new command' })
-  create(@Body() createCommandDto: CreateCommandDto): Promise<JsonResponse<CommandDto>> {
+  create(
+    @Body() createCommandDto: CreateCommandDto,
+  ): Promise<JsonResponse<CommandDto>> {
     return this.commandsService.create(createCommandDto);
   }
 }

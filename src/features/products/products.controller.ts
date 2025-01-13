@@ -8,11 +8,17 @@ import {
   Delete,
   Query,
   ParseUUIDPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { ApiBearerAuth, ApiCreatedResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ApiDefaultErrorResponse } from 'src/common/decorators/responses/api-default-error-response.decorator';
 import { ApiSuccessResponse } from 'src/common/decorators/responses/api-success-response.decorator';
 import { ProductDto } from './dto/product.dto';
@@ -21,6 +27,7 @@ import { PaginationResource } from 'src/core/interfaces/pagination-resource.inte
 import { ProductStatsDto } from './dto/product-stats.dto';
 import { PriceJsonItem } from 'src/core/interfaces/price-json.interface';
 import { ProductOrderHistoryDto } from './dto/product-orders.dto';
+import { AuthGuard } from 'src/core/guards/auth.guard';
 
 @Controller({ path: 'products', version: '1' })
 @ApiTags('products')
@@ -28,7 +35,8 @@ import { ProductOrderHistoryDto } from './dto/product-orders.dto';
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
-  @Post()    // Route pour créer un produit
+  @Post()
+  @UseGuards(AuthGuard)
   @ApiDefaultErrorResponse()
   @ApiSuccessResponse({
     model: ProductDto,
@@ -42,6 +50,7 @@ export class ProductsController {
   }
 
   @Get()
+  @UseGuards(AuthGuard)
   @ApiDefaultErrorResponse()
   @ApiSuccessResponse({
     model: ProductDto,
@@ -49,7 +58,7 @@ export class ProductsController {
   })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'perPage', required: false })
-  @ApiQuery({ name: 'name', required: false})
+  @ApiQuery({ name: 'name', required: false })
   @ApiQuery({ name: 'category', required: false })
   @ApiQuery({ name: 'minPrice', required: false })
   @ApiQuery({ name: 'maxPrice', required: false })
@@ -67,7 +76,7 @@ export class ProductsController {
   ): Promise<JsonResponse<PaginationResource<ProductDto>>> {
     const currentPage = page && page > 0 ? page : 1;
     const itemsPerPage = perPage && perPage > 0 ? perPage : 20;
-  
+
     const searchOptions = {
       name,
       category,
@@ -76,11 +85,16 @@ export class ProductsController {
       quantity_in_stock: minQuantity ? Number(minQuantity) : undefined,
       alert_threshold: maxQuantity ? Number(maxQuantity) : undefined,
     };
-  
-    return this.productsService.findAllProducts(currentPage, itemsPerPage, searchOptions);
+
+    return this.productsService.findAllProducts(
+      currentPage,
+      itemsPerPage,
+      searchOptions,
+    );
   }
-  
+
   @Get(':id')
+  @UseGuards(AuthGuard)
   @ApiDefaultErrorResponse()
   @ApiSuccessResponse({
     model: ProductDto,
@@ -93,6 +107,7 @@ export class ProductsController {
   }
 
   @Put(':id')
+  @UseGuards(AuthGuard)
   @ApiDefaultErrorResponse()
   @ApiSuccessResponse({
     model: ProductDto,
@@ -106,6 +121,7 @@ export class ProductsController {
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard)
   @ApiDefaultErrorResponse()
   @ApiSuccessResponse({
     model: ProductDto,
@@ -116,6 +132,7 @@ export class ProductsController {
   }
 
   @Get('g/stats')
+  @UseGuards(AuthGuard)
   @ApiDefaultErrorResponse()
   @ApiSuccessResponse({
     model: Object,
@@ -126,6 +143,7 @@ export class ProductsController {
   }
 
   @Get(':id/prices')
+  @UseGuards(AuthGuard)
   @ApiDefaultErrorResponse()
   @ApiSuccessResponse({
     model: Object,
@@ -138,6 +156,7 @@ export class ProductsController {
   }
 
   @Get(':id/orders')
+  @UseGuards(AuthGuard)
   @ApiDefaultErrorResponse()
   @ApiSuccessResponse({
     model: Object,
@@ -148,6 +167,4 @@ export class ProductsController {
   ): Promise<JsonResponse<Array<ProductOrderHistoryDto>>> {
     return this.productsService.getOrderHistory(id);
   }
-
 }
-
