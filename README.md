@@ -38,6 +38,7 @@ DB_USERNAME=postgres
 DB_PASSWORD=yourpassword
 DB_NAME=mydatabase
 JWT_SECRET=mysecretkey
+CSRF_SECRET=mysecretkey
 ```
 
 ## Usage

@@ -34,7 +34,46 @@ async function bootstrap() {
       },
     }),
   );
+  app.use(
+    cookieParser({
+      sameSite: 'lax',
+      secure: false,
+    }),
+  );
+  app.use(helmet());
 
+  // const { doubleCsrfProtection, generateToken } = doubleCsrf({
+  //   getSecret: () => configService.get<string>('CSRF_SECRET'),
+  //   cookieName: '__Host-psifi.x-csrf-token',
+  //   cookieOptions: {
+  //     sameSite: 'lax',
+  //     path: '/',
+  //     secure: false,
+  //   },
+  // });
+  // app.use((req, res, next) => {
+  //   const csrfToken = generateToken(req, res);
+  //   req.csrfToken = () => csrfToken;
+  //   res.cookie('__Host-psifi.x-csrf-token', csrfToken, {
+  //     sameSite: 'lax',
+  //     path: '/',
+  //     secure: false,
+  //   });
+  //   next();
+  // });
+  // app.use((req, res, next) => {
+  //   if (req.url === '/auth/login') {
+  //     return next();
+  //   }
+  //   return doubleCsrfProtection(req, res, next);
+  // });
+  app.enableCors({
+    origin: 'http://localhost:3000',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
+    exposedHeaders: ['Authorization'],
+    allowedHeaders: ['Authorization', 'Content-Type'],
+  });
   configOpenApiDoc(app);
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
