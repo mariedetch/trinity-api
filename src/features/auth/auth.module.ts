@@ -23,5 +23,6 @@ import { CsrfConfigModule } from 'src/config/csrf/config.module';
   ],
   controllers: [AuthController],
   providers: [AuthService, UsersService, CsrfConfigService, JwtConfigService],
+  exports: [JwtModule],
 })
 export class AuthModule {}

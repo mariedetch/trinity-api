@@ -34,7 +34,7 @@ const transports = [
 ];
 
 export const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || 'info',
+  level: process.env.LOG_LEVEL || 'debug',
   format: combine(timestamp(), customFormat),
   transports: transports,
 });
