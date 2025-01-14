@@ -29,7 +29,6 @@ export class AuthController {
   }
 
   @Post('refresh')
-  @UseGuards(AuthGuard)
   async refreshToken(
     @Req() req: ExpressRequest,
     @Res({ passthrough: true }) res: Response,

@@ -12,7 +12,10 @@ import { ApiConfigService } from './config/api/config.service';
 import { CorsMiddleware } from './common/middlewares/cors.middleware';
 import { ApiConfigModule } from './config/api/config.module';
 import { FeaturesModule } from './features/features.module';
-import { APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { JwtConfigModule } from './config/jwt/config.module';
+import { AuthGuard } from './core/guards/auth.guard';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -21,15 +24,17 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
     }),
     PostgresDatabaseProviderModule,
     ApiConfigModule,
+    JwtConfigModule,
     FeaturesModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
+    JwtService,
     {
       provide: APP_INTERCEPTOR,
       useClass: ClassSerializerInterceptor,
-    },
+    }
   ],
 })
 export class AppModule {

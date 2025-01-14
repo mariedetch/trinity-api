@@ -28,6 +28,9 @@ import { ProductStatsDto } from './dto/product-stats.dto';
 import { PriceJsonItem } from 'src/core/interfaces/price-json.interface';
 import { ProductOrderHistoryDto } from './dto/product-orders.dto';
 import { AuthGuard } from 'src/core/guards/auth.guard';
+import { Role } from '../users/enum';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { RolesGuard } from 'src/core/guards/roles.guard';
 
 @Controller({ path: 'products', version: '1' })
 @ApiTags('products')
@@ -36,7 +39,8 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Post()
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.MANAGER)
   @ApiDefaultErrorResponse()
   @ApiSuccessResponse({
     model: ProductDto,
@@ -107,7 +111,8 @@ export class ProductsController {
   }
 
   @Put(':id')
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.MANAGER)
   @ApiDefaultErrorResponse()
   @ApiSuccessResponse({
     model: ProductDto,
@@ -122,6 +127,8 @@ export class ProductsController {
 
   @Delete(':id')
   @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.CUSTOMER)
   @ApiDefaultErrorResponse()
   @ApiSuccessResponse({
     model: ProductDto,
@@ -132,7 +139,8 @@ export class ProductsController {
   }
 
   @Get('g/stats')
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.CUSTOMER)
   @ApiDefaultErrorResponse()
   @ApiSuccessResponse({
     model: Object,
@@ -143,7 +151,8 @@ export class ProductsController {
   }
 
   @Get(':id/prices')
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.CUSTOMER)
   @ApiDefaultErrorResponse()
   @ApiSuccessResponse({
     model: Object,
@@ -156,7 +165,8 @@ export class ProductsController {
   }
 
   @Get(':id/orders')
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.CUSTOMER)
   @ApiDefaultErrorResponse()
   @ApiSuccessResponse({
     model: Object,
