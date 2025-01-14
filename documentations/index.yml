@@ -1358,12 +1358,38 @@ paths:
           $ref: "#/components/responses/NotFound"
         '500':
           $ref: "#/components/responses/InternalServerError"
+  /commands/{id}/products:
+    parameters:
+      - $ref: "#/components/parameters/commandId"
+    get:
+      summary: Retreive the list of products ordered in the command
+      description: Retreive the list of products ordered in the command
+      tags:
+        - Commands
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: "Successful response with command details."
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/CommandProductItem"
+        '404':
+          $ref: "#/components/responses/NotFound"
+        '500':
+          $ref: "#/components/responses/InternalServerError"
 
-  #invoices
+  #cart validation, paiement
+  #paiements
+  #stats
   #supplies
   #inventory
-  #cart validation, piement
-  #stats
 components:
   schemas:
     BaseHeaders:
@@ -2010,9 +2036,33 @@ components:
           format: datetime
           description: "The timestamp when the payment was initiated."
           example: "2024-01-01T12:00:00Z"
-
-
-
+    CommandProductItem:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/BaseId"
+        product:
+          $ref: "#/components/schemas/Product"
+        quantity:
+          type: integer
+          description: "The number of product to command."
+          example: 100
+        unit_price_incl:
+          type: number
+          format: double
+          description: Unitary price of the product taxe includ
+        unit_price_excl:
+          type: number
+          format: double
+          description: Unitary price of the product taxe exclud
+        total_price_incl:
+          type: number
+          format: double
+          description: Total price of the product taxe includ
+        total_price_excl:
+          type: number
+          format: double
+          description: Total price of the product taxe exclud
 
   responses:
     BadRequest:
