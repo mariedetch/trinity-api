@@ -30,13 +30,15 @@ npm install
 ### Configuration de l'environnement
 Créez un fichier .env à la racine du projet avec les variables suivantes :
 ```bash
-APP_NAME="Secure Sante"
+APP_NAME="Trinity Api"
 APP_PORT=3000
+
 DB_HOST=localhost
 DB_PORT=5432
 DB_USERNAME=postgres
 DB_PASSWORD=yourpassword
 DB_NAME=mydatabase
+
 JWT_SECRET=mysecretkey
 CSRF_SECRET=mysecretkey
 ```
@@ -63,7 +65,7 @@ Lorsque l'API retourne un seul objet (ex. un utilisateur), la réponse est struc
 {
   "status_code": 200,
   "timestamp": "2024-08-20T12:34:56Z",
-  "message": "Succès",
+  "message": "An Human Readable Message",
   "data": {
     "id": 1,
     "name": "John Doe",
@@ -81,7 +83,7 @@ Pour les réponses contenant une liste d'objets (ex. liste des utilisateurs), la
 {
   "status_code": 200,
   "timestamp": "2024-08-20T12:34:56Z",
-  "message": "Succès",
+  "message": "An Human Readable Message",
   "data": [
     {
       "id": 1,
@@ -106,7 +108,7 @@ Lorsque les données sont paginées, la réponse inclut des informations sur la 
 {
   "status_code": 200,
   "timestamp": "2024-08-20T12:34:56Z",
-  "message": "Succès",
+  "message": "An Human Readable Message",
   "data": {
     "items": [
       {
