@@ -34,10 +34,6 @@ export class UserDto {
   email: string;
 
   @Expose()
-  @ApiProperty()
-  password: string;
-
-  @Expose()
   @ApiProperty({
     type: PaymentMethod,
     isArray: true,
