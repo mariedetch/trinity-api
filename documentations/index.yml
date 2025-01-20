@@ -1134,6 +1134,58 @@ paths:
                 }
         '500':
           $ref: "#/components/responses/InternalServerError"
+    put:
+      summary: Validate the auth user cart for checkout
+      description: Validate the auth user cart for checkout
+      tags:
+        - User Cart
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                shipping_address:
+                  $ref: "#/components/schemas/Address"
+      responses:
+        '200':
+          description: "Cart validates successfully."
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: 'object'
+                        properties:
+                          total_price_incl:
+                            $ref: "#/components/schemas/Command/properties/total_price_incl"
+                          total_price_excl:
+                            $ref: "#/components/schemas/Command/properties/total_price_excl"
+        '401':
+          $ref: "#/components/responses/Unauthorized"
+        '422':
+          description: "Unprocessable Entity – Validation errors"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+              example:
+                success: false
+                status: "INVALID_CREDENTIALS"
+                code: -1000
+                message: "Validation error occurred."
+                errors: {
+                  country: [
+                    "The country is required"
+                  ],
+                }
+        '500':
+          $ref: "#/components/responses/InternalServerError"
   /carts/item/{id}:
     put:
       summary: "Update an existing cart item"
@@ -1332,7 +1384,7 @@ paths:
           $ref: "#/components/responses/NotFound"
         '500':
           $ref: "#/components/responses/InternalServerError"
-  /commands/{id}/paiements:
+  /commands/{id}/payments:
     parameters:
       - $ref: "#/components/parameters/commandId"
     get:
@@ -1353,7 +1405,72 @@ paths:
                   - type: object
                     properties:
                       data:
-                        $ref: "#/components/schemas/PaiementItem"
+                        $ref: "#/components/schemas/PaymentItem"
+        '404':
+          $ref: "#/components/responses/NotFound"
+        '500':
+          $ref: "#/components/responses/InternalServerError"
+    post:
+      summary: Initiate the payment for validated command
+      description: Initiate the payment for validated command
+      tags:
+        - Commands
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                payment_mode:
+                  $ref: "#/components/schemas/PaymentItem/properties/payment_mode"
+                phone_number:
+                  $ref: "#/components/schemas/PaymentItem/properties/phone_number"
+      responses:
+        '200':
+          description: "Payment initiated successfully"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/PaymentItem"
+        '404':
+          $ref: "#/components/responses/NotFound"
+        '500':
+          $ref: "#/components/responses/InternalServerError"
+    put:
+      summary: Update the status of a payment
+      description: Update the status of a payment
+      tags:
+        - Commands
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  description: The status of the payment
+      responses:
+        '200':
+          description: "Successful response with command details."
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/CommandProductItem"
         '404':
           $ref: "#/components/responses/NotFound"
         '500':
@@ -1986,7 +2103,7 @@ components:
           type: integer
           example: 15
           description: Total command that are delivered
-    PaiementItem:
+    PaymentItem:
       type: object
       properties:
         id:
@@ -1994,27 +2111,31 @@ components:
         reference:
           type: string
           description: The unique paiement reference
-        external_id:
-          type: string
-          description: The unique transaction id from the external provider
         amount:
           type: number
           format: double
           description: The amount paid
         status:
           $ref: "#/components/schemas/PaymentStatus"
+        phone_number:
+          type: string
+          example: "2290167266867"
+          description: "The mobile number the user want to pay from"
+        payment_mode:
+          description: The mobile operator
+          type: string
+          enum:
+            - MTN_MOMO
+            - CELTIS_CASH
+            - FLOOZ
+          example: "MTN_MOMO"
         meta_data:
           type: object
           properties:
-            approved_at:
+            succeded_at:
               type: string
               format: datetime
-              description: "The timestamp when the payment was approved"
-              example: "2024-01-01T12:00:00Z"
-            completed_at:
-              type: string
-              format: datetime
-              description: "The timestamp when the payment was completed"
+              description: "The timestamp when the payment was succeded"
               example: "2024-01-01T12:00:00Z"
             failed_at:
               type: string
