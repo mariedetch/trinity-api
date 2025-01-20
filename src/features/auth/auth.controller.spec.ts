@@ -8,18 +8,56 @@ import { LoginUserDto } from './dto/login-user.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { Role } from 'src/features/users/enum';
 import { UserDto } from 'src/features/users/dto/user.dto';
-import { Request, Response } from 'express';
+import { Request as ExpressRequest, Response } from 'express';
 import { JsonResponse } from 'src/common/helpers/json-response.helper';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 
 describe('AuthController', () => {
   let controller: AuthController;
   let authServiceMock: Partial<AuthService>;
   let jwtServiceMock: Partial<JwtService>;
 
-  // Mock Request et Response
+  // Mock Request complet
   const mockRequest = {
-    // Ajoutez les propriétés dont vous avez besoin
-  } as Request;
+    user: {
+      sub: 'mock_user_id',
+      email: 'test@example.com',
+      role: Role.MANAGER,
+    },
+    // Ajout des propriétés requises de Express.Request
+    get: jest.fn(),
+    header: jest.fn(),
+    accepts: jest.fn(),
+    acceptsCharsets: jest.fn(),
+    acceptsEncodings: jest.fn(),
+    acceptsLanguages: jest.fn(),
+    param: jest.fn(),
+    is: jest.fn(),
+    protocol: 'http',
+    secure: false,
+    ip: '::1',
+    ips: [],
+    subdomains: [],
+    path: '',
+    hostname: '',
+    host: '',
+    fresh: false,
+    stale: true,
+    xhr: false,
+    body: {},
+    cookies: {},
+    method: 'POST',
+    params: {},
+    query: {},
+    route: {},
+    signedCookies: {},
+    originalUrl: '',
+    url: '',
+    baseUrl: '',
+    app: {},
+    res: {},
+    next: jest.fn(),
+  } as unknown as ExpressRequest;
 
   const mockResponse = {
     cookie: jest.fn().mockReturnThis(),
@@ -46,22 +84,39 @@ describe('AuthController', () => {
     },
   };
 
+  const mockAuthUserResponse: JsonResponse<UserDto> = {
+    status_code: 200,
+    message: 'User successfully gotten',
+    timestamp: new Date().toDateString(),
+    data: {
+      id: 'mock_user_id',
+      email: 'test@example.com',
+      first_name: 'John',
+      last_name: 'Doe',
+      role: Role.MANAGER,
+    } as UserDto,
+  };
+
+  const mockLogoutResponse: JsonResponse<null> = {
+    status_code: 200,
+    message: 'Successfully logged out',
+    timestamp: new Date().toDateString(),
+    data: null,
+  };
+
   beforeEach(async () => {
     authServiceMock = {
       login: jest.fn().mockResolvedValue(mockUserResponse),
       refreshToken: jest.fn().mockResolvedValue(mockUserResponse),
-      getAuthUser: jest.fn().mockResolvedValue(mockUserResponse),
-      logout: jest.fn().mockResolvedValue({
-        statusCode: 200,
-        message: 'Successfully logged out',
-      }),
+      getAuthUser: jest.fn().mockResolvedValue(mockAuthUserResponse),
+      logout: jest.fn().mockResolvedValue(mockLogoutResponse),
       getTokenFromHeader: jest.fn().mockReturnValue('mock_access_token'),
     };
 
     jwtServiceMock = {
       verifyAsync: jest.fn().mockResolvedValue({
         sub: 'mock_user_id',
-        email: 'mock@example.com',
+        email: 'test@example.com',
         role: Role.MANAGER,
       }),
     };
@@ -105,25 +160,27 @@ describe('AuthController', () => {
       expect(authServiceMock.login).toHaveBeenCalledWith(
         mockRequest,
         mockResponse,
-        {
-          email: 'test@example.com',
-          password: 'password123',
-        },
+        loginUserDto,
       );
     });
   });
 
   describe('refreshToken', () => {
     it('should return refresh token response', async () => {
-      const refreshToken = 'Bearer mock_refresh_token';
+      const refreshTokenDto: RefreshTokenDto = {
+        refreshToken: 'Bearer mock_refresh_token',
+      };
 
       const result = await controller.refreshToken(
         mockRequest,
         mockResponse,
-        refreshToken,
+        refreshTokenDto,
       );
 
       expect(result).toEqual(mockUserResponse);
+      expect(authServiceMock.getTokenFromHeader).toHaveBeenCalledWith(
+        refreshTokenDto.refreshToken,
+      );
       expect(authServiceMock.refreshToken).toHaveBeenCalledWith(
         mockRequest,
         mockResponse,
@@ -134,26 +191,21 @@ describe('AuthController', () => {
 
   describe('getAuthUser', () => {
     it('should return authenticated user data', async () => {
-      const authHeader = 'Bearer mock_access_token';
-      const result = await controller.getAuthUser(authHeader);
+      const result = await controller.getAuthUser(mockRequest);
 
-      expect(result).toEqual(mockUserResponse);
+      expect(result).toEqual(mockAuthUserResponse);
       expect(authServiceMock.getAuthUser).toHaveBeenCalledWith(
-        'mock_access_token',
+        mockRequest['user'],
       );
     });
   });
 
   describe('logout', () => {
     it('should return logout success message', async () => {
-      const authHeader = 'Bearer mock_access_token';
-      const result = await controller.logout(authHeader);
+      const result = await controller.logout(mockRequest);
 
-      expect(result).toEqual({
-        statusCode: 200,
-        message: 'Successfully logged out',
-      });
-      expect(authServiceMock.logout).toHaveBeenCalledWith('mock_access_token');
+      expect(result).toEqual(mockLogoutResponse);
+      expect(authServiceMock.logout).toHaveBeenCalledWith(mockRequest['user']);
     });
   });
 });

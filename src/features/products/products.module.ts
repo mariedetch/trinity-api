@@ -6,12 +6,9 @@ import { Product } from './product.entity';
 import { JwtService } from '@nestjs/jwt';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Product]) ],
+  imports: [TypeOrmModule.forFeature([Product])],
   exports: [TypeOrmModule.forFeature([Product])],
   controllers: [ProductsController],
-  providers: [
-    ProductsService,
-    JwtService
-  ],
+  providers: [ProductsService, JwtService],
 })
 export class ProductsModule {}
