@@ -1,0 +1,106 @@
+2025-01-13T18:29:40.922Z [info]: Starting Nest application...
+2025-01-13T18:29:40.941Z [info]: PostgresDatabaseProviderModule dependencies initialized
+2025-01-13T18:29:40.941Z [info]: TypeOrmModule dependencies initialized
+2025-01-13T18:29:40.942Z [info]: FeaturesModule dependencies initialized
+2025-01-13T18:29:40.942Z [info]: ConfigHostModule dependencies initialized
+2025-01-13T18:29:40.943Z [info]: ConfigModule dependencies initialized
+2025-01-13T18:29:40.943Z [info]: ConfigModule dependencies initialized
+2025-01-13T18:29:40.943Z [info]: ConfigModule dependencies initialized
+2025-01-13T18:29:40.944Z [info]: PostgresConfigModule dependencies initialized
+2025-01-13T18:29:40.944Z [info]: ApiConfigModule dependencies initialized
+2025-01-13T18:29:40.973Z [info]: AppModule dependencies initialized
+2025-01-13T18:29:41.078Z [info]: TypeOrmCoreModule dependencies initialized
+2025-01-13T18:29:41.078Z [info]: TypeOrmModule dependencies initialized
+2025-01-13T18:29:41.079Z [info]: ProductsModule dependencies initialized
+2025-01-13T18:29:41.113Z [info]: AppController {/api}:
+2025-01-13T18:29:41.116Z [info]: Mapped {/api, GET} route
+2025-01-13T18:29:41.117Z [info]: ProductsController {/api/products} (version: 1):
+2025-01-13T18:29:41.118Z [info]: Mapped {/api/products, POST} (version: 1) route
+2025-01-13T18:29:41.120Z [info]: Mapped {/api/products, GET} (version: 1) route
+2025-01-13T18:29:41.120Z [info]: Mapped {/api/products/:id, GET} (version: 1) route
+2025-01-13T18:29:41.122Z [info]: Mapped {/api/products/:id, PATCH} (version: 1) route
+2025-01-13T18:29:41.123Z [info]: Mapped {/api/products/:id, DELETE} (version: 1) route
+2025-01-13T18:29:41.126Z [info]: Nest application successfully started
+2025-01-13T18:30:57.908Z [info]: Starting Nest application...
+2025-01-13T18:30:57.926Z [info]: PostgresDatabaseProviderModule dependencies initialized
+2025-01-13T18:30:57.926Z [info]: TypeOrmModule dependencies initialized
+2025-01-13T18:30:57.926Z [info]: FeaturesModule dependencies initialized
+2025-01-13T18:30:57.926Z [info]: ConfigHostModule dependencies initialized
+2025-01-13T18:30:57.927Z [info]: ConfigModule dependencies initialized
+2025-01-13T18:30:57.927Z [info]: ConfigModule dependencies initialized
+2025-01-13T18:30:57.927Z [info]: ConfigModule dependencies initialized
+2025-01-13T18:30:57.928Z [info]: PostgresConfigModule dependencies initialized
+2025-01-13T18:30:57.928Z [info]: ApiConfigModule dependencies initialized
+2025-01-13T18:30:57.954Z [info]: AppModule dependencies initialized
+2025-01-13T18:30:58.095Z [info]: TypeOrmCoreModule dependencies initialized
+2025-01-13T18:30:58.096Z [info]: TypeOrmModule dependencies initialized
+2025-01-13T18:30:58.096Z [info]: TypeOrmModule dependencies initialized
+2025-01-13T18:30:58.096Z [info]: CommandsModule dependencies initialized
+2025-01-13T18:30:58.097Z [info]: ProductsModule dependencies initialized
+2025-01-13T18:30:58.133Z [info]: AppController {/api}:
+2025-01-13T18:30:58.136Z [info]: Mapped {/api, GET} route
+2025-01-13T18:30:58.137Z [info]: ProductsController {/api/products} (version: 1):
+2025-01-13T18:30:58.138Z [info]: Mapped {/api/products, POST} (version: 1) route
+2025-01-13T18:30:58.138Z [info]: Mapped {/api/products, GET} (version: 1) route
+2025-01-13T18:30:58.139Z [info]: Mapped {/api/products/:id, GET} (version: 1) route
+2025-01-13T18:30:58.139Z [info]: Mapped {/api/products/:id, PUT} (version: 1) route
+2025-01-13T18:30:58.140Z [info]: Mapped {/api/products/:id, DELETE} (version: 1) route
+2025-01-13T18:30:58.140Z [info]: Mapped {/api/products/g/stats, GET} (version: 1) route
+2025-01-13T18:30:58.140Z [info]: Mapped {/api/products/:id/prices, GET} (version: 1) route
+2025-01-13T18:30:58.141Z [info]: Mapped {/api/products/:id/orders, GET} (version: 1) route
+2025-01-13T18:30:58.141Z [info]: CommandsController {/api/commands}:
+2025-01-13T18:30:58.141Z [info]: Mapped {/api/commands, POST} route
+2025-01-13T18:30:58.144Z [info]: Nest application successfully started
+2025-01-13T18:53:54.275Z [info]: Starting Nest application...
+2025-01-13T18:53:54.292Z [info]: PostgresDatabaseProviderModule dependencies initialized
+2025-01-13T18:53:54.292Z [info]: TypeOrmModule dependencies initialized
+2025-01-13T18:53:54.293Z [info]: FeaturesModule dependencies initialized
+2025-01-13T18:53:54.293Z [info]: ConfigHostModule dependencies initialized
+2025-01-13T18:53:54.294Z [info]: ConfigModule dependencies initialized
+2025-01-13T18:53:54.294Z [info]: ConfigModule dependencies initialized
+2025-01-13T18:53:54.294Z [info]: ConfigModule dependencies initialized
+2025-01-13T18:53:54.294Z [info]: PostgresConfigModule dependencies initialized
+2025-01-13T18:53:54.295Z [info]: ApiConfigModule dependencies initialized
+2025-01-13T18:53:54.329Z [info]: AppModule dependencies initialized
+2025-01-13T18:53:54.490Z [error]: Unable to connect to the database. Retrying (1)...
+2025-01-13T18:53:57.599Z [error]: Unable to connect to the database. Retrying (2)...
+2025-01-13T18:54:00.683Z [error]: Unable to connect to the database. Retrying (3)...
+2025-01-13T18:54:03.775Z [error]: Unable to connect to the database. Retrying (4)...
+2025-01-13T18:54:06.858Z [error]: Unable to connect to the database. Retrying (5)...
+2025-01-13T18:54:09.937Z [error]: Unable to connect to the database. Retrying (6)...
+2025-01-13T18:54:13.038Z [error]: Unable to connect to the database. Retrying (7)...
+2025-01-13T18:54:16.140Z [error]: Unable to connect to the database. Retrying (8)...
+2025-01-13T18:54:19.199Z [error]: Unable to connect to the database. Retrying (9)...
+2025-01-13T18:54:53.090Z [info]: Starting Nest application...
+2025-01-13T18:54:53.106Z [info]: PostgresDatabaseProviderModule dependencies initialized
+2025-01-13T18:54:53.106Z [info]: TypeOrmModule dependencies initialized
+2025-01-13T18:54:53.107Z [info]: FeaturesModule dependencies initialized
+2025-01-13T18:54:53.107Z [info]: ConfigHostModule dependencies initialized
+2025-01-13T18:54:53.108Z [info]: ConfigModule dependencies initialized
+2025-01-13T18:54:53.108Z [info]: ConfigModule dependencies initialized
+2025-01-13T18:54:53.108Z [info]: ConfigModule dependencies initialized
+2025-01-13T18:54:53.109Z [info]: PostgresConfigModule dependencies initialized
+2025-01-13T18:54:53.109Z [info]: ApiConfigModule dependencies initialized
+2025-01-13T18:54:53.135Z [info]: AppModule dependencies initialized
+2025-01-13T18:54:53.270Z [error]: Unable to connect to the database. Retrying (1)...
+2025-01-13T18:54:56.386Z [error]: Unable to connect to the database. Retrying (2)...
+2025-01-13T18:54:59.488Z [error]: Unable to connect to the database. Retrying (3)...
+2025-01-13T18:55:02.587Z [error]: Unable to connect to the database. Retrying (4)...
+2025-01-13T18:55:05.683Z [error]: Unable to connect to the database. Retrying (5)...
+2025-01-13T18:55:08.830Z [error]: Unable to connect to the database. Retrying (6)...
+2025-01-13T18:55:11.903Z [error]: Unable to connect to the database. Retrying (7)...
+2025-01-13T18:55:15.001Z [error]: Unable to connect to the database. Retrying (8)...
+2025-01-13T18:55:18.097Z [error]: Unable to connect to the database. Retrying (9)...
+2025-01-13T19:18:56.270Z [info]: Starting Nest application...
+2025-01-13T19:18:56.287Z [info]: PostgresDatabaseProviderModule dependencies initialized
+2025-01-13T19:18:56.288Z [info]: TypeOrmModule dependencies initialized
+2025-01-13T19:18:56.288Z [info]: FeaturesModule dependencies initialized
+2025-01-13T19:18:56.289Z [info]: ConfigHostModule dependencies initialized
+2025-01-13T19:18:56.289Z [info]: ConfigModule dependencies initialized
+2025-01-13T19:18:56.290Z [info]: ConfigModule dependencies initialized
+2025-01-13T19:18:56.290Z [info]: ConfigModule dependencies initialized
+2025-01-13T19:18:56.290Z [info]: PostgresConfigModule dependencies initialized
+2025-01-13T19:18:56.291Z [info]: ApiConfigModule dependencies initialized
+2025-01-13T19:18:56.318Z [info]: AppModule dependencies initialized
+2025-01-13T19:18:56.442Z [error]: Unable to connect to the database. Retrying (1)...
+2025-01-13T19:18:59.542Z [error]: Unable to connect to the database. Retrying (2)...
