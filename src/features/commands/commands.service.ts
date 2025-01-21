@@ -7,7 +7,10 @@ import { Product } from '../products/product.entity';
 import { CreateCommandDto } from './dto/create-command.dto';
 import { CommandDto } from './dto/command.dto';
 import { CommandStatus } from './enums';
-import { JsonResponse, successResponse } from 'src/common/helpers/json-response.helper';
+import {
+  JsonResponse,
+  successResponse,
+} from 'src/common/helpers/json-response.helper';
 import { plainToInstance } from 'class-transformer';
 
 @Injectable()
@@ -25,9 +28,11 @@ export class CommandsService {
     return `CMD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
   }
 
-  async create(createCommandDto: CreateCommandDto): Promise<JsonResponse<CommandDto>> {
+  async create(
+    createCommandDto: CreateCommandDto,
+  ): Promise<JsonResponse<CommandDto>> {
     // 1. Récupérer les produits demandés
-    const productsIds = createCommandDto.products.map(p => p.product_id);
+    const productsIds = createCommandDto.products.map((p) => p.product_id);
     const products = await this.productRepository.findByIds(productsIds);
 
     // Vérifier que tous les produits existent
@@ -39,9 +44,9 @@ export class CommandsService {
     let total_price_excl = 0;
     let total_price_incl = 0;
 
-    const commandProductsData = createCommandDto.products.map(productDto => {
-      const product = products.find(p => p.id === productDto.product_id);
-      
+    const commandProductsData = createCommandDto.products.map((productDto) => {
+      const product = products.find((p) => p.id === productDto.product_id);
+
       const unit_price_excl = product.selling_price;
       const unit_price_incl = unit_price_excl * 1.2; // TVA 20%
       const total_product_price_excl = unit_price_excl * productDto.quantity;
@@ -56,7 +61,7 @@ export class CommandsService {
         unit_price_incl,
         total_price_excl: total_product_price_excl,
         total_price_incl: total_product_price_incl,
-        quantity: productDto.quantity
+        quantity: productDto.quantity,
       };
     });
 
@@ -66,19 +71,19 @@ export class CommandsService {
       reference: this.generateReference(),
       shipping_address: createCommandDto.shipping_address,
       shipping_charge: createCommandDto.shipping_charge,
-      status: CommandStatus.CREATED,
+      status: CommandStatus.INITIATED,
       meta_data: {
-        created_at: new Date()
+        created_at: new Date(),
       },
       total_price_excl: total_price_excl,
-      total_price_incl: total_price_incl
+      total_price_incl: total_price_incl,
     });
 
     // 4. Sauvegarder la commande
     const savedCommand = await this.commandRepository.save(command);
 
     // 5. Créer et sauvegarder les command_products
-    const commandProducts = commandProductsData.map(data => 
+    const commandProducts = commandProductsData.map((data) =>
       this.commandProductRepository.create({
         command_id: savedCommand.id,
         product_id: data.product.id,
@@ -86,21 +91,21 @@ export class CommandsService {
         unit_price_excl: data.unit_price_excl,
         unit_price_incl: data.unit_price_incl,
         total_price_excl: data.total_price_excl,
-        total_price_incl: data.total_price_incl
-      })
+        total_price_incl: data.total_price_incl,
+      }),
     );
 
     await this.commandProductRepository.save(commandProducts);
 
     return successResponse(
       this.convertToDto(savedCommand),
-      'Command created successfully'
+      'Command created successfully',
     );
   }
 
   private convertToDto(command: Command): CommandDto {
     return plainToInstance(CommandDto, command, {
-      excludeExtraneousValues: true
+      excludeExtraneousValues: true,
     });
   }
 }

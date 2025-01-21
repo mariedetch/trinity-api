@@ -1,6 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, IsNumber, IsObject, IsUUID, Min, ValidateNested } from 'class-validator';
+import {
+  IsArray,
+  IsNumber,
+  IsObject,
+  IsUUID,
+  Min,
+  ValidateNested,
+} from 'class-validator';
 
 export class CreateCommandProductDto {
   @ApiProperty()

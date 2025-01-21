@@ -126,7 +126,7 @@ export class ProductsController {
   }
 
   @Delete(':id')
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard) // à revoir
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.CUSTOMER)
   @ApiDefaultErrorResponse()
@@ -140,7 +140,7 @@ export class ProductsController {
 
   @Get('g/stats')
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles(Role.CUSTOMER)
+  @Roles(Role.MANAGER)
   @ApiDefaultErrorResponse()
   @ApiSuccessResponse({
     model: Object,
@@ -152,7 +152,7 @@ export class ProductsController {
 
   @Get(':id/prices')
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles(Role.CUSTOMER)
+  @Roles(Role.MANAGER)
   @ApiDefaultErrorResponse()
   @ApiSuccessResponse({
     model: Object,
@@ -166,7 +166,7 @@ export class ProductsController {
 
   @Get(':id/orders')
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles(Role.CUSTOMER)
+  @Roles(Role.MANAGER)
   @ApiDefaultErrorResponse()
   @ApiSuccessResponse({
     model: Object,
