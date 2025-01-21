@@ -14,24 +14,28 @@ export class Command extends BaseEntity {
   @Column({ type: 'varchar' })
   reference: string;
 
-  @Column({ type: 'float' })
+  @Column({ type: 'float', nullable: true })
   total_price_incl: number;
 
-  @Column({ type: 'float' })
+  @Column({ type: 'float', nullable: true })
   total_price_excl: number;
 
-  @Column({ type: 'json' })
+  @Column({ type: 'json', nullable: true })
   shipping_address: any;
 
-  @Column({ type: 'float' })
+  @Column({ type: 'float', nullable: true })
   shipping_charge: number;
 
-  @Column({ type: 'json' })
+  @Column({ type: 'json', nullable: true })
   meta_data: any;
 
-  @Column({ type: 'enum', enum: CommandStatus, default: CommandStatus.CREATED})
+  @Column({
+    type: 'enum',
+    enum: CommandStatus,
+    default: CommandStatus.INITIATED,
+  })
   status: CommandStatus;
 
-  @OneToMany(() => CommandProduct, commandProduct => commandProduct.command)
+  @OneToMany(() => CommandProduct, (commandProduct) => commandProduct.command)
   command_products: CommandProduct[];
 }

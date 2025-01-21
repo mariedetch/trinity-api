@@ -16,9 +16,7 @@ import { DatabaseType } from 'typeorm';
         password: postgresConfigService.password,
         database: postgresConfigService.database,
         entities: [__dirname + '/../../features/**/*.entity{.ts,.js}'],
-        migrations: [
-          __dirname + '/../../database/migrations/*.migration{.ts,.js}',
-        ],
+        migrations: [__dirname + '/../../database/migrations/*.{.ts,.js}'],
         synchronize: true,
       }),
       inject: [PostgresConfigService],
