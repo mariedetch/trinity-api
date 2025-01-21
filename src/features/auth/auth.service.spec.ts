@@ -20,6 +20,11 @@ describe('AuthService', () => {
     email: 'test@example.com',
     password: 'hashedpassword',
     role: 'MANAGER',
+    first_name: 'John',
+    last_name: 'Doe',
+    phonenumber: '1234567890',
+    payment_methods: [],
+    addresses: [],
   };
 
   const usersServiceMock = {
