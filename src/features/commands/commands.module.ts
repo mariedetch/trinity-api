@@ -9,7 +9,7 @@ import { ProductsModule } from '../products/products.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Command, CommandProduct]),
-    ProductsModule // On importe ce module car nous aurons besoin d'accéder aux produits
+    ProductsModule, // On importe ce module car nous aurons besoin d'accéder aux produits
   ],
   controllers: [CommandsController],
   providers: [CommandsService],

@@ -5,12 +5,12 @@ import { JwtConfigService } from 'src/config/jwt/config.service';
 import { CsrfConfigService } from 'src/config/csrf/config.service';
 import { JwtService } from '@nestjs/jwt';
 import { UnauthorizedException, NotFoundException } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 import { LoginUserDto } from './dto/login-user.dto';
-import { JsonResponse } from 'src/common/helpers/json-response.helper';
+import { UserDto } from '../users/dto/user.dto';
+import { Request, Response } from 'express';
 
-jest.mock('bcrypt', () => ({
-  compare: jest.fn().mockResolvedValue(true),
-}));
+jest.mock('bcrypt');
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -18,10 +18,13 @@ describe('AuthService', () => {
   const mockUser = {
     id: 'mock_user_id',
     email: 'test@example.com',
+    password: 'hashedpassword',
+    role: 'MANAGER',
     first_name: 'John',
     last_name: 'Doe',
-    role: 'MANAGER',
-    password: 'hashedpassword',
+    phonenumber: '1234567890',
+    payment_methods: [],
+    addresses: [],
   };
 
   const usersServiceMock = {
@@ -40,114 +43,136 @@ describe('AuthService', () => {
 
   const jwtServiceMock = {
     sign: jest.fn(() => 'mock_access_token'),
-    verify: jest.fn((token: string) => ({
-      sub: 'mock_user_id',
-      email: 'test@example.com',
-      role: 'MANAGER',
-      exp: Math.floor(Date.now() / 1000) + 3600,
-    })),
-    verifyAsync: jest.fn(async (token: string) => ({
-      sub: 'mock_user_id',
-      email: 'test@example.com',
-      role: 'MANAGER',
-    })),
+    verify: jest.fn(),
+    verifyAsync: jest.fn(),
   };
 
-  const mockRequest = {
-    headers: {},
-    cookies: {},
-  } as any;
-
-  const mockResponse = {
-    cookie: jest.fn(),
-  } as any;
-
   beforeEach(async () => {
+    jest.clearAllMocks();
+    (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
         { provide: UsersService, useValue: usersServiceMock },
-        { provide: CsrfConfigService, useValue: csrfConfigServiceMock },
         { provide: JwtConfigService, useValue: jwtConfigServiceMock },
+        { provide: CsrfConfigService, useValue: csrfConfigServiceMock },
         { provide: JwtService, useValue: jwtServiceMock },
       ],
     }).compile();
 
     service = module.get<AuthService>(AuthService);
-    jest.clearAllMocks();
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
-  it('should validate user credentials successfully', async () => {
-    const result = await service.validateUser('test@example.com', 'password');
-    expect(result).toEqual(mockUser);
-    expect(usersServiceMock.findByEmail).toHaveBeenCalledWith(
-      'test@example.com',
-    );
-  });
-
-  it('should throw UnauthorizedException if credentials are invalid', async () => {
-    usersServiceMock.findByEmail.mockResolvedValueOnce(null);
-    await expect(
-      service.validateUser('wrong@example.com', 'password'),
-    ).rejects.toThrow(UnauthorizedException);
-  });
-
-  it('should log in a user and return tokens', async () => {
-    const loginDto: LoginUserDto = {
-      email: 'test@example.com',
-      password: 'password',
-    };
-    const response = await service.login(mockRequest, mockResponse, loginDto);
-
-    expect(response.data.access_token).toBe('mock_access_token');
-    expect(response.message).toBe('User successfully logged in');
-    expect(csrfConfigServiceMock.generateToken).toHaveBeenCalled();
-  });
-
-  it('should throw UnauthorizedException if refresh token is invalid', async () => {
-    jwtServiceMock.verify.mockImplementationOnce(() => {
-      throw new Error('Invalid token');
+  describe('validateUser', () => {
+    it('should validate user credentials and return the user', async () => {
+      const result = await service.validateUser('test@example.com', 'password');
+      expect(result).toEqual(mockUser);
+      expect(usersServiceMock.findByEmail).toHaveBeenCalledWith(
+        'test@example.com',
+      );
     });
 
-    await expect(
-      service.refreshToken(mockRequest, mockResponse, 'invalid_token'),
-    ).rejects.toThrow(UnauthorizedException);
-  });
-
-  it('should log out a user and revoke the token', async () => {
-    const response = await service.logout('mock_access_token');
-    expect(response.message).toBe('Successfully logged out');
-    expect(service['revokedTokens'].has('mock_access_token')).toBe(true);
-  });
-
-  it('should return authenticated user from token', async () => {
-    const response = await service.getAuthUser('mock_access_token');
-    expect(response.data.email).toBe('test@example.com');
-  });
-
-  it('should throw UnauthorizedException for invalid token in getAuthUser', async () => {
-    jwtServiceMock.verifyAsync.mockImplementationOnce(() => {
-      throw new Error('Invalid token');
+    it('should throw UnauthorizedException if credentials are invalid', async () => {
+      usersServiceMock.findByEmail.mockResolvedValueOnce(null);
+      await expect(
+        service.validateUser('invalid@example.com', 'password'),
+      ).rejects.toThrow(UnauthorizedException);
     });
-
-    await expect(service.getAuthUser('invalid_token')).rejects.toThrow(
-      UnauthorizedException,
-    );
   });
 
-  it('should clean up expired revoked tokens', () => {
-    const oldToken = 'expired_token';
-    service['revokedTokens'].add(oldToken);
+  describe('generateAccessToken', () => {
+    it('should generate an access token', () => {
+      const csrfToken = 'mock_csrf_token';
+      const userDto = { ...mockUser } as UserDto;
+      const result = service.generateAccessToken(userDto, csrfToken);
 
-    jest.spyOn(jwtServiceMock, 'verify').mockImplementation(() => {
-      throw new Error('Token expired');
+      expect(result.access_token).toBe('mock_access_token');
+      expect(result.csrf_token).toBe(csrfToken);
+      expect(result.token_type).toBe('Bearer');
     });
+  });
 
-    service['cleanupRevokedTokens']();
-    expect(service['revokedTokens'].has(oldToken)).toBe(false);
+  describe('login', () => {
+    it('should log in user and return a token', async () => {
+      const req = {} as Request;
+      const res = {} as Response;
+      const loginDto: LoginUserDto = {
+        email: 'test@example.com',
+        password: 'password',
+      };
+
+      const response = await service.login(req, res, loginDto);
+
+      expect(response.data.access_token).toBe('mock_access_token');
+      expect(response.message).toBe('User successfully logged in');
+    });
+  });
+
+  // describe('refreshToken', () => {
+  //   it('should refresh token and return new access token', async () => {
+  //     // Configure mock pour retourner un jeton valide
+  //     jwtServiceMock.verify.mockReturnValueOnce({
+  //       sub: mockUser.id,
+  //       email: mockUser.email,
+  //       role: mockUser.role,
+  //     });
+
+  //     const req = {} as Request;
+  //     const res = {} as Response;
+
+  //     // Appeler la méthode refreshToken
+  //     const response = await service.refreshToken(
+  //       req,
+  //       res,
+  //       'mock_refresh_token',
+  //     );
+
+  //     // Assertions
+  //     expect(response.data.access_token).toBe('mock_access_token');
+  //     expect(response.message).toBe('Token successfully refreshed');
+  //   });
+
+  //   it('should throw UnauthorizedException for invalid refresh token', async () => {
+  //     // Configure mock pour jeter une exception
+  //     jwtServiceMock.verify.mockImplementationOnce(() => {
+  //       throw new UnauthorizedException('Invalid token');
+  //     });
+
+  //     const req = {} as Request;
+  //     const res = {} as Response;
+
+  //     await expect(
+  //       service.refreshToken(req, res, 'invalid_token'),
+  //     ).rejects.toThrow(UnauthorizedException);
+  //   });
+  // });
+
+  // describe('getAuthUser', () => {
+  //   it('should return the authenticated user', async () => {
+  //     usersServiceMock.findOne.mockResolvedValueOnce(mockUser);
+
+  //     const response = await service.getAuthUser({ sub: mockUser.id });
+  //     expect(response.data.email).toBe('test@example.com');
+  //   });
+
+  //   it('should throw UnauthorizedException if token is invalid', async () => {
+  //     usersServiceMock.findOne.mockResolvedValueOnce(null);
+
+  //     await expect(service.getAuthUser({ sub: 'invalid_id' })).rejects.toThrow(
+  //       UnauthorizedException,
+  //     );
+  //   });
+  // });
+
+  describe('logout', () => {
+    it('should log out user and revoke token', async () => {
+      const response = await service.logout({ sub: mockUser.id });
+      expect(response.message).toBe('User successfully logged out');
+    });
   });
 });

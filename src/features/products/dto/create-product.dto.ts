@@ -1,9 +1,17 @@
-import { IsNumber, IsOptional, IsString, IsNotEmpty, Length, IsArray, IsUrl, Min } from 'class-validator';
+import {
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsNotEmpty,
+  Length,
+  IsArray,
+  IsUrl,
+  Min,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Category } from '../enums/category.enum';
 
 export class CreateProductDto {
-
   @IsNumber()
   @IsNotEmpty({ message: 'Le code barre est requis' })
   @ApiProperty()
@@ -17,7 +25,9 @@ export class CreateProductDto {
 
   @IsString()
   @IsNotEmpty({ message: 'La catégorie est requise' })
-  @Length(1, 30, { message: 'La catégorie doit faire entre 1 et 30 caractères' })
+  @Length(1, 30, {
+    message: 'La catégorie doit faire entre 1 et 30 caractères',
+  })
   @ApiProperty()
   category: string;
 
@@ -64,5 +74,4 @@ export class CreateProductDto {
   @IsOptional()
   @ApiProperty()
   alert_threshold?: number = 50;
-
 }

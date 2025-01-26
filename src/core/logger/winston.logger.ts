@@ -30,7 +30,7 @@ const transports = [
     maxSize: '20m',
     maxFiles: '14d',
     format: combine(timestamp(), customFormat),
-  })
+  }),
 ];
 
 export const logger = winston.createLogger({

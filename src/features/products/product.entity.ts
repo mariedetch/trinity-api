@@ -8,37 +8,41 @@ export class Product extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({type: 'bigint', unique: true,  nullable: true })  // Colonne unique et limitée à 100 caractères
+  @Column({ type: 'bigint', unique: true, nullable: true }) // Colonne unique et limitée à 100 caractères
   bar_code: number;
 
-  @Column({ length: 100 }) 
+  @Column({ length: 100 })
   name: string;
 
-  @Column({ length: 30 })  // Colonne limitée à 30 caractères
+  @Column({ length: 30 }) // Colonne limitée à 30 caractères
   category: string;
 
   @Column({ type: 'json' }) // Colonne qui contient un json
   nutriments: any;
 
-  @Column('simple-array')  // Colonne qui contient une liste de string
+  @Column('simple-array') // Colonne qui contient une liste de string
   ingredients: string[];
 
   @Column()
   picture: string;
 
-  @Column({ type: 'float' }) 
+  @Column({ type: 'float' })
   initial_cost: number;
-  
-  @Column({ type: 'float' }) 
+
+  @Column({ type: 'float' })
   selling_price: number;
-  
-  @Column({ type: 'jsonb', nullable: true, array: false, default: () => "'[]'" }) // Colonne qui contient le json de l'historique des prix
+
+  @Column({
+    type: 'jsonb',
+    nullable: true,
+    array: false,
+    default: () => "'[]'",
+  }) // Colonne qui contient le json de l'historique des prix
   prices: Array<PriceJsonItem>;
 
-  @Column({ type: 'int', default: 1000})
+  @Column({ type: 'int', default: 1000 })
   quantity_in_stock: number;
-  
-  @Column({ type: 'int', default: 50})
-  alert_threshold: number;
 
+  @Column({ type: 'int', default: 50 })
+  alert_threshold: number;
 }

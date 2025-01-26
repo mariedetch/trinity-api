@@ -59,5 +59,4 @@ export class ProductDto {
   // @Expose()
   // @ApiProperty()
   // updatedAt: Date; // Date de dernière mise à jour
-
 }

@@ -1,4 +1,10 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { BaseEntity } from 'src/core/entities/base.entity';
 import { Command } from './command.entity';
 import { Product } from '../products/product.entity';
@@ -29,9 +35,11 @@ export class CommandProduct extends BaseEntity {
   @Column({ type: 'float' })
   total_price_excl: number;
 
-  @ManyToOne(() => Command, command => command.command_products)
+  @ManyToOne(() => Command, (command) => command.command_products)
+  @JoinColumn({ name: 'command_id' }) // Nom explicite de la colonne
   command: Command;
 
   @ManyToOne(() => Product)
+  @JoinColumn({ name: 'product_id' })
   product: Product;
 }

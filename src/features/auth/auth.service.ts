@@ -20,14 +20,16 @@ import { Request as ExpressRequest, Response } from 'express';
 
 @Injectable()
 export class AuthService {
-  private revokedTokens: Set<string> = new Set();
+  private readonly revokedTokens: Set<string>;
 
   constructor(
     private jwtService: JwtService,
     private readonly usersService: UsersService,
     private csrfConfigService: CsrfConfigService,
     private jwtConfigService: JwtConfigService,
-  ) {}
+  ) {
+    this.revokedTokens = new Set();
+  }
 
   async validateUser(email: string, password: string) {
     const user = await this.usersService.findByEmail(email);
@@ -53,7 +55,7 @@ export class AuthService {
       }),
       refresh_token: this.jwtService.sign(payload, {
         secret: this.jwtConfigService.secret,
-        expiresIn: '7d', // plus long
+        expiresIn: '7d',
       }),
       csrf_token: csrf_token,
       token_type: 'Bearer',
@@ -119,19 +121,15 @@ export class AuthService {
     }
   }
 
-  async getAuthUser(token: string): Promise<JsonResponse<UserDto>> {
+  async getAuthUser(payload: any): Promise<JsonResponse<UserDto>> {
     try {
-      const payload = await this.jwtService.verifyAsync(token, {
-        secret: this.jwtConfigService.secret,
-      });
-
       const user = await this.usersService.findOne(payload.sub);
       if (!user) {
         throw new UnauthorizedException('Not found');
       }
 
       return successResponse(
-        plainToClass(UserDto, user),
+        plainToClass(UserDto, user.data),
         `User successfully gotten`,
         200,
       );
@@ -140,37 +138,36 @@ export class AuthService {
     }
   }
 
-  async logout(access_token: string): Promise<JsonResponse<any>> {
+  async logout(payload: any): Promise<JsonResponse<null>> {
     try {
-      if (this.revokedTokens.has(access_token)) {
-        throw new UnauthorizedException('Token already revoked');
+      const user = await this.usersService.findOne(payload.sub);
+      if (!user) {
+        throw new NotFoundException('User not found');
       }
-      this.revokedTokens.add(access_token);
+      const tokenId = payload.sub + '_' + Date.now();
+      this.revokedTokens.add(tokenId);
 
       this.cleanupRevokedTokens();
 
-      return successResponse(null, 'Successfully logged out', 200);
+      return successResponse(null, 'User successfully logged out', 200);
     } catch (error) {
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-      throw new UnauthorizedException('Invalid token');
+      throw new UnauthorizedException('Invalid user or session');
     }
   }
 
-  private cleanupRevokedTokens(): void {
-    const now = new Date();
-    for (const token of this.revokedTokens) {
-      try {
-        const payload = this.jwtService.verify(token, {
-          secret: this.jwtConfigService.secret,
-        });
-        if (payload.exp * 1000 < now.getTime()) {
-          this.revokedTokens.delete(token);
-        }
-      } catch {
-        this.revokedTokens.delete(token);
-      }
+  public cleanupRevokedTokens(): void {
+    const MAX_REVOKED_TOKENS = 1000;
+    if (this.revokedTokens.size > MAX_REVOKED_TOKENS) {
+      const tokensArray = Array.from(this.revokedTokens);
+      const tokensToRemove = tokensArray.slice(
+        0,
+        tokensArray.length - MAX_REVOKED_TOKENS,
+      );
+      tokensToRemove.forEach((token) => this.revokedTokens.delete(token));
     }
+  }
+
+  isTokenRevoked(token: string): boolean {
+    return this.revokedTokens.has(token);
   }
 }
