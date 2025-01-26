@@ -786,7 +786,6 @@ paths:
           $ref: "#/components/responses/BadRequest"
         '500':
           $ref: "#/components/responses/InternalServerError"
-
     post:
       summary: "Create a New Product"
       description: "Create a new product by providing the necessary details."
@@ -1299,16 +1298,18 @@ paths:
             example: "John|Doe|john.doe@example.com|229637417"
         - name: start_date
           in: query
-          description: "The status of command to filtred for."
           required: false
           schema:
-            $ref: "#/components/schemas/CommandStatus"
+            type: string
+            format: datetime
+            example: "2023-12-31T23:59:59Z"
         - name: end_date
           in: query
-          description: "The status of command to filtred for."
           required: false
           schema:
-            $ref: "#/components/schemas/CommandStatus"
+            type: string
+            format: datetime
+            example: "2023-12-31T23:59:59Z"
       responses:
         '200':
           description: "Successful response with paginated customers."
@@ -1371,6 +1372,46 @@ paths:
       responses:
         '200':
           description: "Successful response with command details."
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Command"
+        '404':
+          $ref: "#/components/responses/NotFound"
+        '500':
+          $ref: "#/components/responses/InternalServerError"
+    put:
+      summary: Update the status of a command
+      description: Passes a command from one state to another
+      tags:
+        - Commands
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  description: Defines the different states that a command can be throug
+                  enum:
+                    - IN_PROGRESSS
+                    - SHIPPED
+                  example: IN_PROGRESSS
+                phone_number:
+                  type: number
+                  description: Required only when the status is IN_PROGRESSS
+                  example: 40.63
+      responses:
+        '200':
+          description: "Status updated successfully"
           content:
             application/json:
               schema:
@@ -1502,11 +1543,294 @@ paths:
         '500':
           $ref: "#/components/responses/InternalServerError"
 
-  #cart validation, paiement
-  #paiements
-  #stats
-  #supplies
-  #inventory
+  /notifications:
+    get:
+      summary: "List all notifications for the user"
+      description: "Fetch all notifications for the currently authenticated user."
+      tags:
+        - Notifications
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: "List of notifications"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notification'
+  /notifications/{id}:
+    get:
+      summary: "Get details of a specific notification"
+      description: "Retrieve details of a specific notification by its ID."
+      tags:
+        - Notifications
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          description: "The ID of the notification."
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: "Notification details"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+    put:
+      summary: "Update a notification"
+      description: "Update details of a specific notification, such as marking it as read."
+      tags:
+        - Notifications
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          description: "The ID of the notification."
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationUpdateRequest'
+      responses:
+        '200':
+          description: "Notification updated successfully"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+
+  /supplies:
+    get:
+      summary: Retreive the paginated list of supplies
+      description: Returns a paginated list of supplies
+      tags:
+        - Supplies
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/perPage"
+      responses:
+        '200':
+          description: "Successful response with paginated supplies."
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        allOf:
+                          - $ref: '#/components/schemas/PaginationResource'
+                          - type: object
+                            properties:
+                              items:
+                                $ref: "#/components/schemas/Supply"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      summary: "Create a New Supply"
+      description: "Supplies products into the store"
+      operationId: "createSupply"
+      tags:
+        - Supplies
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSupply"
+      responses:
+        '201':
+          description: "Supply created successfully."
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Supply"
+        '400':
+          $ref: "#/components/responses/BadRequest"
+        '422':
+          description: "Unprocessable Entity – Validation errors"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+              example:
+                success: false
+                status: "INVALID_CREDENTIALS"
+                code: -1000
+                message: "Validation error occurred."
+                errors: {
+                  name: [
+                    "The name is required",
+                    "The name should be ..."
+                  ],
+                }
+        '500':
+          $ref: "#/components/responses/InternalServerError"
+  /supplies/{id}/items:
+    get:
+      summary: Retreive the list of supplied product of a supply
+      description: Returns a list of supplied product of a supply
+      tags:
+        - Supplies
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/perPage"
+      responses:
+        '200':
+          description: "Successful response with paginated list."
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        allOf:
+                          - $ref: '#/components/schemas/PaginationResource'
+                          - type: object
+                            properties:
+                              items:
+                                $ref: "#/components/schemas/SupplyProduct"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /inventories:
+    get:
+      summary: "List all inventories"
+      description: "Fetch a list of all inventories."
+      tags:
+        - Inventories
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: "List of inventories"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        allOf:
+                          - $ref: '#/components/schemas/PaginationResource'
+                          - type: object
+                            properties:
+                              items:
+                                $ref: "#/components/schemas/Inventory"
+
+    post:
+      summary: "Create a new inventory"
+      description: "Create a new inventory record with the associated products."
+      tags:
+        - Inventories
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InventoryCreateRequest'
+      responses:
+        '201':
+          description: "Inventory created successfully"
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Supply"
+  /inventories/{id}:
+    put:
+      summary: "Update inventory quantities"
+      description: "Update the actual stock quantities of products within a specific inventory."
+      tags:
+        - Inventories
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          description: "The ID of the inventory."
+          schema:
+            type: "integer"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                items:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/InventoryItemUpdateRequest'
+      responses:
+        '200':
+          description: "Inventory quantities updated successfully"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Inventory'
+  /inventories/{id}/items:
+    get:
+      summary: "Get items of a specific inventory"
+      description: "Fetch the list of products with their quantities in a specific inventory."
+      tags:
+        - Inventories
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          description: "The ID of the inventory."
+          schema:
+            type: "integer"
+      responses:
+        '200':
+          description: "List of items in the inventory"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InventoryItem'
+
 components:
   schemas:
     BaseHeaders:
@@ -1544,7 +1868,7 @@ components:
         - DELIVERED
         - CANCELLED
         - RETURNED
-        - REFUNDED*
+        - REFUNDED
       default: CREATED
       example: CREATED
     PaymentStatus:
@@ -1864,8 +2188,6 @@ components:
     CreateProduct:
       type: object
       properties:
-        correlation_id:
-          $ref: "#/components/schemas/Product/properties/correlation_id"
         category:
           $ref: "#/components/schemas/Product/properties/category"
         name:
@@ -1885,7 +2207,6 @@ components:
         picture:
           $ref: "#/components/schemas/Product/properties/picture"
       required:
-        - correlation_id
         - category
         - name
         - description
@@ -1998,6 +2319,37 @@ components:
         - quantity
         - old_quantity
         - new_quantity
+    SupplyProduct:
+      allOf:
+        - $ref: "#/components/schemas/SupplyItem"
+        - type: object
+          properties:
+            product:
+              $ref: "#/components/schemas/Product"
+    Supply:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/BaseId"
+        reference:
+          type: string
+          description: The unique reference
+        date:
+          type: string
+          format: datetime
+          example: "2023-12-31T23:59:59Z"
+    CreateSupply:
+      type: array
+      items:
+        type: object
+        properties:
+          product_id:
+            description: The id of product to supply
+            $ref: "#/components/schemas/BaseId"
+          quantity:
+            type: integer
+            example: 16
+            description: The quantity of the product to supply
     CartProductItem:
       type: object
       description: Represent a unique product in the cart
@@ -2184,6 +2536,104 @@ components:
           type: number
           format: double
           description: Total price of the product taxe exclud
+    Inventory:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: "Unique identifier for the inventory."
+        name:
+          type: string
+          description: "Name of the inventory."
+        description:
+          type: string
+          description: "Description of the inventory."
+        start_date:
+          type: string
+          format: datetime
+          description: "Date when the inventory was started."
+        end_date:
+          type: string
+          format: datetime
+          description: "Date when the inventory was ended."
+        created_at:
+          type: string
+          format: datetime
+          description: "Date and time when the inventory was created."
+        validated:
+          type: boolean
+          description: "Whether the inventory has been validated."
+        validated_at:
+          type: string
+          format: datetime
+          description: "Date and time when the inventory was validated."
+    InventoryCreateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: "Name of the inventory."
+        description:
+          type: string
+          description: "Description of the inventory."
+        start_date:
+          type: string
+          format: datetime
+          description: "Date when the inventory was started."
+        end_date:
+          type: string
+          format: datetime
+          description: "Date when the inventory was ended."
+    InventoryItem:
+      type: object
+      properties:
+        product:
+          $ref: "#/components/schemas/Product"
+        quantity:
+          type: integer
+          description: "Quantity of the product in the inventory."
+        real_quantity:
+          type: integer
+          description: "The actual quantity of the product in the stock."
+    InventoryItemUpdateRequest:
+      type: array
+      items:
+        properties:
+          product_id:
+            type: integer
+            description: "The ID of the product."
+          quantity:
+            type: integer
+            description: "The actual quantity of the product in stock."
+    Notification:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: "Unique identifier for the notification."
+        title:
+          type: string
+          description: "The title of the notification."
+        message:
+          type: string
+          description: "The body content of the notification."
+        type:
+          type: string
+          enum: ["INFO", "WARNING", "ERROR"]
+          description: "The type or category of the notification."
+        is_read:
+          type: boolean
+          description: "Indicates whether the notification has been read by the user."
+        created_at:
+          type: string
+          format: date-time
+          description: "The date and time the notification was created."
+    NotificationUpdateRequest:
+      type: object
+      properties:
+        is_read:
+          type: boolean
+          description: "Indicates whether the notification has been read by the user."
 
   responses:
     BadRequest:
