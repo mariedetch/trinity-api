@@ -18,7 +18,7 @@ import { Roles } from 'src/common/decorators/roles.decorator';
 import { Role } from '../users/enum';
 import { AuthGuard } from 'src/core/guards/auth.guard';
 
-@Controller('users/customers')
+@Controller({ path: 'users/customers', version: '1' })
 @ApiTags('Customers')
 @ApiBearerAuth('access-token')
 @UseGuards(AuthGuard, RolesGuard)
