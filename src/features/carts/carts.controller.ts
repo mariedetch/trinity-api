@@ -15,19 +15,18 @@ import { AddToCartDto } from './dto/add-to-cart.dto';
 import { AuthGuard } from 'src/core/guards/auth.guard';
 import { Request } from 'express';
 import { JsonResponse } from 'src/common/helpers/json-response.helper';
-import { CartResponseDto } from './dto/cart-response.dto';
+import { CartItem, CartResponseDto } from './dto/cart-response.dto';
 import { ApiBearerAuth, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import { UpdateCartItemDto } from './dto/update-cart-item.dto';
 
-@Controller('carts')
+@Controller({ path: 'carts', version: '1' })
 @ApiTags('carts')
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard) // il s'applique à toutes les routes de ce fichier
 @ApiBearerAuth('access-token')
 export class CartsController {
   constructor(private readonly cartsService: CartsService) {}
 
   @Get()
-  @UseGuards(AuthGuard)
   async getCart(
     @Req() request: Request,
   ): Promise<JsonResponse<CartResponseDto>> {
@@ -36,22 +35,28 @@ export class CartsController {
   }
 
   @Post('add')
-  @UseGuards(AuthGuard)
   async addToCart(
     @Req() request: Request,
     @Body() addToCartDto: AddToCartDto,
-  ): Promise<JsonResponse<CartResponseDto>> {
+  ): Promise<JsonResponse<CartItem>> {
     const userId = request['user'].sub;
     return await this.cartsService.addToCart(userId, addToCartDto);
   }
 
+  @Put('validate')
+  async validateCart(
+    @Req() request: Request,
+  ): Promise<JsonResponse<CartResponseDto>> {
+    const userId = request['user'].sub;
+    return await this.cartsService.validateCart(userId);
+  }
+
   @Put('item/:id')
-  @UseGuards(AuthGuard)
   async updateCartItem(
     @Req() request: Request,
     @Param('id', ParseUUIDPipe) commandProductId: string,
     @Body() updateCartItemDto: UpdateCartItemDto,
-  ): Promise<JsonResponse<CartResponseDto>> {
+  ): Promise<JsonResponse<CartItem>> {
     const userId = request['user'].sub;
     return this.cartsService.updateCartItem(
       userId,
@@ -61,11 +66,10 @@ export class CartsController {
   }
 
   @Delete('item/:id')
-  @UseGuards(AuthGuard)
   async removeCartItem(
     @Req() request: Request,
     @Param('id', ParseUUIDPipe) commandProductId: string,
-  ): Promise<JsonResponse<CartResponseDto>> {
+  ): Promise<JsonResponse<void>> {
     const userId = request['user'].sub;
     return this.cartsService.removeCartItem(userId, commandProductId);
   }

@@ -2,6 +2,34 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
 
 @Exclude()
+export class CartItem {
+  @Expose()
+  @ApiProperty()
+  commandProduct_id: string;
+  
+  @Expose()
+  @ApiProperty()
+  id: string;
+  
+  @Expose()
+  @ApiProperty()
+  name: string;
+  
+  @Expose()
+  @ApiProperty()
+  picture: string;
+  
+  @Expose()
+  @ApiProperty()
+  quantity: number;
+
+  @Expose()
+  @ApiProperty()
+  selling_price: number;
+}
+
+
+@Exclude()
 export class CartResponseDto {
   @Expose()
   @ApiProperty()
@@ -15,21 +43,15 @@ export class CartResponseDto {
   @ApiProperty()
   status: string;
 
-  // @Expose()
-  // @ApiProperty()
-  // command_products: {
-  //   id: string;
-  //   product_id: string;
-  //   quantity: number;
-  // }[];
+  @Expose()
+  @ApiProperty()
+  products: CartItem[];
 
   @Expose()
   @ApiProperty()
-  products: {
-    commandProduct_id: string;
-    id: string;
-    name: string;
-    picture: string;
-    quantity: number;
-  }[];
+  total_price_incl?: number | null;
+
+  @Expose()
+  @ApiProperty()
+  total_price_excl?: number | null;
 }

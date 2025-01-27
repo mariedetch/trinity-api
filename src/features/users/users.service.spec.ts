@@ -21,6 +21,7 @@ describe('UsersService', () => {
     role: Role.MANAGER,
     phonenumber: '1234567890',
     password: 'hashedpassword',
+    commands: [],
     payment_methods: [],
     addresses: [],
     createdAt: fixedDate,
