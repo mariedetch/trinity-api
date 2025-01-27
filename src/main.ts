@@ -70,7 +70,7 @@ async function bootstrap() {
   //   return doubleCsrfProtection(req, res, next);
   // });
   app.enableCors({
-    origin: 'http://localhost:3000',
+    origin: 'http://localhost:5173',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
     exposedHeaders: ['Authorization'],
