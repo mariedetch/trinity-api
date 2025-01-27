@@ -13,11 +13,12 @@ import { Product } from '../products/product.entity';
 import { AddToCartDto } from './dto/add-to-cart.dto';
 import { CommandStatus } from '../commands/enums';
 import { v4 as uuidv4 } from 'uuid';
+import { plainToClass } from 'class-transformer';
 import {
   JsonResponse,
   successResponse,
 } from 'src/common/helpers/json-response.helper';
-import { CartResponseDto } from './dto/cart-response.dto';
+import { CartItem, CartResponseDto } from './dto/cart-response.dto';
 import { UpdateCartItemDto } from './dto/update-cart-item.dto';
 
 @Injectable()
@@ -31,20 +32,12 @@ export class CartsService {
     private productRepository: Repository<Product>,
   ) {}
 
+  private TVA = 1.18
+
   private async convertToDtoWithProducts(
     command: Command,
     commandProducts: CommandProduct[],
   ): Promise<CartResponseDto> {
-    // Récupérer tous les produits associés
-    const products = await this.productRepository.findBy({
-      id: In(commandProducts.map((cp) => cp.product_id)),
-    });
-
-    // Créer un Map pour un accès facile aux produits
-    const productMap = new Map(
-      products.map((product) => [product.id, product]),
-    );
-
     return {
       command_id: command.id,
       reference: command.reference,
@@ -52,8 +45,9 @@ export class CartsService {
       products: commandProducts.map((cp) => ({
         commandProduct_id: cp.id,
         id: cp.product_id,
-        name: productMap.get(cp.product_id)?.name || '',
-        picture: productMap.get(cp.product_id)?.picture || '',
+        name: cp.product.name,
+        picture: cp.product.picture,
+        selling_price: cp.product.selling_price,
         quantity: cp.quantity,
       })),
     };
@@ -84,6 +78,7 @@ export class CartsService {
     // Récupérer les produits de la commande
     const commandProducts = await this.commandProductRepository.find({
       where: { command_id: command.id },
+      relations: ['product']
     });
 
     const cartDto = await this.convertToDtoWithProducts(
@@ -94,11 +89,11 @@ export class CartsService {
     return successResponse(cartDto, 'Cart retrieved successfully', 200);
   }
 
-  // Ajouter un produit au panier d'un user
+  // Route pour ajouter un produit au panier d'un user
   async addToCart(
     userId: string,
     addToCartDto: AddToCartDto,
-  ): Promise<JsonResponse<CartResponseDto>> {
+  ): Promise<JsonResponse<CartItem>> {
     // Vérifier si le produit existe
     const product = await this.productRepository.findOne({
       where: { id: addToCartDto.product_id },
@@ -124,12 +119,14 @@ export class CartsService {
       command = await this.commandRepository.save({
         user_id: userId,
         reference: `CMD-${uuidv4()}`,
-        total_price_incl: 0,
-        total_price_excl: 0,
-        shipping_charge: 0,
         status: CommandStatus.INITIATED,
-        shipping_address: null,
-        meta_data: {},
+        shipping_address: {},
+        meta_data: {
+          paid_at: null,
+          validated_at: null,
+          shipped_at: null,
+          delivered_at: null,
+        },
       });
     } else {
       // Vérifier si le produit existe déjà dans le panier
@@ -148,15 +145,21 @@ export class CartsService {
     const newProduct = await this.commandProductRepository.save({
       command_id: command.id,
       product_id: addToCartDto.product_id,
-      quantity: addToCartDto.quantity,
-      unit_price_incl: 0,
-      unit_price_excl: 0,
-      total_price_incl: 0,
-      total_price_excl: 0,
+      quantity: addToCartDto.quantity
     });
 
     // Retourner le panier mis à jour
-    return this.getCart(userId);
+    return successResponse(
+      {
+        commandProduct_id: newProduct.id,
+        id: newProduct.product_id,
+        name: product.name,
+        picture: product.picture,
+        selling_price: product.selling_price,
+        quantity: newProduct.quantity,
+      },
+      "Product added successfully"
+    )
   }
 
   // Update d'un produit dans un panier
@@ -164,11 +167,11 @@ export class CartsService {
     userId: string,
     commandProductId: string,
     updateCartItemDto: UpdateCartItemDto,
-  ): Promise<JsonResponse<CartResponseDto>> {
+  ): Promise<JsonResponse<CartItem>> {
     // Vérifier que le produit existe dans le panier
     const commandProduct = await this.commandProductRepository.findOne({
       where: { id: commandProductId },
-      relations: ['command'],
+      relations: ['command', 'product'],
     });
 
     if (!commandProduct) {
@@ -192,14 +195,75 @@ export class CartsService {
     }
 
     // Récupérer le panier mis à jour
-    return this.getCart(userId);
+    return successResponse(
+      {
+        commandProduct_id: commandProduct.id,
+        id: commandProduct.product_id,
+        name: commandProduct.product.name,
+        picture: commandProduct.product.picture,
+        selling_price: commandProduct.product.selling_price,
+        quantity: updateCartItemDto.quantity,
+      },
+      "Product updated successfully"
+    )
+  }
+
+  // Route pour valider un panier avant payement
+  async validateCart(
+    userId: string
+  ): Promise<JsonResponse<CartResponseDto>> {
+
+    // Recherche d'une commande existante avec le statut INITIATED
+    let command = await this.commandRepository.findOne({
+      where: {
+        user_id: userId,
+        status: CommandStatus.INITIATED,
+      },
+      relations: ['command_products'], // Charger les produits associés
+    });
+
+    if (!command) {
+      throw new NotFoundException(`Cart Empty`);
+    }
+
+    command.command_products.forEach(async commandItem => {
+      const product = await this.productRepository.findOne({
+        where: { id: commandItem.product_id }
+      })
+
+      const unit_price_excl = product.selling_price,
+            unit_price_incl = product.selling_price * this.TVA,
+            total_price_excl = unit_price_excl * commandItem.quantity,
+            total_price_incl = unit_price_incl * commandItem.quantity;
+
+      await this.commandProductRepository.update(
+        commandItem.id,
+        {
+          unit_price_excl,
+          unit_price_incl,
+          total_price_excl,
+          total_price_incl
+        }
+      );
+
+      command.total_price_excl += total_price_excl
+      command.total_price_incl += total_price_incl
+    });
+
+    command.status = CommandStatus.VALIDATED
+    const updatedCommand = await this.commandRepository.save(command);
+
+    return successResponse(
+      plainToClass(CartResponseDto, updatedCommand),
+      "Cart Validated successfully"
+    )
   }
 
   // Supprimer un produit du panier
   async removeCartItem(
     userId: string,
     commandProductId: string,
-  ): Promise<JsonResponse<CartResponseDto>> {
+  ): Promise<JsonResponse<void>> {
     const commandProduct = await this.commandProductRepository.findOne({
       where: { id: commandProductId },
       relations: ['command'],
@@ -218,6 +282,6 @@ export class CartsService {
     await this.commandProductRepository.remove(commandProduct);
 
     // Récupérer le panier mis à jour
-    return this.getCart(userId);
+    return successResponse(null, "Product removed successfully");
   }
 }

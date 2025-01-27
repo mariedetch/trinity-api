@@ -1,7 +1,8 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { BaseEntity } from 'src/core/entities/base.entity';
 import { CommandProduct } from './command-product.entity';
 import { CommandStatus } from './enums';
+import { User } from '../users/user.entity';
 
 @Entity('commands')
 export class Command extends BaseEntity {
@@ -14,16 +15,16 @@ export class Command extends BaseEntity {
   @Column({ type: 'varchar' })
   reference: string;
 
-  @Column({ type: 'float', nullable: true })
+  @Column({ type: 'float', default: 0, nullable: true })
   total_price_incl: number;
 
-  @Column({ type: 'float', nullable: true })
+  @Column({ type: 'float', default: 0, nullable: true })
   total_price_excl: number;
 
   @Column({ type: 'json', nullable: true })
   shipping_address: any;
 
-  @Column({ type: 'float', nullable: true })
+  @Column({ type: 'float', default: 0, nullable: true })
   shipping_charge: number;
 
   @Column({ type: 'json', nullable: true })
@@ -38,4 +39,9 @@ export class Command extends BaseEntity {
 
   @OneToMany(() => CommandProduct, (commandProduct) => commandProduct.command)
   command_products: CommandProduct[];
+
+  // Ajout de la relation vers User
+  @ManyToOne(() => User, (user) => user.commands)
+  @JoinColumn({ name: 'user_id' }) // Associe explicitement user_id comme clé étrangère
+  user: User;
 }

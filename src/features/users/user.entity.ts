@@ -1,6 +1,7 @@
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 import { Role } from './enum';
 import { BaseEntity } from '../../core/entities/base.entity';
+import { Command } from '../commands/command.entity';
 
 @Entity('users')
 export class User extends BaseEntity {
@@ -40,4 +41,8 @@ export class User extends BaseEntity {
     phone: string;
     email: string;
   }[];
+
+  // Relation avec Command
+  @OneToMany(() => Command, (command) => command.user)
+  commands: Command[];
 }

@@ -23,16 +23,16 @@ export class CommandProduct extends BaseEntity {
   @Column({ type: 'integer' })
   quantity: number;
 
-  @Column({ type: 'float' })
+  @Column({ type: 'float', default: 0 })
   unit_price_incl: number;
 
-  @Column({ type: 'float' })
+  @Column({ type: 'float', default: 0 })
   unit_price_excl: number;
 
-  @Column({ type: 'float' })
+  @Column({ type: 'float', default: 0 })
   total_price_incl: number;
 
-  @Column({ type: 'float' })
+  @Column({ type: 'float', default: 0 })
   total_price_excl: number;
 
   @ManyToOne(() => Command, (command) => command.command_products)
