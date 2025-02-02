@@ -63,7 +63,7 @@ export class CommandDto {
 
   @Expose()
   @ApiProperty()
-  created_at: string;
+  createdAt: string;
 
   @Expose()
   @ApiProperty()

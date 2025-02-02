@@ -92,13 +92,14 @@ export class CustomersService {
     });
 
     // Calcul de la valeur moyenne des commandes
-    customer.avgOrder = await this.commandRepository
+    const avgOrder = await this.commandRepository
       .createQueryBuilder('command')
       .select('AVG(command.total_price_incl)')
       .where('command.user_id = :customerId', { customerId: id })
       .getRawOne();
 
     customer.lastOrder = plainToClass(CommandDto, lastOrder)
+    customer.avgOrder = avgOrder.avg
 
     return successResponse(customer, `Customer retrieved successfully`);
   }

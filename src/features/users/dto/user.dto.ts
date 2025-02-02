@@ -48,4 +48,8 @@ export class UserDto {
   })
   @Type(() => Addresses)
   addresses: Addresses[];
+
+  @Expose()
+  @ApiProperty()
+  createdAt?: Date;
 }

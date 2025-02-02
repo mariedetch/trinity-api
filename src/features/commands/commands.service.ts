@@ -173,7 +173,9 @@ export class CommandsService {
 
   async getCommandsByCustomerId(customerId: string): Promise<JsonResponse<CommandDto[]>> {
     const commands = await this.commandRepository.find({
-      where: { user_id: customerId, status: In(Object.values(ValidatedCommandStatus)) }
+      where: { user_id: customerId, status: In(Object.values(ValidatedCommandStatus)) },
+      order: { id: "DESC" },
+      take: 10
     });
 
     return successResponse(plainToInstance(CommandDto, commands), 'Commands retrieved successfully')
