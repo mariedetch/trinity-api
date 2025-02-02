@@ -10,11 +10,12 @@ import {
   successResponse,
 } from 'src/common/helpers/json-response.helper';
 import { CommandStatsDto } from './dto/command-stats.dto';
-import { CommandDetailsDto } from './dto/command-detail.dto';
+import { CommandDetailDto } from './dto/command-detail.dto';
 import { CommandProductsDto } from './dto/command-products.dto';
 import { PaginationResource } from 'src/core/interfaces/pagination-resource.interface';
 import { UpdateCommandStatusDto } from './dto/update-command-status.dto';
 import { CartItem } from '../carts/dto/cart-response.dto';
+import { plainToClass } from 'class-transformer';
 
 interface CommandListQuery {
   page?: number;
@@ -52,7 +53,7 @@ export class CommandsService {
   }
 
   // Route pour afficher toutes les commandes de manière paginée
-  async getCommandList(query: CommandListQuery): Promise<JsonResponse<PaginationResource<CommandDetailsDto>>> {
+  async getCommandList(query: CommandListQuery): Promise<JsonResponse<PaginationResource<CommandDetailDto>>> {
     const { page = 1, perPage = 10, status, customer, startDate, endDate, user_id } = query;
     const skip = (page - 1) * perPage;
 
@@ -86,30 +87,8 @@ export class CommandsService {
 
     const [items, total] = await queryBuilder.getManyAndCount();
 
-    const result: PaginationResource<CommandDetailsDto> = {
-      items: items.map((command) => ({
-        id: command.id,
-        reference: command.reference,
-        customer: {
-          id: command.user.id,
-          firstname: command.user.first_name,
-          lastname: command.user.last_name,
-          phonenumber: command.user.phonenumber,
-          email: command.user.email,
-        },
-        created_at: command.createdAt.toISOString(),
-        total_price_incl: command.total_price_incl,
-        total_price_excl: command.total_price_excl,
-        shipping_charge: command.shipping_charge,
-        meta_data: {
-          paid_at: command.meta_data?.paid_at,
-          validated_at: command.meta_data?.validated_at,
-          shipped_at: command.meta_data?.shipped_at,
-          delivered_at: command.meta_data?.delivered_at,
-        },
-        shipping_address: command.shipping_address,
-        status: command.status,
-      })),
+    const result: PaginationResource<CommandDetailDto> = {
+      items: items.map((command) => (plainToClass(CommandDetailDto, command))),
       currentPage: page,
       perPage,
       total
@@ -144,7 +123,7 @@ export class CommandsService {
   }
 
   // Route pour avoir les détails d'une commande 
-  async getCommandDetails(commandId: string): Promise<JsonResponse<CommandDetailsDto>> {
+  async getCommandDetails(commandId: string): Promise<JsonResponse<CommandDetailDto>> {
     const command = await this.commandRepository.findOne({
       where: { id: commandId },
       relations: ['user'],
@@ -154,31 +133,7 @@ export class CommandsService {
       throw new NotFoundException(`Command with ID ${commandId} not found`);
     }
 
-    const commandDetails: CommandDetailsDto = {
-      id: command.id,
-      reference: command.reference,
-      customer: {
-        id: command.user.id,
-        firstname: command.user.first_name,
-        lastname: command.user.last_name,
-        phonenumber: command.user.phonenumber,
-        email: command.user.email,
-      },
-      created_at : command.createdAt.toISOString(),
-      total_price_incl: command.total_price_incl,
-      total_price_excl: command.total_price_excl,
-      shipping_charge: command.shipping_charge,
-      meta_data: {
-        paid_at: command.meta_data?.paid_at,
-        validated_at: command.meta_data?.validated_at,
-        shipped_at: command.meta_data?.shipped_at,
-        delivered_at: command.meta_data?.delivered_at,
-      },
-      shipping_address: command.shipping_address,
-      status: command.status,
-    };
-
-    return successResponse(commandDetails, 'Command details retrieved successfully');
+    return successResponse(plainToClass(CommandDetailDto, command), 'Command details retrieved successfully');
   }
 
 
@@ -199,7 +154,7 @@ export class CommandsService {
 
   // Route pour modifier le statut d'une commande
 
-  async updateCommandStatus(updateDto: UpdateCommandStatusDto): Promise<JsonResponse<CommandDetailsDto>> {
+  async updateCommandStatus(updateDto: UpdateCommandStatusDto): Promise<JsonResponse<CommandDetailDto>> {
     const command = await this.commandRepository.findOne({
       where: { id: updateDto.command_id },
     });

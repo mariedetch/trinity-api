@@ -21,7 +21,7 @@ import {
   JsonResponse,
   successResponse,
 } from 'src/common/helpers/json-response.helper';
-import { PriceJsonItem } from 'src/core/interfaces/price-json.interface';
+import { PriceJsonItem } from 'src/core/interfaces/app.interface';
 import { ProductStatsDto } from './dto/product-stats.dto';
 import { ProductOrderHistoryDto } from './dto/product-orders.dto';
 

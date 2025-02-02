@@ -17,13 +17,14 @@ import { RolesGuard } from 'src/core/guards/roles.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { Role } from '../users/enum';
 import { AuthGuard } from 'src/core/guards/auth.guard';
+import { SortDirection } from 'src/common/utils/constants';
 
 @Controller({ path: 'users/customers', version: '1' })
 @ApiTags('Customers')
 @ApiBearerAuth('access-token')
 @UseGuards(AuthGuard, RolesGuard)
 export class CustomersController {
-  constructor(private readonly customersService: CustomersService) {}
+  constructor(private readonly customersService: CustomersService) { }
 
   @Get()
   @Roles(Role.MANAGER)
@@ -34,14 +35,19 @@ export class CustomersController {
   })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'perPage', required: false })
+  @ApiQuery({ name: 'sortDir', required: false, })
+  @ApiQuery({ name: 'keyword', required: false, })
   findAll(
     @Query('page') page: number,
     @Query('perPage') perPage: number,
+    @Query('sortDir') sortDir: SortDirection,
+    @Query('keyword') keyword: string,
   ): Promise<JsonResponse<PaginationResource<UserDto>>> {
     const currentPage = page && page > 0 ? page : 1;
+    const isortDir = sortDir ?? 'ASC';
     const itemsPerPage = perPage && perPage > 0 ? perPage : 20;
 
-    return this.customersService.findAll(currentPage, itemsPerPage);
+    return this.customersService.findAll(currentPage, itemsPerPage, sortDir, keyword);
   }
 
   @Get(':id')

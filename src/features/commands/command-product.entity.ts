@@ -5,7 +5,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { BaseEntity } from 'src/core/entities/base.entity';
+import { BaseEntity } from '../../core/entities/base.entity';
 import { Command } from './command.entity';
 import { Product } from '../products/product.entity';
 

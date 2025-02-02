@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { Category } from './enums/category.enum';
-import { BaseEntity } from 'src/core/entities/base.entity';
-import { PriceJsonItem } from 'src/core/interfaces/price-json.interface';
+import { BaseEntity } from '../../core/entities/base.entity';
+import { PriceJsonItem } from 'src/core/interfaces/app.interface';
 
 @Entity('products')
 export class Product extends BaseEntity {
@@ -20,7 +20,12 @@ export class Product extends BaseEntity {
   @Column({ type: 'json' }) // Colonne qui contient un json
   nutriments: any;
 
-  @Column('simple-array') // Colonne qui contient une liste de string
+  @Column({
+    type: 'jsonb',
+    nullable: true,
+    array: false,
+    default: () => "'[]'",
+  }) // Colonne qui contient une liste de string
   ingredients: string[];
 
   @Column()

@@ -1,7 +1,9 @@
-import { Column, Entity, OneToMany } from 'typeorm';
+import { BeforeInsert, Column, Entity, OneToMany } from 'typeorm';
 import { Role } from './enum';
 import { BaseEntity } from '../../core/entities/base.entity';
 import { Command } from '../commands/command.entity';
+import * as bcrypt from 'bcrypt';
+import { Addresse } from 'src/core/interfaces/app.interface';
 
 @Entity('users')
 export class User extends BaseEntity {
@@ -32,17 +34,15 @@ export class User extends BaseEntity {
   }[];
 
   @Column({ type: 'json', nullable: true })
-  addresses: {
-    country: string;
-    address: string;
-    city: string;
-    state: string;
-    postal_code: string;
-    phone: string;
-    email: string;
-  }[];
+  addresses: Addresse[];
 
   // Relation avec Command
   @OneToMany(() => Command, (command) => command.user)
   commands: Command[];
+
+  @BeforeInsert()
+  async setPassword(password: string) {
+    const salt = await bcrypt.genSalt()
+    this.password = await bcrypt.hash(password || this.password, salt)
+  }
 }

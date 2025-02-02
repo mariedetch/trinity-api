@@ -1,6 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { Addresse } from 'src/core/interfaces/app.interface';
+import { Addresses } from 'src/features/users/dto/addresses.dto';
+import { CommandStatus } from '../enums';
 
-class CustomerDetails {
+class CustomerDetailDto {
   @ApiProperty()
   id: string;
   
@@ -17,26 +21,6 @@ class CustomerDetails {
   email: string;
 }
 
-// class ShippingAddressDto {
-//   @ApiProperty()
-//   country: string;
-  
-//   @ApiProperty()
-//   city: string;
-  
-//   @ApiProperty()
-//   state: string;
-  
-//   @ApiProperty()
-//   postal_code: string;
-  
-//   @ApiProperty()
-//   phone: string;
-  
-//   @ApiProperty()
-//   email: string;
-// }
-
 class MetaData {
   @ApiProperty()
   paid_at: string;
@@ -51,7 +35,7 @@ class MetaData {
   delivered_at: string;
 }
 
-export class CommandDetailsDto {
+export class CommandDetailDto {
   @ApiProperty()
   id: string;
 
@@ -59,7 +43,8 @@ export class CommandDetailsDto {
   reference: string;
   
   @ApiProperty()
-  customer: CustomerDetails;
+  @Type(() => CustomerDetailDto)
+  customer: CustomerDetailDto;
   
   @ApiProperty()
   created_at: string;
@@ -74,11 +59,13 @@ export class CommandDetailsDto {
   shipping_charge: number;
   
   @ApiProperty()
+  @Type(() => MetaData)
   meta_data: MetaData;
   
   @ApiProperty()
-  shipping_address: any;
+  @Type(() => Addresses)
+  shipping_address: Addresse;
   
   @ApiProperty()
-  status: string;
+  status: CommandStatus;
 }

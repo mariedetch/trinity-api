@@ -6,7 +6,7 @@ import { JsonResponse } from 'src/common/helpers/json-response.helper';
 import { request } from 'http';
 import { AuthGuard } from 'src/core/guards/auth.guard';
 import { CommandStatsDto } from './dto/command-stats.dto';
-import { CommandDetailsDto } from './dto/command-detail.dto';
+import { CommandDetailDto } from './dto/command-detail.dto';
 import { CommandProductsDto } from './dto/command-products.dto';
 import { CommandStatus } from './enums';
 import { PaginationResource } from 'src/core/interfaces/pagination-resource.interface';
@@ -36,7 +36,7 @@ export class CommandsController {
     @Query('customer') customer?: string,
     @Query('start_date') startDate?: string,
     @Query('end_date') endDate?: string,
-  ): Promise<JsonResponse<PaginationResource<CommandDetailsDto>>> {
+  ): Promise<JsonResponse<PaginationResource<CommandDetailDto>>> {
     const userId = request['user'].sub;
     const userRole = request['user'].role;
 
@@ -61,7 +61,7 @@ export class CommandsController {
 
   @Get(':id')
   @ApiDefaultErrorResponse()
-  async getCommandDetails(@Param('id') commandId: string): Promise<JsonResponse<CommandDetailsDto>> {
+  async getCommandDetails(@Param('id') commandId: string): Promise<JsonResponse<CommandDetailDto>> {
     return await this.commandsService.getCommandDetails(commandId);
   }
  
@@ -74,7 +74,7 @@ export class CommandsController {
   async updateCommandStatus(
     @Param('id') commandId: string,
     @Body() updateDto: UpdateCommandStatusDto,
-  ): Promise<JsonResponse<CommandDetailsDto>> {
+  ): Promise<JsonResponse<CommandDetailDto>> {
     updateDto.command_id = commandId
     return await this.commandsService.updateCommandStatus(updateDto);
   }

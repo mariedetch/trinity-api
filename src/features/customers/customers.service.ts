@@ -10,6 +10,7 @@ import {
 } from 'src/common/helpers/json-response.helper';
 import { UserDto } from '../users/dto/user.dto';
 import { Role } from '../users/enum';
+import { SortDirection } from 'src/common/utils/constants';
 
 @Injectable()
 export class CustomersService {
@@ -32,12 +33,27 @@ export class CustomersService {
   async findAll(
     page: number,
     perPage: number,
+    sortDirection: SortDirection,
+    keyword: string
   ): Promise<JsonResponse<PaginationResource<UserDto>>> {
-    const [entities, total] = await this.repository.findAndCount({
-      where: { role: Role.CUSTOMER },
-      skip: ((page <= 0 ? 1 : page) - 1) * perPage,
-      take: perPage,
-    });
+    const queryBuilder = this.repository.createQueryBuilder('user')
+      .where('user.role = :role', { role: Role.CUSTOMER })
+      .orderBy('user.first_name', sortDirection)
+      .skip(((page <= 0 ? 1 : page) - 1) * perPage)
+      .take(perPage);
+
+    if (keyword) {
+      queryBuilder.andWhere(
+        `(user.first_name ILIKE :keyword 
+          OR user.last_name ILIKE :keyword 
+          OR user.email ILIKE :keyword 
+          OR user.phonenumber ILIKE :keyword)`,
+        { keyword: `%${keyword}%` }
+      );
+    }
+
+    const [entities, total] = await queryBuilder.getManyAndCount();
+
     const result: PaginationResource<UserDto> = {
       items: this.convertToDto(entities),
       currentPage: page,

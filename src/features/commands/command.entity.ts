@@ -1,8 +1,9 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { BaseEntity } from 'src/core/entities/base.entity';
+import { BaseEntity } from '../../core/entities/base.entity';
 import { CommandProduct } from './command-product.entity';
 import { CommandStatus } from './enums';
 import { User } from '../users/user.entity';
+import { Addresse, CommandMetaData } from 'src/core/interfaces/app.interface';
 
 @Entity('commands')
 export class Command extends BaseEntity {
@@ -22,13 +23,18 @@ export class Command extends BaseEntity {
   total_price_excl: number;
 
   @Column({ type: 'json', nullable: true })
-  shipping_address: any;
+  shipping_address: Addresse;
 
   @Column({ type: 'float', default: 0, nullable: true })
   shipping_charge: number;
 
-  @Column({ type: 'json', nullable: true })
-  meta_data: any;
+  @Column({
+    type: 'jsonb',
+    nullable: true,
+    array: false,
+    default: () => "'{}'",
+  })
+  meta_data: CommandMetaData;
 
   @Column({
     type: 'enum',
