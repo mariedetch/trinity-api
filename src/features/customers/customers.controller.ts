@@ -18,13 +18,19 @@ import { Roles } from 'src/common/decorators/roles.decorator';
 import { Role } from '../users/enum';
 import { AuthGuard } from 'src/core/guards/auth.guard';
 import { SortDirection } from 'src/common/utils/constants';
+import { CustomerDto } from './dto/customer.dto';
+import { CommandsService } from '../commands/commands.service';
+import { CommandDto } from '../commands/dto/command-detail.dto';
 
 @Controller({ path: 'users/customers', version: '1' })
 @ApiTags('Customers')
 @ApiBearerAuth('access-token')
 @UseGuards(AuthGuard, RolesGuard)
 export class CustomersController {
-  constructor(private readonly customersService: CustomersService) { }
+  constructor(
+    private readonly customersService: CustomersService,
+    private readonly commandService: CommandsService
+  ) { }
 
   @Get()
   @Roles(Role.MANAGER)
@@ -47,18 +53,33 @@ export class CustomersController {
     const isortDir = sortDir ?? 'ASC';
     const itemsPerPage = perPage && perPage > 0 ? perPage : 20;
 
-    return this.customersService.findAll(currentPage, itemsPerPage, sortDir, keyword);
+    return this.customersService.findAll(currentPage, itemsPerPage, isortDir, keyword);
   }
 
   @Get(':id')
+  @Roles(Role.MANAGER)
   @ApiDefaultErrorResponse()
   @ApiSuccessResponse({
-    model: UserDto,
+    model: CustomerDto,
     description: 'The customer has been successfully retieved.',
   })
   findOne(
     @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<JsonResponse<UserDto>> {
+  ): Promise<JsonResponse<CustomerDto>> {
     return this.customersService.findOne(id);
   }
+
+  @Get(':id/commands')
+  @Roles(Role.MANAGER)
+  @ApiDefaultErrorResponse()
+  @ApiSuccessResponse({
+    model: Array<CommandDto>,
+    description: 'The commands has been successfully retieved.',
+  })
+  getLastCommands(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<JsonResponse<CommandDto[]>> {
+    return this.commandService.getCommandsByCustomerId(id);
+  }
+
 }

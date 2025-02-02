@@ -1,20 +1,18 @@
-import { Body, Controller,Get, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { Body, Controller,Get, Param, Put, Query, Req, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { CommandsService } from './commands.service';
 import { ApiDefaultErrorResponse } from 'src/common/decorators/responses/api-default-error-response.decorator';
 import { JsonResponse } from 'src/common/helpers/json-response.helper';
-import { request } from 'http';
 import { AuthGuard } from 'src/core/guards/auth.guard';
 import { CommandStatsDto } from './dto/command-stats.dto';
-import { CommandDetailDto } from './dto/command-detail.dto';
-import { CommandProductsDto } from './dto/command-products.dto';
+import { CommandDto } from './dto/command-detail.dto';
 import { CommandStatus } from './enums';
 import { PaginationResource } from 'src/core/interfaces/pagination-resource.interface';
 import { UpdateCommandStatusDto } from './dto/update-command-status.dto';
-import { CartItem } from '../carts/dto/cart-response.dto';
+import { CommandProductDto } from './dto/command-products.dto';
 
 @Controller({ path: 'commands', version: '1' })
-@ApiTags('commands')
+@ApiTags('Commands')
 @UseGuards(AuthGuard) // Il s'applique à toutes les routes
 @ApiBearerAuth('access-token')
 export class CommandsController {
@@ -36,7 +34,7 @@ export class CommandsController {
     @Query('customer') customer?: string,
     @Query('start_date') startDate?: string,
     @Query('end_date') endDate?: string,
-  ): Promise<JsonResponse<PaginationResource<CommandDetailDto>>> {
+  ): Promise<JsonResponse<PaginationResource<CommandDto>>> {
     const userId = request['user'].sub;
     const userRole = request['user'].role;
 
@@ -61,12 +59,12 @@ export class CommandsController {
 
   @Get(':id')
   @ApiDefaultErrorResponse()
-  async getCommandDetails(@Param('id') commandId: string): Promise<JsonResponse<CommandDetailDto>> {
-    return await this.commandsService.getCommandDetails(commandId);
+  async getCommandDetails(@Param('id') commandId: string): Promise<JsonResponse<CommandDto>> {
+    return await this.commandsService.getCommandById(commandId);
   }
  
   @Get(':id/products')
-  async getCommandProducts(@Param('id') commandId: string): Promise<JsonResponse<CartItem[]>> {
+  async getCommandProducts(@Param('id') commandId: string): Promise<JsonResponse<CommandProductDto[]>> {
     return await this.commandsService.getCommandProducts(commandId);
   }
 
@@ -74,9 +72,8 @@ export class CommandsController {
   async updateCommandStatus(
     @Param('id') commandId: string,
     @Body() updateDto: UpdateCommandStatusDto,
-  ): Promise<JsonResponse<CommandDetailDto>> {
-    updateDto.command_id = commandId
-    return await this.commandsService.updateCommandStatus(updateDto);
+  ): Promise<JsonResponse<CommandDto>> {
+    return await this.commandsService.updateCommandStatus(commandId, updateDto);
   }
 
 }

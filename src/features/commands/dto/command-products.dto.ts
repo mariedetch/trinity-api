@@ -1,27 +1,35 @@
 import { ApiProperty } from "@nestjs/swagger";
+import { Exclude, Expose, Type } from "class-transformer";
+import { ProductItemDto } from "src/features/products/dto/product-item.dto";
 
-export class CommandProductsDto {
+@Exclude()
+export class CommandProductDto {
   @ApiProperty()
-  command_id: string;
-
-  @ApiProperty()
-  reference: string;
-
-  @ApiProperty()
-  status: string;
+  @Expose()
+  id: string;
 
   @ApiProperty()
-  created_at: string;
+  @Expose()
+  quantity: number;
 
   @ApiProperty()
-  meta_data: any;
+  @Expose()
+  unit_price_incl: number;
 
   @ApiProperty()
-  products: {
-    commandProduct_id: string;
-    id: string;
-    name: string;
-    picture: string;
-    quantity: number;
-  }[];
+  @Expose()
+  unit_price_excl: number;
+
+  @ApiProperty()
+  @Expose()
+  total_price_incl: number;
+
+  @ApiProperty()
+  @Expose()
+  total_price_excl: number;
+
+  @ApiProperty()
+  @Expose()
+  @Type(() => ProductItemDto)
+  product: ProductItemDto
 }

@@ -13,6 +13,7 @@ import { User } from '../users/user.entity';
     TypeOrmModule.forFeature([Command, CommandProduct, User]),
     ProductsModule, // On importe ce module car nous aurons besoin d'accéder aux produits
   ],
+  exports: [CommandsService],
   controllers: [CommandsController],
   providers: [CommandsService, JwtService],
 })

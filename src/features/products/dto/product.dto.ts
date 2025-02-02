@@ -42,10 +42,6 @@ export class ProductDto {
 
   @Expose()
   @ApiProperty()
-  prices?: any; // Historique des prix du produit //
-
-  @Expose()
-  @ApiProperty()
   quantity_in_stock: number; // Quantité actuelle en stock
 
   @Expose()

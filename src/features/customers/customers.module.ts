@@ -6,10 +6,16 @@ import { User } from 'src/features/users/user.entity';
 import { UsersModule } from '../users/users.module';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
+import { Command } from '../commands/command.entity';
+import { CommandsModule } from '../commands/commands.module';
 
 @Module({
-  imports: [UsersModule, TypeOrmModule.forFeature([User])],
+  imports: [
+    UsersModule,
+    TypeOrmModule.forFeature([User, Command]),
+    CommandsModule
+  ],
   controllers: [CustomersController],
   providers: [CustomersService, UsersService, JwtService],
 })
-export class CustomersModule {}
+export class CustomersModule { }

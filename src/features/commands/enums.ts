@@ -9,3 +9,14 @@ export enum CommandStatus {
   RETURNED = 'RETURNED',
   REFUNDED = 'REFUNDED',
 }
+
+
+export enum ValidatedCommandStatus {
+  PAID = 'PAID',
+  IN_PROGRESS = 'IN_PROGRESS',
+  SHIPPED = 'SHIPPED',
+  DELIVERED = 'DELIVERED',
+  CANCELLED = 'CANCELLED',
+  RETURNED = 'RETURNED',
+  REFUNDED = 'REFUNDED',
+}
