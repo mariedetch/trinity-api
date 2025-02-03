@@ -9,11 +9,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import {
   Repository,
   FindOptionsWhere,
-  Like,
   MoreThanOrEqual,
-  MoreThan,
   LessThanOrEqual,
   DeepPartial,
+  ILike,
 } from 'typeorm';
 import { PaginationResource } from 'src/core/interfaces/pagination-resource.interface';
 import { CrudService } from 'src/core/services/crud-service.interface';
@@ -24,6 +23,7 @@ import {
 import { PriceJsonItem } from 'src/core/interfaces/app.interface';
 import { ProductStatsDto } from './dto/product-stats.dto';
 import { ProductOrderHistoryDto } from './dto/product-orders.dto';
+import { SortDirection } from 'src/common/utils/constants';
 
 @Injectable()
 export class ProductsService
@@ -127,6 +127,7 @@ export class ProductsService
   async findAllProducts(
     page: number,
     perPage: number,
+    sortDir: SortDirection,
     searchOptions: {
       name?: string;
       category?: string;
@@ -140,7 +141,7 @@ export class ProductsService
     const where: FindOptionsWhere<Product> = {};
 
     if (searchOptions.name) {
-      where.name = Like(`%${searchOptions.name}%`);
+      where.name = ILike(`%${searchOptions.name}%`);
     }
     if (searchOptions.category) {
       where.category = searchOptions.category;
@@ -161,6 +162,7 @@ export class ProductsService
     // Retrieve entities with pagination
     const [entities, total] = await this.productRepository.findAndCount({
       where,
+      order: { quantity_in_stock: sortDir },
       skip: ((page <= 0 ? 1 : page) - 1) * perPage,
       take: perPage,
     });

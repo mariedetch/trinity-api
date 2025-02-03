@@ -31,6 +31,7 @@ import { AuthGuard } from 'src/core/guards/auth.guard';
 import { Role } from '../users/enum';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { RolesGuard } from 'src/core/guards/roles.guard';
+import { SortDirection } from 'src/common/utils/constants';
 
 @Controller({ path: 'products', version: '1' })
 @ApiTags('products')
@@ -62,6 +63,7 @@ export class ProductsController {
   })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'perPage', required: false })
+  @ApiQuery({ name: 'sortDir', required: false, })
   @ApiQuery({ name: 'name', required: false })
   @ApiQuery({ name: 'category', required: false })
   @ApiQuery({ name: 'minPrice', required: false })
@@ -71,6 +73,7 @@ export class ProductsController {
   getAllProducts(
     @Query('page') page: number,
     @Query('perPage') perPage: number,
+    @Query('sortDir') sortDir: SortDirection,
     @Query('name') name?: string,
     @Query('category') category?: string,
     @Query('minPrice') minPrice?: number,
@@ -93,6 +96,7 @@ export class ProductsController {
     return this.productsService.findAllProducts(
       currentPage,
       itemsPerPage,
+      sortDir ?? 'ASC',
       searchOptions,
     );
   }
