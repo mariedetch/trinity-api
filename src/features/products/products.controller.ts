@@ -63,7 +63,7 @@ export class ProductsController {
   })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'perPage', required: false })
-  @ApiQuery({ name: 'sortDir', required: false, })
+  @ApiQuery({ name: 'sortDir', required: false })
   @ApiQuery({ name: 'name', required: false })
   @ApiQuery({ name: 'category', required: false })
   @ApiQuery({ name: 'minPrice', required: false })

@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { Command } from './command.entity';
@@ -36,16 +40,27 @@ export class CommandsService {
   ) {}
 
   // Route pour afficher toutes les commandes de manière paginée
-  async getCommandList(query: CommandListQuery): Promise<JsonResponse<PaginationResource<CommandDto>>> {
-    const { page = 1, perPage = 10, status, customer, startDate, endDate, user_id } = query;
+  async getCommandList(
+    query: CommandListQuery,
+  ): Promise<JsonResponse<PaginationResource<CommandDto>>> {
+    const {
+      page = 1,
+      perPage = 10,
+      status,
+      customer,
+      startDate,
+      endDate,
+      user_id,
+    } = query;
     const skip = (page - 1) * perPage;
 
-    const queryBuilder = this.commandRepository.createQueryBuilder('command')
+    const queryBuilder = this.commandRepository
+      .createQueryBuilder('command')
       .leftJoinAndSelect('command.user', 'user')
       .orderBy('command.createdAt', 'DESC')
       .skip(skip)
       .take(perPage);
-  
+
     if (status) {
       queryBuilder.andWhere('command.status = :status', { status });
     }
@@ -74,15 +89,14 @@ export class CommandsService {
     const [items, total] = await queryBuilder.getManyAndCount();
 
     const result: PaginationResource<CommandDto> = {
-      items: items.map((command) => (plainToClass(CommandDto, command))),
+      items: items.map((command) => plainToClass(CommandDto, command)),
       currentPage: page,
       perPage,
-      total
+      total,
     };
 
     return successResponse(result, 'Commands list retrieved successfully');
   }
-
 
   // Route pour récuperer les stats des commandes
   async getCommandStats(): Promise<JsonResponse<CommandStatsDto>> {
@@ -93,9 +107,13 @@ export class CommandsService {
       delivered_commands,
     ] = await Promise.all([
       this.commandRepository.count(),
-      this.commandRepository.count({ where: { status: CommandStatus.PAID }, }),
-      this.commandRepository.count({ where: { status: CommandStatus.SHIPPED }, }),
-      this.commandRepository.count({ where: { status: CommandStatus.DELIVERED }, }),
+      this.commandRepository.count({ where: { status: CommandStatus.PAID } }),
+      this.commandRepository.count({
+        where: { status: CommandStatus.SHIPPED },
+      }),
+      this.commandRepository.count({
+        where: { status: CommandStatus.DELIVERED },
+      }),
     ]);
 
     const stats: CommandStatsDto = {
@@ -108,7 +126,7 @@ export class CommandsService {
     return successResponse(stats, 'Command statistics retrieved successfully');
   }
 
-  // Route pour avoir les détails d'une commande 
+  // Route pour avoir les détails d'une commande
   async getCommandById(commandId: string): Promise<JsonResponse<CommandDto>> {
     const command = await this.commandRepository.findOne({
       where: { id: commandId },
@@ -119,12 +137,16 @@ export class CommandsService {
       throw new NotFoundException(`Command with ID ${commandId} not found`);
     }
 
-    return successResponse(plainToClass(CommandDto, command), 'Command details retrieved successfully');
+    return successResponse(
+      plainToClass(CommandDto, command),
+      'Command details retrieved successfully',
+    );
   }
 
-
   // Route pour récupérer les produits qui sont dans une commande
-  async getCommandProducts(commandId: string): Promise<JsonResponse<CommandProductDto[]>> {
+  async getCommandProducts(
+    commandId: string,
+  ): Promise<JsonResponse<CommandProductDto[]>> {
     const command_products = await this.commandProductRepository.find({
       where: { command_id: commandId },
       relations: ['product'],
@@ -135,16 +157,22 @@ export class CommandsService {
   }
 
   // Route pour modifier le statut d'une commande
-  async updateCommandStatus(commandId: string, updateDto: UpdateCommandStatusDto): Promise<JsonResponse<CommandDto>> {
+  async updateCommandStatus(
+    commandId: string,
+    updateDto: UpdateCommandStatusDto,
+  ): Promise<JsonResponse<CommandDto>> {
     const command = await this.commandRepository.findOneOrFail({
       where: { id: commandId },
     });
 
     // Vérifier les transitions autorisées de statut
     if (
-      (command.status === CommandStatus.PAID && updateDto.new_status === CommandStatus.IN_PROGRESS) ||
-      (command.status === CommandStatus.IN_PROGRESS && updateDto.new_status === CommandStatus.SHIPPED) ||
-      (command.status === CommandStatus.SHIPPED && updateDto.new_status === CommandStatus.DELIVERED)
+      (command.status === CommandStatus.PAID &&
+        updateDto.new_status === CommandStatus.IN_PROGRESS) ||
+      (command.status === CommandStatus.IN_PROGRESS &&
+        updateDto.new_status === CommandStatus.SHIPPED) ||
+      (command.status === CommandStatus.SHIPPED &&
+        updateDto.new_status === CommandStatus.DELIVERED)
     ) {
       // Mise à jour du statut et des méta-données
       command.status = updateDto.new_status;
@@ -152,7 +180,9 @@ export class CommandsService {
       // Mise à jour des méta-données dans le champ JSON
       if (updateDto.new_status === CommandStatus.IN_PROGRESS) {
         if (!updateDto.shipping_charge) {
-          throw new BadRequestException('Shipping charge is required to update status to IN_PROGRESS');
+          throw new BadRequestException(
+            'Shipping charge is required to update status to IN_PROGRESS',
+          );
         }
         command.meta_data.validated_at = new Date();
         command.shipping_charge = updateDto.shipping_charge;
@@ -164,21 +194,30 @@ export class CommandsService {
 
       await this.commandRepository.save(command);
 
-      return successResponse(plainToClass(CommandDto, command), "Command updated successfully")
-
+      return successResponse(
+        plainToClass(CommandDto, command),
+        'Command updated successfully',
+      );
     } else {
       throw new BadRequestException('Invalid status transition');
     }
   }
 
-  async getCommandsByCustomerId(customerId: string): Promise<JsonResponse<CommandDto[]>> {
+  async getCommandsByCustomerId(
+    customerId: string,
+  ): Promise<JsonResponse<CommandDto[]>> {
     const commands = await this.commandRepository.find({
-      where: { user_id: customerId, status: In(Object.values(ValidatedCommandStatus)) },
-      order: { id: "DESC" },
-      take: 10
+      where: {
+        user_id: customerId,
+        status: In(Object.values(ValidatedCommandStatus)),
+      },
+      order: { id: 'DESC' },
+      take: 10,
     });
 
-    return successResponse(plainToInstance(CommandDto, commands), 'Commands retrieved successfully')
+    return successResponse(
+      plainToInstance(CommandDto, commands),
+      'Commands retrieved successfully',
+    );
   }
-
 }

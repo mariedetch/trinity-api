@@ -10,20 +10,21 @@ export default setSeederFactory(User, async (faker) => {
 
   user.first_name = faker.person.firstName(sex);
   user.last_name = faker.person.lastName(sex);
-  user.email = user.last_name.charAt(0) + user.first_name.split(' ')[0] + "@gmail.com"
-  user.phonenumber = faker.phone.number()
+  user.email =
+    user.last_name.charAt(0) + user.first_name.split(' ')[0] + '@gmail.com';
+  user.phonenumber = faker.phone.number();
   user.addresses = [
     {
-        country: faker.location.country(),
-        address: faker.location.streetAddress(),
-        city: faker.location.city(),
-        state: faker.location.state(),
-        postal_code: faker.location.zipCode(),
-        phone: user.phonenumber,
-        email: user.email
-    }
-  ]
-  user.password = await bcrypt.hash("password", 10)
+      country: faker.location.country(),
+      address: faker.location.streetAddress(),
+      city: faker.location.city(),
+      state: faker.location.state(),
+      postal_code: faker.location.zipCode(),
+      phone: user.phonenumber,
+      email: user.email,
+    },
+  ];
+  user.password = await bcrypt.hash('password', 10);
 
   return user;
 });

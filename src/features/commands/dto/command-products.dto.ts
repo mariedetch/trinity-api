@@ -1,6 +1,6 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { Exclude, Expose, Type } from "class-transformer";
-import { ProductItemDto } from "src/features/products/dto/product-item.dto";
+import { ApiProperty } from '@nestjs/swagger';
+import { Exclude, Expose, Type } from 'class-transformer';
+import { ProductItemDto } from 'src/features/products/dto/product-item.dto';
 
 @Exclude()
 export class CommandProductDto {
@@ -31,5 +31,5 @@ export class CommandProductDto {
   @ApiProperty()
   @Expose()
   @Type(() => ProductItemDto)
-  product: ProductItemDto
+  product: ProductItemDto;
 }

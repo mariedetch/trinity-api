@@ -6,19 +6,19 @@ export class CartItem {
   @Expose()
   @ApiProperty()
   commandProduct_id: string;
-  
+
   @Expose()
   @ApiProperty()
   id: string;
-  
+
   @Expose()
   @ApiProperty()
   name: string;
-  
+
   @Expose()
   @ApiProperty()
   picture: string;
-  
+
   @Expose()
   @ApiProperty()
   quantity: number;
@@ -27,7 +27,6 @@ export class CartItem {
   @ApiProperty()
   selling_price: number;
 }
-
 
 @Exclude()
 export class CartResponseDto {

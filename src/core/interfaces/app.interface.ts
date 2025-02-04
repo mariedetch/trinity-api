@@ -7,10 +7,10 @@ export interface PriceJsonItem {
 }
 
 export interface CommandMetaData {
-  paid_at: Date | undefined,
-  validated_at: Date | undefined,
-  shipped_at: Date | undefined,
-  delivered_at: Date | undefined,
+  paid_at: Date | undefined;
+  validated_at: Date | undefined;
+  shipped_at: Date | undefined;
+  delivered_at: Date | undefined;
 }
 
 export interface Addresse {

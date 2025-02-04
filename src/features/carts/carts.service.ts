@@ -32,7 +32,7 @@ export class CartsService {
     private productRepository: Repository<Product>,
   ) {}
 
-  private TVA = 1.18
+  private TVA = 1.18;
 
   private async convertToDtoWithProducts(
     command: Command,
@@ -78,7 +78,7 @@ export class CartsService {
     // Récupérer les produits de la commande
     const commandProducts = await this.commandProductRepository.find({
       where: { command_id: command.id },
-      relations: ['product']
+      relations: ['product'],
     });
 
     const cartDto = await this.convertToDtoWithProducts(
@@ -145,7 +145,7 @@ export class CartsService {
     const newProduct = await this.commandProductRepository.save({
       command_id: command.id,
       product_id: addToCartDto.product_id,
-      quantity: addToCartDto.quantity
+      quantity: addToCartDto.quantity,
     });
 
     // Retourner le panier mis à jour
@@ -158,8 +158,8 @@ export class CartsService {
         selling_price: product.selling_price,
         quantity: newProduct.quantity,
       },
-      "Product added successfully"
-    )
+      'Product added successfully',
+    );
   }
 
   // Update d'un produit dans un panier
@@ -204,17 +204,14 @@ export class CartsService {
         selling_price: commandProduct.product.selling_price,
         quantity: updateCartItemDto.quantity,
       },
-      "Product updated successfully"
-    )
+      'Product updated successfully',
+    );
   }
 
   // Route pour valider un panier avant payement
-  async validateCart(
-    userId: string
-  ): Promise<JsonResponse<CartResponseDto>> {
-
+  async validateCart(userId: string): Promise<JsonResponse<CartResponseDto>> {
     // Recherche d'une commande existante avec le statut INITIATED
-    let command = await this.commandRepository.findOne({
+    const command = await this.commandRepository.findOne({
       where: {
         user_id: userId,
         status: CommandStatus.INITIATED,
@@ -226,37 +223,34 @@ export class CartsService {
       throw new NotFoundException(`Cart Empty`);
     }
 
-    command.command_products.forEach(async commandItem => {
+    command.command_products.forEach(async (commandItem) => {
       const product = await this.productRepository.findOne({
-        where: { id: commandItem.product_id }
-      })
+        where: { id: commandItem.product_id },
+      });
 
       const unit_price_excl = product.selling_price,
-            unit_price_incl = product.selling_price * this.TVA,
-            total_price_excl = unit_price_excl * commandItem.quantity,
-            total_price_incl = unit_price_incl * commandItem.quantity;
+        unit_price_incl = product.selling_price * this.TVA,
+        total_price_excl = unit_price_excl * commandItem.quantity,
+        total_price_incl = unit_price_incl * commandItem.quantity;
 
-      await this.commandProductRepository.update(
-        commandItem.id,
-        {
-          unit_price_excl,
-          unit_price_incl,
-          total_price_excl,
-          total_price_incl
-        }
-      );
+      await this.commandProductRepository.update(commandItem.id, {
+        unit_price_excl,
+        unit_price_incl,
+        total_price_excl,
+        total_price_incl,
+      });
 
-      command.total_price_excl += total_price_excl
-      command.total_price_incl += total_price_incl
+      command.total_price_excl += total_price_excl;
+      command.total_price_incl += total_price_incl;
     });
 
-    command.status = CommandStatus.VALIDATED
+    command.status = CommandStatus.VALIDATED;
     const updatedCommand = await this.commandRepository.save(command);
 
     return successResponse(
       plainToClass(CartResponseDto, updatedCommand),
-      "Cart Validated successfully"
-    )
+      'Cart Validated successfully',
+    );
   }
 
   // Supprimer un produit du panier
@@ -282,6 +276,6 @@ export class CartsService {
     await this.commandProductRepository.remove(commandProduct);
 
     // Récupérer le panier mis à jour
-    return successResponse(null, "Product removed successfully");
+    return successResponse(null, 'Product removed successfully');
   }
 }

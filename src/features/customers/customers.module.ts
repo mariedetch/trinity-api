@@ -13,9 +13,9 @@ import { CommandsModule } from '../commands/commands.module';
   imports: [
     UsersModule,
     TypeOrmModule.forFeature([User, Command]),
-    CommandsModule
+    CommandsModule,
   ],
   controllers: [CustomersController],
   providers: [CustomersService, UsersService, JwtService],
 })
-export class CustomersModule { }
+export class CustomersModule {}

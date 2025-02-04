@@ -23,7 +23,7 @@ export class CustomersService {
     private readonly repository: Repository<User>,
 
     @InjectRepository(Command)
-    private readonly commandRepository: Repository<Command>
+    private readonly commandRepository: Repository<Command>,
   ) {}
 
   convertToDto(user: User | User[]): any {
@@ -41,9 +41,10 @@ export class CustomersService {
     page: number,
     perPage: number,
     sortDirection: SortDirection,
-    keyword: string
+    keyword: string,
   ): Promise<JsonResponse<PaginationResource<UserDto>>> {
-    const queryBuilder = this.repository.createQueryBuilder('user')
+    const queryBuilder = this.repository
+      .createQueryBuilder('user')
       .where('user.role = :role', { role: Role.CUSTOMER })
       .orderBy('user.first_name', sortDirection)
       .skip(((page <= 0 ? 1 : page) - 1) * perPage)
@@ -55,7 +56,7 @@ export class CustomersService {
           OR user.last_name ILIKE :keyword 
           OR user.email ILIKE :keyword 
           OR user.phonenumber ILIKE :keyword)`,
-        { keyword: `%${keyword}%` }
+        { keyword: `%${keyword}%` },
       );
     }
 
@@ -82,7 +83,7 @@ export class CustomersService {
       where: { id, role: Role.CUSTOMER },
     } as any);
 
-    const customer = plainToClass(CustomerDto, entity)
+    const customer = plainToClass(CustomerDto, entity);
 
     // Récupérer la dernière commande
     const lastOrder = await this.commandRepository.findOne({
@@ -98,8 +99,8 @@ export class CustomersService {
       .where('command.user_id = :customerId', { customerId: id })
       .getRawOne();
 
-    customer.lastOrder = plainToClass(CommandDto, lastOrder)
-    customer.avgOrder = avgOrder.avg
+    customer.lastOrder = plainToClass(CommandDto, lastOrder);
+    customer.avgOrder = avgOrder.avg;
 
     return successResponse(customer, `Customer retrieved successfully`);
   }

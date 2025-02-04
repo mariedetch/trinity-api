@@ -1,4 +1,13 @@
-import { Body, Controller,Get, Param, Put, Query, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Put,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { CommandsService } from './commands.service';
 import { ApiDefaultErrorResponse } from 'src/common/decorators/responses/api-default-error-response.decorator';
@@ -40,7 +49,7 @@ export class CommandsController {
 
     const query = {
       page: page ? Number(page) : 1,
-      perPage: perPage ? Number(perPage) : 10, 
+      perPage: perPage ? Number(perPage) : 10,
       status,
       customer,
       startDate: startDate ? new Date(startDate) : undefined,
@@ -59,12 +68,16 @@ export class CommandsController {
 
   @Get(':id')
   @ApiDefaultErrorResponse()
-  async getCommandDetails(@Param('id') commandId: string): Promise<JsonResponse<CommandDto>> {
+  async getCommandDetails(
+    @Param('id') commandId: string,
+  ): Promise<JsonResponse<CommandDto>> {
     return await this.commandsService.getCommandById(commandId);
   }
- 
+
   @Get(':id/products')
-  async getCommandProducts(@Param('id') commandId: string): Promise<JsonResponse<CommandProductDto[]>> {
+  async getCommandProducts(
+    @Param('id') commandId: string,
+  ): Promise<JsonResponse<CommandProductDto[]>> {
     return await this.commandsService.getCommandProducts(commandId);
   }
 
@@ -75,5 +88,4 @@ export class CommandsController {
   ): Promise<JsonResponse<CommandDto>> {
     return await this.commandsService.updateCommandStatus(commandId, updateDto);
   }
-
 }

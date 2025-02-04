@@ -12,19 +12,25 @@ export default class ProductSeeder implements Seeder {
     const productRepository = dataSource.getRepository(Product);
 
     const currentPage = 1,
-          fields = "code,image_url,ingredients,nutriments,product_name",
-          url = `https://world.openfoodfacts.org/api/v2/search?page=${currentPage}&page_size=10&fields=${fields}`
+      fields = 'code,image_url,ingredients,nutriments,product_name',
+      url = `https://world.openfoodfacts.org/api/v2/search?page=${currentPage}&page_size=10&fields=${fields}`;
 
     for (const category of PRODUCT_CATEGORIES) {
-      const response = await axios.get<FoodFactResponse>(`${url}&categories_tags=${category.id}`)
+      const response = await axios.get<FoodFactResponse>(
+        `${url}&categories_tags=${category.id}`,
+      );
 
       for (const product of response.data.products) {
         try {
           if (product.product_name) {
-            const existantProduct = await productRepository.existsBy({ bar_code: parseInt(product.code) })
-            
+            const existantProduct = await productRepository.existsBy({
+              bar_code: parseInt(product.code),
+            });
+
             if (!existantProduct) {
-              const initial_cost = Math.floor(Math.random() * (1000 - 250000 + 1) + 250000)
+              const initial_cost = Math.floor(
+                Math.random() * (1000 - 250000 + 1) + 250000,
+              );
 
               await productRepository.insert({
                 bar_code: parseInt(product.code),
@@ -33,10 +39,12 @@ export default class ProductSeeder implements Seeder {
                 nutriments: product.nutriments ?? {},
                 ingredients: product.ingredients ?? [],
                 picture: product.image_url ?? '',
-                quantity_in_stock: Math.floor(Math.random() * (0 - 100 + 1) + 100),
+                quantity_in_stock: Math.floor(
+                  Math.random() * (0 - 100 + 1) + 100,
+                ),
                 alert_threshold: 10,
                 initial_cost,
-                selling_price: initial_cost + 1200
+                selling_price: initial_cost + 1200,
               });
             }
           }
@@ -50,11 +58,11 @@ export default class ProductSeeder implements Seeder {
 
 export interface FoodFactResponse {
   products: {
-    categories: string,
-    code: string,
-    image_url: string,
-    ingredients: [],
-    nutriments: {},
-    product_name: string
-  }[]
+    categories: string;
+    code: string;
+    image_url: string;
+    ingredients: [];
+    nutriments: object;
+    product_name: string;
+  }[];
 }

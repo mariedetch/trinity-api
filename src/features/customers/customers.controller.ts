@@ -29,8 +29,8 @@ import { CommandDto } from '../commands/dto/command-detail.dto';
 export class CustomersController {
   constructor(
     private readonly customersService: CustomersService,
-    private readonly commandService: CommandsService
-  ) { }
+    private readonly commandService: CommandsService,
+  ) {}
 
   @Get()
   @Roles(Role.MANAGER)
@@ -41,8 +41,8 @@ export class CustomersController {
   })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'perPage', required: false })
-  @ApiQuery({ name: 'sortDir', required: false, })
-  @ApiQuery({ name: 'keyword', required: false, })
+  @ApiQuery({ name: 'sortDir', required: false })
+  @ApiQuery({ name: 'keyword', required: false })
   findAll(
     @Query('page') page: number,
     @Query('perPage') perPage: number,
@@ -53,7 +53,12 @@ export class CustomersController {
     const isortDir = sortDir ?? 'ASC';
     const itemsPerPage = perPage && perPage > 0 ? perPage : 20;
 
-    return this.customersService.findAll(currentPage, itemsPerPage, isortDir, keyword);
+    return this.customersService.findAll(
+      currentPage,
+      itemsPerPage,
+      isortDir,
+      keyword,
+    );
   }
 
   @Get(':id')
@@ -81,5 +86,4 @@ export class CustomersController {
   ): Promise<JsonResponse<CommandDto[]>> {
     return this.commandService.getCommandsByCustomerId(id);
   }
-
 }

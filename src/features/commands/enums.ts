@@ -10,7 +10,6 @@ export enum CommandStatus {
   REFUNDED = 'REFUNDED',
 }
 
-
 export enum ValidatedCommandStatus {
   PAID = 'PAID',
   IN_PROGRESS = 'IN_PROGRESS',
