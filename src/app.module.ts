@@ -16,6 +16,7 @@ import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { JwtConfigModule } from './config/jwt/config.module';
 import { AuthGuard } from './core/guards/auth.guard';
 import { JwtService } from '@nestjs/jwt';
+import { SuppliesModule } from './features/supplies/supplies.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { JwtService } from '@nestjs/jwt';
     ApiConfigModule,
     JwtConfigModule,
     FeaturesModule,
+    SuppliesModule,
   ],
   controllers: [AppController],
   providers: [

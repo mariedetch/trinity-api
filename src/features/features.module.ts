@@ -6,6 +6,7 @@ import { UsersModule } from './users/users.module';
 import { ProfilesModule } from './profiles/profiles.module';
 import { CustomersModule } from './customers/customers.module';
 import { CartsModule } from './carts/cart.module';
+import { SuppliesModule } from './supplies/supplies.module';
 import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
@@ -17,6 +18,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     CustomersModule,
     CommandsModule,
     CartsModule,
+    SuppliesModule,
     NotificationsModule,
   ],
   providers: [],
