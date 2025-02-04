@@ -79,7 +79,7 @@ export class CustomersService {
    * @returns A promise containing the JSON response with the details of the retrieved resource.
    */
   async findOne(id: string): Promise<JsonResponse<CustomerDto>> {
-    const entity = await this.repository.findOne({
+    const entity = await this.repository.findOneByOrFail({
       where: { id, role: Role.CUSTOMER },
     } as any);
 

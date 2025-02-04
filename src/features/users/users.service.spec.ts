@@ -26,6 +26,9 @@ describe('UsersService', () => {
     addresses: [],
     createdAt: fixedDate,
     updatedAt: fixedDate,
+    setPassword: function (password: string): Promise<void> {
+      return
+    }
   };
 
   const mockCreateUserDto: CreateUserDto = {

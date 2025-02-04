@@ -3,10 +3,12 @@ import { CustomersController } from './customers.controller';
 import { CustomersService } from './customers.service';
 import { AuthGuard } from 'src/core/guards/auth.guard';
 import { JwtService } from '@nestjs/jwt';
+import { CommandsService } from '../commands/commands.service';
 
 describe('CustomersController', () => {
   let controller: CustomersController;
   let serviceMock: Partial<CustomersService>;
+  let commandServiceMock: Partial<CommandsService>
 
   beforeEach(async () => {
     serviceMock = {
@@ -14,12 +16,20 @@ describe('CustomersController', () => {
       findOne: jest.fn(),
     };
 
+    commandServiceMock = {
+      getCommandsByCustomerId: jest.fn()
+    }
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [CustomersController],
       providers: [
         {
           provide: CustomersService,
           useValue: serviceMock,
+        },
+        {
+          provide: CommandsService,
+          useValue: commandServiceMock
         },
         {
           provide: JwtService,
