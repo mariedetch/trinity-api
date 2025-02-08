@@ -4,7 +4,7 @@ import { UsersService } from '../users/users.service';
 import { JwtConfigService } from 'src/config/jwt/config.service';
 import { CsrfConfigService } from 'src/config/csrf/config.service';
 import { JwtService } from '@nestjs/jwt';
-import { UnauthorizedException, NotFoundException } from '@nestjs/common';
+import { UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { LoginUserDto } from './dto/login-user.dto';
 import { UserDto } from '../users/dto/user.dto';

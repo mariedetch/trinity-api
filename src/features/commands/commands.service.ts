@@ -16,7 +16,6 @@ import { CommandStatsDto } from './dto/command-stats.dto';
 import { CommandDto } from './dto/command-detail.dto';
 import { PaginationResource } from 'src/core/interfaces/pagination-resource.interface';
 import { UpdateCommandStatusDto } from './dto/update-command-status.dto';
-import { CartItem } from '../carts/dto/cart-response.dto';
 import { plainToClass, plainToInstance } from 'class-transformer';
 import { CommandProductDto } from './dto/command-products.dto';
 

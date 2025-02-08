@@ -6,6 +6,7 @@ import { UsersModule } from './users/users.module';
 import { ProfilesModule } from './profiles/profiles.module';
 import { CustomersModule } from './customers/customers.module';
 import { CartsModule } from './carts/cart.module';
+import { InventoriesModule } from './inventories/inventories.module';
 import { StatsModule } from './Stats/stats.module';
 import { SuppliesModule } from './supplies/supplies.module';
 import { NotificationsModule } from './notifications/notifications.module';
@@ -19,6 +20,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     CustomersModule,
     CommandsModule,
     CartsModule,
+    InventoriesModule,
     StatsModule,
     SuppliesModule,
     NotificationsModule,
