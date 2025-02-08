@@ -72,4 +72,31 @@ describe('CustomersController', () => {
       expect(result).toEqual(mockCustomer);
     });
   });
+
+  // Ajoutez un test pour la méthode `findAll`
+  describe('findAll', () => {
+    it('should call CustomersService.findAll with the correct arguments', async () => {
+      const mockResponse = {
+        data: [], // Remplissez avec des données fictives appropriées
+        message: 'Customers retrieved successfully',
+      };
+
+      const page = 1;
+      const perPage = 20;
+      const sortDir = 'ASC';
+      const keyword = '';
+
+      (serviceMock.findAll as jest.Mock).mockResolvedValueOnce(mockResponse);
+
+      const result = await controller.findAll(page, perPage, sortDir, keyword);
+
+      expect(serviceMock.findAll).toHaveBeenCalledWith(
+        page,
+        perPage,
+        sortDir,
+        keyword,
+      );
+      expect(result).toEqual(mockResponse);
+    });
+  });
 });

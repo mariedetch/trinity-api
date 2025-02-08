@@ -9,7 +9,6 @@ import {
   Min,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { Category } from '../enums/category.enum';
 
 export class CreateProductDto {
   @IsNumber()

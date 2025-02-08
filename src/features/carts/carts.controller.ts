@@ -16,7 +16,7 @@ import { AuthGuard } from 'src/core/guards/auth.guard';
 import { Request } from 'express';
 import { JsonResponse } from 'src/common/helpers/json-response.helper';
 import { CartItem, CartResponseDto } from './dto/cart-response.dto';
-import { ApiBearerAuth, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UpdateCartItemDto } from './dto/update-cart-item.dto';
 
 @Controller({ path: 'carts', version: '1' })

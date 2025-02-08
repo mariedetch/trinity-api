@@ -1,5 +1,4 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { Category } from './enums/category.enum';
 import { BaseEntity } from '../../core/entities/base.entity';
 import { PriceJsonItem } from 'src/core/interfaces/app.interface';
 

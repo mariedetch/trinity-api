@@ -1,12 +1,11 @@
 import {
-  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Command } from '../commands/command.entity';
 import { CommandProduct } from '../commands/command-product.entity';
 import { Product } from '../products/product.entity';

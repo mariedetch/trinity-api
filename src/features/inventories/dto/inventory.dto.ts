@@ -2,24 +2,36 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
 
 @Exclude()
-export class ProductItemDto {
+export class InventoryDto {
   @Expose()
   @ApiProperty()
   id: string;
 
   @Expose()
   @ApiProperty()
-  name: string;
+  numero: number;
 
   @Expose()
   @ApiProperty()
-  picture: string;
+  description: string;
 
   @Expose()
   @ApiProperty()
-  initial_cost: number;
+  validated: boolean;
 
   @Expose()
   @ApiProperty()
-  selling_price: number;
+  validated_at: Date;
+
+  @Expose()
+  @ApiProperty()
+  start_date: Date;
+
+  @Expose()
+  @ApiProperty()
+  end_date: Date;
+
+  @Expose()
+  @ApiProperty()
+  createdAt: Date;
 }
