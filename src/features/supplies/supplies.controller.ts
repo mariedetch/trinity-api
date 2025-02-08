@@ -24,12 +24,12 @@ import { RolesGuard } from 'src/core/guards/roles.guard';
 
 @Controller({ path: 'supplies', version: '1' })
 @UseGuards(AuthGuard, RolesGuard)
-@Roles(Role.MANAGER)
 @ApiTags('supplies')
 export class SuppliesController {
   constructor(private readonly suppliesService: SuppliesService) {}
 
   @Post()
+  @Roles(Role.MANAGER)
   @ApiDefaultErrorResponse()
   @ApiOperation({ summary: 'Create a new supply' })
   @ApiBody({
@@ -43,6 +43,7 @@ export class SuppliesController {
   }
 
   @Get(':id/items')
+  @Roles(Role.MANAGER)
   @ApiDefaultErrorResponse()
   @ApiSuccessResponse({
     model: ProductDto,
@@ -63,6 +64,7 @@ export class SuppliesController {
   }
 
   @Get()
+  @Roles(Role.MANAGER)
   @ApiDefaultErrorResponse()
   @ApiSuccessResponse({
     model: SupplyDto,
