@@ -1,4 +1,4 @@
-import { IsUUID, IsEnum, ValidateIf, IsNumber } from 'class-validator';
+import { IsEnum, ValidateIf } from 'class-validator';
 import { CommandStatus } from '../enums';
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
