@@ -5,9 +5,6 @@ export class NotificationDto {
   id: string;
 
   @ApiProperty()
-  user_id: string;
-
-  @ApiProperty()
   message: string;
 
   @ApiProperty()

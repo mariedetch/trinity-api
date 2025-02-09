@@ -157,21 +157,25 @@ describe('CommandsController', () => {
       const commandId = 'command123';
       const expectedProducts = {
         success: true,
-        data: [{
-          id: 'product123',
-          quantity: 2,
-          unit_price_incl: 10.99,
-          unit_price_excl: 9.99,
-          total_price_incl: 21.98,
-          total_price_excl: 19.98,
-          product: {
-            id: 'prod1',
-            name: 'Test Product'
-          }
-        }]
+        data: [
+          {
+            id: 'product123',
+            quantity: 2,
+            unit_price_incl: 10.99,
+            unit_price_excl: 9.99,
+            total_price_incl: 21.98,
+            total_price_excl: 19.98,
+            product: {
+              id: 'prod1',
+              name: 'Test Product',
+            },
+          },
+        ],
       };
 
-      mockCommandsService.getCommandProducts.mockResolvedValue(expectedProducts);
+      mockCommandsService.getCommandProducts.mockResolvedValue(
+        expectedProducts,
+      );
 
       const result = await controller.getCommandProducts(commandId);
 
@@ -182,7 +186,7 @@ describe('CommandsController', () => {
 
   describe('updateCommandStatus', () => {
     // Test de la mise à jour du statut d'une commande
-    it('devrait mettre à jour le statut d\'une commande', async () => {
+    it("devrait mettre à jour le statut d'une commande", async () => {
       const commandId = 'command123';
       const updateDto = {
         new_status: CommandStatus.IN_PROGRESS,
@@ -201,7 +205,10 @@ describe('CommandsController', () => {
 
       const result = await controller.updateCommandStatus(commandId, updateDto);
 
-      expect(service.updateCommandStatus).toHaveBeenCalledWith(commandId, updateDto);
+      expect(service.updateCommandStatus).toHaveBeenCalledWith(
+        commandId,
+        updateDto,
+      );
       expect(result).toEqual(expectedResult);
     });
   });

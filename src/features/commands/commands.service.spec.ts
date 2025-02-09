@@ -67,16 +67,32 @@ describe('CommandsService', () => {
     it('should return a paginated list of commands', async () => {
       // On simule que le query builder retourne deux commandes et un total de 2
       const sampleCommands = [
-        { id: '1', createdAt: new Date(), status: CommandStatus.PAID, user: {} },
-        { id: '2', createdAt: new Date(), status: CommandStatus.SHIPPED, user: {} },
+        {
+          id: '1',
+          createdAt: new Date(),
+          status: CommandStatus.PAID,
+          user: {},
+        },
+        {
+          id: '2',
+          createdAt: new Date(),
+          status: CommandStatus.SHIPPED,
+          user: {},
+        },
       ];
       mockQueryBuilder.getManyAndCount.mockResolvedValue([sampleCommands, 2]);
 
       const query = { page: 1, perPage: 10 };
       const response = await service.getCommandList(query);
 
-      expect(mockQueryBuilder.leftJoinAndSelect).toHaveBeenCalledWith('command.user', 'user');
-      expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith('command.createdAt', 'DESC');
+      expect(mockQueryBuilder.leftJoinAndSelect).toHaveBeenCalledWith(
+        'command.user',
+        'user',
+      );
+      expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith(
+        'command.createdAt',
+        'DESC',
+      );
       expect(response.data.items).toHaveLength(2);
       expect(response.message).toEqual('Commands list retrieved successfully');
     });
@@ -87,9 +103,12 @@ describe('CommandsService', () => {
       // On simule les compteurs pour chaque statut
       commandRepository.count.mockImplementation((options?: any) => {
         if (!options) return Promise.resolve(100);
-        if (options.where && options.where.status === CommandStatus.PAID) return Promise.resolve(10);
-        if (options.where && options.where.status === CommandStatus.SHIPPED) return Promise.resolve(20);
-        if (options.where && options.where.status === CommandStatus.DELIVERED) return Promise.resolve(30);
+        if (options.where && options.where.status === CommandStatus.PAID)
+          return Promise.resolve(10);
+        if (options.where && options.where.status === CommandStatus.SHIPPED)
+          return Promise.resolve(20);
+        if (options.where && options.where.status === CommandStatus.DELIVERED)
+          return Promise.resolve(30);
       });
 
       const response = await service.getCommandStats();
@@ -98,7 +117,9 @@ describe('CommandsService', () => {
       expect(response.data.waiting_commands).toEqual(10);
       expect(response.data.shipped_commands).toEqual(20);
       expect(response.data.delivered_commands).toEqual(30);
-      expect(response.message).toEqual('Command statistics retrieved successfully');
+      expect(response.message).toEqual(
+        'Command statistics retrieved successfully',
+      );
     });
   });
 
@@ -113,27 +134,35 @@ describe('CommandsService', () => {
         where: { id: '1' },
         relations: ['user'],
       });
-      expect(response.data).toMatchObject({ id: '1', status: CommandStatus.PAID });
-      expect(response.message).toEqual('Command details retrieved successfully');
+      expect(response.data).toMatchObject({
+        id: '1',
+        status: CommandStatus.PAID,
+      });
+      expect(response.message).toEqual(
+        'Command details retrieved successfully',
+      );
     });
 
     it('should throw NotFoundException when command is not found', async () => {
       commandRepository.findOne.mockResolvedValue(undefined);
 
-      await expect(service.getCommandById('non-existent')).rejects.toThrow(NotFoundException);
+      await expect(service.getCommandById('non-existent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
   describe('getCommandProducts', () => {
     it('should return products of a command', async () => {
       const sampleProducts = [
-        { id: 'prod1', 
-          quantity: 2, 
-          unit_price_incl: 10, 
-          unit_price_excl: 8, 
-          total_price_incl: 20, 
-          total_price_excl: 16, 
-          product: {} 
+        {
+          id: 'prod1',
+          quantity: 2,
+          unit_price_incl: 10,
+          unit_price_excl: 8,
+          total_price_incl: 20,
+          total_price_excl: 16,
+          product: {},
         },
       ];
       commandProductRepository.find.mockResolvedValue(sampleProducts);
@@ -145,7 +174,9 @@ describe('CommandsService', () => {
         relations: ['product'],
       });
       expect(response.data).toHaveLength(1);
-      expect(response.message).toEqual('Command products retrieved successfully');
+      expect(response.message).toEqual(
+        'Command products retrieved successfully',
+      );
     });
   });
 
@@ -191,7 +222,9 @@ describe('CommandsService', () => {
         // shipping_charge manquant
       };
 
-      await expect(service.updateCommandStatus('1', updateDto as any)).rejects.toThrow(BadRequestException);
+      await expect(
+        service.updateCommandStatus('1', updateDto as any),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should throw BadRequestException for invalid status transition', async () => {
@@ -208,7 +241,9 @@ describe('CommandsService', () => {
         new_status: CommandStatus.SHIPPED,
       };
 
-      await expect(service.updateCommandStatus('1', updateDto as any)).rejects.toThrow(BadRequestException);
+      await expect(
+        service.updateCommandStatus('1', updateDto as any),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 

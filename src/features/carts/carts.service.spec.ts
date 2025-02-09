@@ -6,7 +6,11 @@ import { Command } from '../commands/command.entity';
 import { CommandProduct } from '../commands/command-product.entity';
 import { Product } from '../products/product.entity';
 import { CommandStatus } from '../commands/enums';
-import { NotFoundException, ConflictException, ForbiddenException } from '@nestjs/common';
+import {
+  NotFoundException,
+  ConflictException,
+  ForbiddenException,
+} from '@nestjs/common';
 
 describe('CartsService', () => {
   let service: CartsService;
@@ -51,9 +55,15 @@ describe('CartsService', () => {
     }).compile();
 
     service = module.get<CartsService>(CartsService);
-    commandRepository = module.get<Repository<Command>>(getRepositoryToken(Command));
-    commandProductRepository = module.get<Repository<CommandProduct>>(getRepositoryToken(CommandProduct));
-    productRepository = module.get<Repository<Product>>(getRepositoryToken(Product));
+    commandRepository = module.get<Repository<Command>>(
+      getRepositoryToken(Command),
+    );
+    commandProductRepository = module.get<Repository<CommandProduct>>(
+      getRepositoryToken(CommandProduct),
+    );
+    productRepository = module.get<Repository<Product>>(
+      getRepositoryToken(Product),
+    );
   });
 
   afterEach(() => {
@@ -112,7 +122,10 @@ describe('CartsService', () => {
       mockProductRepository.findOne.mockResolvedValue(null);
 
       await expect(
-        service.addToCart('user-123', { product_id: 'non-existent', quantity: 1 })
+        service.addToCart('user-123', {
+          product_id: 'non-existent',
+          quantity: 1,
+        }),
       ).rejects.toThrow(NotFoundException);
     });
 
@@ -148,7 +161,7 @@ describe('CartsService', () => {
       mockCommandProductRepository.findOne.mockResolvedValue(null);
 
       await expect(
-        service.updateCartItem('user-123', 'non-existent', { quantity: 1 })
+        service.updateCartItem('user-123', 'non-existent', { quantity: 1 }),
       ).rejects.toThrow(NotFoundException);
     });
 
@@ -158,7 +171,7 @@ describe('CartsService', () => {
       });
 
       await expect(
-        service.updateCartItem('user-123', 'cp-1', { quantity: 1 })
+        service.updateCartItem('user-123', 'cp-1', { quantity: 1 }),
       ).rejects.toThrow(ForbiddenException);
     });
 
@@ -173,9 +186,13 @@ describe('CartsService', () => {
         },
       };
 
-      mockCommandProductRepository.findOne.mockResolvedValue(mockCommandProduct);
+      mockCommandProductRepository.findOne.mockResolvedValue(
+        mockCommandProduct,
+      );
 
-      const result = await service.updateCartItem('user-123', 'cp-1', { quantity: 0 });
+      const result = await service.updateCartItem('user-123', 'cp-1', {
+        quantity: 0,
+      });
 
       expect(mockCommandProductRepository.remove).toHaveBeenCalled();
       expect(result.message).toBe('Product updated successfully');
@@ -186,7 +203,9 @@ describe('CartsService', () => {
     it('should throw NotFoundException when no active cart exists', async () => {
       mockCommandRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.validateCart('user-123')).rejects.toThrow(NotFoundException);
+      await expect(service.validateCart('user-123')).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should validate cart and update prices', async () => {

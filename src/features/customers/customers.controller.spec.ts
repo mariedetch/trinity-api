@@ -8,7 +8,7 @@ import { CommandsService } from '../commands/commands.service';
 describe('CustomersController', () => {
   let controller: CustomersController;
   let serviceMock: Partial<CustomersService>;
-  let commandServiceMock: Partial<CommandsService>
+  let commandServiceMock: Partial<CommandsService>;
 
   beforeEach(async () => {
     serviceMock = {
@@ -17,8 +17,8 @@ describe('CustomersController', () => {
     };
 
     commandServiceMock = {
-      getCommandsByCustomerId: jest.fn()
-    }
+      getCommandsByCustomerId: jest.fn(),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [CustomersController],
@@ -29,7 +29,7 @@ describe('CustomersController', () => {
         },
         {
           provide: CommandsService,
-          useValue: commandServiceMock
+          useValue: commandServiceMock,
         },
         {
           provide: JwtService,

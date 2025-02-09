@@ -7,16 +7,18 @@ import {
   UseGuards,
   Param,
   Req,
+  Query,
 } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { AuthGuard } from 'src/core/guards/auth.guard';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ApiDefaultErrorResponse } from 'src/common/decorators/responses/api-default-error-response.decorator';
 import { ApiSuccessResponse } from 'src/common/decorators/responses/api-success-response.decorator';
 import { NotificationDto } from './dto/notification.dto';
 import { Request as ExpressRequest } from 'express';
 import { JsonResponse } from 'src/common/helpers/json-response.helper';
+import { PaginationResource } from 'src/core/interfaces/pagination-resource.interface';
 
 @Controller({ path: 'notifications', version: '1' })
 @ApiTags('Notifications')
@@ -44,10 +46,27 @@ export class NotificationsController {
     description:
       'The notifications of the auth user has been successfully retieved.',
   })
-  async findAllByUser(@Req() req: ExpressRequest) {
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'perPage', required: false })
+  @ApiQuery({ name: 'isRead', required: false })
+  async findAllByUser(
+    @Query('page') page: number,
+    @Query('perPage') perPage: number,
+    @Query('isRead') isRead: boolean,
+    @Req() req: ExpressRequest,
+  ): Promise<JsonResponse<PaginationResource<NotificationDto>>> {
+    const currentPage = page && page > 0 ? page : 1;
+    const itemsPerPage = perPage && perPage > 0 ? perPage : 20;
+
     const payload = req['user'];
     const id = payload.sub;
-    return this.notificationsService.findAllByUser(id);
+
+    return this.notificationsService.findAllByUser(
+      currentPage,
+      itemsPerPage,
+      isRead,
+      id,
+    );
   }
 
   @Get(':id')

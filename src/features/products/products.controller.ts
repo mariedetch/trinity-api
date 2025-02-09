@@ -36,11 +36,11 @@ import { SortDirection } from 'src/common/utils/constants';
 @Controller({ path: 'products', version: '1' })
 @ApiTags('products')
 @ApiBearerAuth('access-token')
+@UseGuards(AuthGuard, RolesGuard)
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Post()
-  @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.MANAGER)
   @ApiDefaultErrorResponse()
   @ApiSuccessResponse({
@@ -55,7 +55,6 @@ export class ProductsController {
   }
 
   @Get()
-  @UseGuards(AuthGuard)
   @ApiDefaultErrorResponse()
   @ApiSuccessResponse({
     model: ProductDto,
@@ -102,7 +101,6 @@ export class ProductsController {
   }
 
   @Get(':id')
-  @UseGuards(AuthGuard)
   @ApiDefaultErrorResponse()
   @ApiSuccessResponse({
     model: ProductDto,
@@ -115,7 +113,6 @@ export class ProductsController {
   }
 
   @Put(':id')
-  @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.MANAGER)
   @ApiDefaultErrorResponse()
   @ApiSuccessResponse({
@@ -130,9 +127,7 @@ export class ProductsController {
   }
 
   @Delete(':id')
-  @UseGuards(AuthGuard) // à revoir
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles(Role.CUSTOMER)
+  @Roles(Role.MANAGER)
   @ApiDefaultErrorResponse()
   @ApiSuccessResponse({
     model: ProductDto,
@@ -143,7 +138,6 @@ export class ProductsController {
   }
 
   @Get('g/stats')
-  @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.MANAGER)
   @ApiDefaultErrorResponse()
   @ApiSuccessResponse({
@@ -155,7 +149,6 @@ export class ProductsController {
   }
 
   @Get(':id/prices')
-  @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.MANAGER)
   @ApiDefaultErrorResponse()
   @ApiSuccessResponse({
@@ -169,7 +162,6 @@ export class ProductsController {
   }
 
   @Get(':id/orders')
-  @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.MANAGER)
   @ApiDefaultErrorResponse()
   @ApiSuccessResponse({

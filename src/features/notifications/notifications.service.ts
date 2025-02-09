@@ -10,6 +10,7 @@ import {
   JsonResponse,
   successResponse,
 } from 'src/common/helpers/json-response.helper';
+import { PaginationResource } from 'src/core/interfaces/pagination-resource.interface';
 
 @Injectable()
 export class NotificationsService {
@@ -36,16 +37,33 @@ export class NotificationsService {
   }
 
   async findAllByUser(
+    page: number,
+    perPage: number,
+    isRead: boolean,
     user_id: string,
-  ): Promise<JsonResponse<NotificationDto[]>> {
-    const [notifications] = await this.notificationsRepository.find({
-      where: { user_id: user_id },
-    });
-    return successResponse(
-      this.convertToDto(notifications),
-      `Notification created successfully`,
-      201,
-    );
+  ): Promise<JsonResponse<PaginationResource<NotificationDto>>> {
+    const conditions = { user_id: user_id };
+
+    if (isRead) {
+      conditions['isRead'] = false;
+    }
+
+    const [notifications, total] =
+      await this.notificationsRepository.findAndCount({
+        where: conditions,
+        skip: ((page <= 0 ? 1 : page) - 1) * perPage,
+        take: perPage,
+        order: { createdAt: 'DESC' },
+      });
+
+    const result: PaginationResource<NotificationDto> = {
+      items: this.convertToDto(notifications),
+      currentPage: page,
+      perPage,
+      total,
+    };
+
+    return successResponse(result, `Notification retrived successfully`);
   }
 
   async findOne(id: string): Promise<JsonResponse<NotificationDto[]>> {
@@ -55,7 +73,7 @@ export class NotificationsService {
     return successResponse(
       this.convertToDto(notification),
       `Notification created successfully`,
-      201,
+      200,
     );
   }
 
@@ -72,7 +90,7 @@ export class NotificationsService {
     return successResponse(
       await this.convertToDto(notification),
       `Notification created successfully`,
-      201,
+      200,
     );
   }
 }

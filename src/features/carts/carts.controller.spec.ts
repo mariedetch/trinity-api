@@ -17,7 +17,9 @@ describe('CartsController', () => {
 
   // Valeurs de retour fictives pour le service
   const cartResponse = { data: { cart: [] } };
-  const cartItemResponse = { data: { id: uuidv4(), product: 'Produit Test', quantity: 1 } };
+  const cartItemResponse = {
+    data: { id: uuidv4(), product: 'Produit Test', quantity: 1 },
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -62,7 +64,10 @@ describe('CartsController', () => {
 
       const result = await controller.addToCart(mockRequest, addToCartDto);
       expect(result).toEqual(cartItemResponse);
-      expect(cartsService.addToCart).toHaveBeenCalledWith(mockUser.sub, addToCartDto);
+      expect(cartsService.addToCart).toHaveBeenCalledWith(
+        mockUser.sub,
+        addToCartDto,
+      );
     });
   });
 
@@ -75,25 +80,39 @@ describe('CartsController', () => {
   });
 
   describe('updateCartItem', () => {
-    it("doit mettre à jour un item du panier", async () => {
+    it('doit mettre à jour un item du panier', async () => {
       const commandProductId = uuidv4();
       const updateCartItemDto: UpdateCartItemDto = {
         quantity: 3,
       };
 
-      const result = await controller.updateCartItem(mockRequest, commandProductId, updateCartItemDto);
+      const result = await controller.updateCartItem(
+        mockRequest,
+        commandProductId,
+        updateCartItemDto,
+      );
       expect(result).toEqual(cartItemResponse);
-      expect(cartsService.updateCartItem).toHaveBeenCalledWith(mockUser.sub, commandProductId, updateCartItemDto);
+      expect(cartsService.updateCartItem).toHaveBeenCalledWith(
+        mockUser.sub,
+        commandProductId,
+        updateCartItemDto,
+      );
     });
   });
 
   describe('removeCartItem', () => {
-    it("doit supprimer un item du panier", async () => {
+    it('doit supprimer un item du panier', async () => {
       const commandProductId = uuidv4();
 
-      const result = await controller.removeCartItem(mockRequest, commandProductId);
+      const result = await controller.removeCartItem(
+        mockRequest,
+        commandProductId,
+      );
       expect(result).toEqual({ data: null });
-      expect(cartsService.removeCartItem).toHaveBeenCalledWith(mockUser.sub, commandProductId);
+      expect(cartsService.removeCartItem).toHaveBeenCalledWith(
+        mockUser.sub,
+        commandProductId,
+      );
     });
   });
 });
