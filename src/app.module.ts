@@ -12,10 +12,10 @@ import { ApiConfigService } from './config/api/config.service';
 import { CorsMiddleware } from './common/middlewares/cors.middleware';
 import { ApiConfigModule } from './config/api/config.module';
 import { FeaturesModule } from './features/features.module';
-import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { JwtConfigModule } from './config/jwt/config.module';
-import { AuthGuard } from './core/guards/auth.guard';
 import { JwtService } from '@nestjs/jwt';
+import { InventoriesModule } from './features/inventories/inventories.module';
 import { SuppliesModule } from './features/supplies/supplies.module';
 
 @Module({
@@ -27,6 +27,7 @@ import { SuppliesModule } from './features/supplies/supplies.module';
     ApiConfigModule,
     JwtConfigModule,
     FeaturesModule,
+    InventoriesModule,
     SuppliesModule,
   ],
   controllers: [AppController],

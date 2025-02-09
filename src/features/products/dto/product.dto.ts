@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose, Type } from 'class-transformer';
-import { PriceJsonItem } from 'src/core/interfaces/app.interface';
 
 @Exclude()
 export class ProductDto {
