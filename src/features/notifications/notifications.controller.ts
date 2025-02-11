@@ -2,12 +2,13 @@ import {
   Controller,
   Post,
   Get,
-  Patch,
   Body,
   UseGuards,
   Param,
   Req,
   Query,
+  Put,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { CreateNotificationDto } from './dto/create-notification.dto';
@@ -75,13 +76,13 @@ export class NotificationsController {
     model: NotificationDto,
     description: 'The notification has been successfully retieved.',
   })
-  async findOne(@Param() id: string) {
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.notificationsService.findOne(id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   async markAsRead(
-    @Param() id: string,
+    @Param('id', ParseUUIDPipe) id: string,
   ): Promise<JsonResponse<NotificationDto>> {
     return this.notificationsService.markAsRead(id);
   }
