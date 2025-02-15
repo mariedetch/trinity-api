@@ -8,10 +8,10 @@ import { RolesGuard } from 'src/core/guards/roles.guard';
 import { JsonResponse } from 'src/common/helpers/json-response.helper';
 import {
   CategoryStatsDto,
-  GlobalProfitDto,
-  GlobalRevenueDto,
-  MonthlyRevenueDto,
+  GlobalStatsDto,
   MonthlyStatsDto,
+  TopCityStatsDto,
+  WeeklyStatsDto,
 } from './dto/stats.dto';
 
 @Controller({ path: 'stats', version: '1' })
@@ -22,38 +22,30 @@ import {
 export class StatsController {
   constructor(private readonly statsService: StatsService) {}
 
-  @Get('commands/monthly')
+  @Get('commands/monthly-stats')
   @ApiOperation({
     summary:
-      'Récupère le nombre de commandes pour chaque mois sur les 12 derniers mois',
+      "Récupère le nombre de commandes et le chiffre d'affaire pour chaque mois sur les 12 derniers mois",
   })
-  async getMonthlyCommandStats(): Promise<JsonResponse<MonthlyStatsDto[]>> {
-    return await this.statsService.getMonthlyCommandStats();
+  async getMonthlyStats(): Promise<JsonResponse<MonthlyStatsDto[]>> {
+    return await this.statsService.getMonthlyCommandAndRevenue();
   }
-
-  @Get('commands/monthly-revenue')
+  
+  @Get('commands/weekly-stats')
   @ApiOperation({
     summary:
-      "Récupère le chiffre d'affaire pour chaque mois sur les 12 derniers mois",
+      "Récupère le nombre de commandes et le chiffre d'affaire pour chaque semaine sur les 8 dernières semaines",
   })
-  async getMonthlyRevenue(): Promise<JsonResponse<MonthlyRevenueDto[]>> {
-    return await this.statsService.getMonthlyRevenue();
+  async getWeeklyStats(): Promise<JsonResponse<WeeklyStatsDto[]>> {
+    return await this.statsService.getWeeklyCommandAndRevenue();
   }
 
-  @Get('commands/global-revenue')
+  @Get('commands/global-stats')
   @ApiOperation({
-    summary: "Récupère le chiffre d'affaire hebdomadaire, mensuel et annuel",
+    summary: "Récupère le chiffre d'affaire, le bénéfice et le total de commandes : hebdomadaire, mensuel et annuel",
   })
-  async getGlobalRevenue(): Promise<JsonResponse<GlobalRevenueDto>> {
-    return await this.statsService.getGlobalRevenue();
-  }
-
-  @Get('commands/global-profit')
-  @ApiOperation({
-    summary: 'Récupère le bénéfice hebdomadaire, mensuel et annuel',
-  })
-  async getGlobalProfit(): Promise<JsonResponse<GlobalProfitDto>> {
-    return await this.statsService.getGlobalProfit();
+  async getGlobalRevenue(): Promise<JsonResponse<GlobalStatsDto>> {
+    return await this.statsService.getGlobalStats();
   }
 
   @Get('customers/monthly')
@@ -61,10 +53,17 @@ export class StatsController {
     summary:
       'Récupère le nombre de nouveaux clients pour chaque mois sur les 12 derniers mois',
   })
-  async getMonthlyNewCustomersStats(): Promise<
-    JsonResponse<MonthlyStatsDto[]>
-  > {
+  async getMonthlyNewCustomersStats(): Promise<JsonResponse<MonthlyStatsDto[]>> {
     return await this.statsService.getMonthlyNewCustomersStats();
+  }
+
+  @Get('customers/top-cities')
+  @ApiOperation({
+    summary:
+      'Récupère les 6 villes qui ont le plus de clients',
+  })
+  async getTopCustomerCities(): Promise<JsonResponse<TopCityStatsDto[]>> {
+    return await this.statsService.getTopCustomerCities();
   }
 
   @Get('commands/category-sales')
