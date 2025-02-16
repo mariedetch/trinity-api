@@ -1,47 +1,46 @@
 export interface MonthlyStatsDto {
   month: string;
   year: number;
-  count: number;
+  orders_count?: number;
+  revenue?: number;
 }
 
-export interface MonthlyRevenueDto {
-  month: string;
+// Interface pour les statistiques hebdomadaires
+export interface WeeklyStatsDto {
+  period: string;        // ex: "13-19 Feb"
+  startDate: string;     // Pour référence interne
+  endDate: string;       // Pour référence interne
   year: number;
-  revenue: number;
+  orders_count?: number;
+  revenue?: number;
 }
 
-export interface GlobalRevenueDto {
+export interface GlobalStatsDto {
   weekly: {
     start_date: string;
     end_date: string;
-    revenue: number;
+    revenue?: number;
+    profit?: number;
+    orders_count?: number;
   };
   monthly: {
     month: string;
     year: number;
-    revenue: number;
+    revenue?: number;
+    profit?: number;
+    orders_count?: number;
   };
   yearly: {
     year: number;
-    revenue: number;
+    revenue?: number;
+    profit?: number;
+    orders_count?: number;
   };
 }
 
-export interface GlobalProfitDto {
-  weekly: {
-    start_date: string;
-    end_date: string;
-    profit: number;
-  };
-  monthly: {
-    month: string;
-    year: number;
-    profit: number;
-  };
-  yearly: {
-    year: number;
-    profit: number;
-  };
+export interface TopCityStatsDto {
+  city: string;
+  customer_count: number;
 }
 
 export interface CategoryStatsDto {
