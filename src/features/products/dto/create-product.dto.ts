@@ -35,7 +35,6 @@ export class CreateProductDto {
   nutriments: any;
 
   @IsArray()
-  @IsString({ each: true })
   @IsNotEmpty({ message: 'La liste des ingrédients est requise' })
   @ApiProperty()
   ingredients: string[];
