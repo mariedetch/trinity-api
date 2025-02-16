@@ -5,6 +5,8 @@ import { Product } from '../../features/products/product.entity';
 import { CommandProduct } from '../../features/commands/command-product.entity';
 import { User } from '../..//features/users/user.entity';
 import { Role } from 'src/features/users/enum';
+import { Payment } from 'src/features/payments/payment.entity';
+import { PaymentMethod, PaymentStatus } from 'src/features/payments/payment.enum';
 
 export default class CommandProductSeeder implements Seeder {
   public async run(
@@ -14,6 +16,7 @@ export default class CommandProductSeeder implements Seeder {
     const userRepository = dataSource.getRepository(User);
     const productRepository = dataSource.getRepository(Product);
     const commandRepository = dataSource.getRepository(Command);
+    const paymentRepository = dataSource.getRepository(Payment);
 
     const commandFactory = factoryManager.get(Command);
     const commandProductFactory = factoryManager.get(CommandProduct);
@@ -21,10 +24,12 @@ export default class CommandProductSeeder implements Seeder {
     const skip = Math.floor(Math.random() * (1 - 20 + 1) + 20);
     const take = Math.floor(Math.random() * (1 - 5 + 1) + 5);
 
+    const methodsPayment = Object.values(PaymentMethod);
+
     const customers = await userRepository.find({
       where: { role: Role.CUSTOMER },
       skip: skip,
-      take: 5,
+      take: 10,
     });
 
     for (const customer of customers) {
@@ -49,6 +54,15 @@ export default class CommandProductSeeder implements Seeder {
       }
 
       commandRepository.save(command);
+      paymentRepository.save({
+        command_id: command.id,
+        customer_id: customer.id,
+        amount: command.total_price_incl,
+        payment_method: methodsPayment[Math.floor(Math.random() * methodsPayment.length)],
+        status: PaymentStatus.PAID,
+        createdAt: command.createdAt,
+        updatedAt: command.updatedAt,
+      });
     }
   }
 }

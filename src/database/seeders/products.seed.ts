@@ -9,7 +9,7 @@ export default class ProductSeeder implements Seeder {
     dataSource: DataSource,
     factoryManager: SeederFactoryManager,
   ): Promise<void> {
-    const productRepository = dataSource.getRepository(Product);
+    /* const productRepository = dataSource.getRepository(Product);
 
     const currentPage = 1,
       fields = 'code,image_url,ingredients,nutriments,product_name',
@@ -29,7 +29,7 @@ export default class ProductSeeder implements Seeder {
 
             if (!existantProduct) {
               const initial_cost = Math.floor(
-                Math.random() * (1000 - 250000 + 1) + 250000,
+                Math.random() * (10 - 2500 + 1) + 2500,
               );
 
               await productRepository.insert({
@@ -52,7 +52,7 @@ export default class ProductSeeder implements Seeder {
           console.log(error);
         }
       }
-    }
+    } */
   }
 }
 

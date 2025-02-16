@@ -25,6 +25,8 @@ export default setSeederFactory(User, async (faker) => {
     },
   ];
   user.password = await bcrypt.hash('password', 10);
+  user.createdAt = faker.date.between("2024-04-01", "2025-02-14");
+  user.updatedAt = user.createdAt;
 
   return user;
 });

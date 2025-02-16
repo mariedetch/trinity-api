@@ -10,6 +10,7 @@ import { InventoriesModule } from './inventories/inventories.module';
 import { StatsModule } from './Stats/stats.module';
 import { SuppliesModule } from './supplies/supplies.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { PaymentsModule } from './payments/payment.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     StatsModule,
     SuppliesModule,
     NotificationsModule,
+    PaymentsModule
   ],
   providers: [],
 })
