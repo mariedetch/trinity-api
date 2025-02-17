@@ -9,7 +9,7 @@ export default class ProductSeeder implements Seeder {
     dataSource: DataSource,
     factoryManager: SeederFactoryManager,
   ): Promise<void> {
-    /* const productRepository = dataSource.getRepository(Product);
+    const productRepository = dataSource.getRepository(Product);
 
     const currentPage = 1,
       fields = 'code,image_url,ingredients,nutriments,product_name',
@@ -52,7 +52,7 @@ export default class ProductSeeder implements Seeder {
           console.log(error);
         }
       }
-    } */
+    }
   }
 }
 

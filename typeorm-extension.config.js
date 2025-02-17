@@ -10,6 +10,7 @@ const AppDataSource = new DataSource({
   database: process.env.DB_DATABASE,
   entities: ['dist/**/*.entity.js'],
   seeds: ['dist/database/seeders/*.js'],
+  factories: ['dist/database/factories/*.js'],
   synchronize: false,
   migrationsRun: true
 });
