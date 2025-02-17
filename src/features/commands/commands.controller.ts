@@ -19,6 +19,7 @@ import { CommandStatus } from './enums';
 import { PaginationResource } from 'src/core/interfaces/pagination-resource.interface';
 import { UpdateCommandStatusDto } from './dto/update-command-status.dto';
 import { CommandProductDto } from './dto/command-products.dto';
+import { SortDirection } from 'src/common/utils/constants';
 
 @Controller({ path: 'commands', version: '1' })
 @ApiTags('Commands')
@@ -35,6 +36,7 @@ export class CommandsController {
   @ApiQuery({ name: 'customer', required: false })
   @ApiQuery({ name: 'start_date', required: false })
   @ApiQuery({ name: 'end_date', required: false })
+  @ApiQuery({ name: 'sortDir', required: false })
   async getCommandList(
     @Req() request: Request,
     @Query('page') page?: string,
@@ -43,6 +45,7 @@ export class CommandsController {
     @Query('customer') customer?: string,
     @Query('start_date') startDate?: string,
     @Query('end_date') endDate?: string,
+    @Query('sortDir') sortDir?: SortDirection,
   ): Promise<JsonResponse<PaginationResource<CommandDto>>> {
     const userId = request['user'].sub;
     const userRole = request['user'].role;
@@ -55,6 +58,7 @@ export class CommandsController {
       startDate: startDate ? new Date(startDate) : undefined,
       endDate: endDate ? new Date(endDate) : undefined,
       user_id: userRole === 'CUSTOMER' ? userId : undefined,
+      sortDir: sortDir ?? 'DESC',
     };
 
     return await this.commandsService.getCommandList(query);

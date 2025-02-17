@@ -7,6 +7,8 @@ import { LoginResponseDto } from './dto/login-response.dto';
 import { Request as ExpressRequest, Response } from 'express';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { LoginThrottlerGuard } from 'src/core/guards/throttler.guard';
+import { Throttle } from '@nestjs/throttler';
 
 @Controller({ path: 'auth', version: '1' })
 @ApiTags('auth')
@@ -14,6 +16,8 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @UseGuards(LoginThrottlerGuard)
   async login(
     @Req() req: ExpressRequest,
     @Res({ passthrough: true }) res: Response,

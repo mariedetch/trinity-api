@@ -10,9 +10,8 @@ export default setSeederFactory(User, async (faker) => {
 
   user.first_name = faker.person.firstName(sex);
   user.last_name = faker.person.lastName(sex);
-  user.email =
-    user.last_name.charAt(0) + user.first_name.split(' ')[0] + '@gmail.com';
-  user.phonenumber = faker.phone.number();
+  user.email = faker.internet.email(user.first_name, user.last_name).toLowerCase();
+  user.phonenumber = faker.phone.number('+229 01 ## ## ## ##');
   user.addresses = [
     {
       country: faker.location.country(),
@@ -25,7 +24,7 @@ export default setSeederFactory(User, async (faker) => {
     },
   ];
   user.password = await bcrypt.hash('password', 10);
-  user.createdAt = faker.date.between("2024-04-01", "2025-02-14");
+  user.createdAt = faker.date.between({ from:"2024-04-01", to:"2025-02-16"});
   user.updatedAt = user.createdAt;
 
   return user;

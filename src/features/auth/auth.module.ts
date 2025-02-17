@@ -11,6 +11,9 @@ import { CsrfConfigService } from 'src/config/csrf/config.service';
 import { JwtConfigService } from 'src/config/jwt/config.service';
 import { JwtConfigModule } from 'src/config/jwt/config.module';
 import { CsrfConfigModule } from 'src/config/csrf/config.module';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
+import { LoginThrottlerGuard } from 'src/core/guards/throttler.guard';
 
 @Module({
   imports: [
@@ -20,9 +23,22 @@ import { CsrfConfigModule } from 'src/config/csrf/config.module';
     JwtModule.register({}),
     JwtConfigModule,
     CsrfConfigModule,
+    ThrottlerModule.forRoot([{
+      ttl: 60000,
+      limit: 15,
+    }]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, UsersService, CsrfConfigService, JwtConfigService],
+  providers: [
+    AuthService,
+    UsersService,
+    CsrfConfigService,
+    JwtConfigService,
+    {
+      provide: APP_GUARD,
+      useClass: LoginThrottlerGuard,
+    },
+  ],
   exports: [JwtModule],
 })
 export class AuthModule {}

@@ -18,6 +18,7 @@ import { PaginationResource } from 'src/core/interfaces/pagination-resource.inte
 import { UpdateCommandStatusDto } from './dto/update-command-status.dto';
 import { plainToClass, plainToInstance } from 'class-transformer';
 import { CommandProductDto } from './dto/command-products.dto';
+import { SortDirection } from 'src/common/utils/constants';
 
 interface CommandListQuery {
   page?: number;
@@ -27,6 +28,7 @@ interface CommandListQuery {
   startDate?: Date;
   endDate?: Date;
   user_id?: string;
+  sortDir?: SortDirection;
 }
 
 @Injectable()
@@ -50,13 +52,14 @@ export class CommandsService {
       startDate,
       endDate,
       user_id,
+      sortDir,
     } = query;
     const skip = (page - 1) * perPage;
 
     const queryBuilder = this.commandRepository
       .createQueryBuilder('command')
       .leftJoinAndSelect('command.user', 'user')
-      .orderBy('command.createdAt', 'DESC')
+      .orderBy('command.createdAt', sortDir)
       .skip(skip)
       .take(perPage);
 
