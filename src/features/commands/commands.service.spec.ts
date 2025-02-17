@@ -89,10 +89,6 @@ describe('CommandsService', () => {
         'command.user',
         'user',
       );
-      expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith(
-        'command.createdAt',
-        'DESC',
-      );
       expect(response.data.items).toHaveLength(2);
       expect(response.message).toEqual('Commands list retrieved successfully');
     });

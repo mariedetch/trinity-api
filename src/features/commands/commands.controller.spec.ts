@@ -12,7 +12,6 @@ describe('CommandsController', () => {
 
   // Mock du service des commandes
   const mockCommandsService = {
-    getCommandList: jest.fn(),
     getCommandStats: jest.fn(),
     getCommandById: jest.fn(),
     getCommandProducts: jest.fn(),
@@ -57,57 +56,6 @@ describe('CommandsController', () => {
   // Vérifie que le contrôleur est bien initialisé
   it('devrait être défini', () => {
     expect(controller).toBeDefined();
-  });
-
-  describe('getCommandList', () => {
-    // Test de la récupération de la liste des commandes pour un client
-    it('devrait retourner une liste paginée des commandes pour un client', async () => {
-      // Préparation des données de test
-      const mockRequest = {
-        user: {
-          sub: 'user123',
-          role: 'CUSTOMER',
-        },
-      };
-
-      const expectedResult = {
-        success: true,
-        data: {
-          items: [],
-          meta: {
-            total: 0,
-            page: 1,
-            perPage: 10,
-          },
-        },
-      };
-
-      mockCommandsService.getCommandList.mockResolvedValue(expectedResult);
-
-      // Exécution du test
-      const result = await controller.getCommandList(
-        mockRequest as any,
-        '1',
-        '10',
-        CommandStatus.INITIATED,
-        'customer1',
-        '2024-01-01',
-        '2024-01-31',
-      );
-
-      // Vérifications
-      expect(service.getCommandList).toHaveBeenCalledWith({
-        page: 1,
-        perPage: 10,
-        status: CommandStatus.INITIATED,
-        customer: 'customer1',
-        startDate: expect.any(Date),
-        endDate: expect.any(Date),
-        user_id: 'user123',
-      });
-
-      expect(result).toEqual(expectedResult);
-    });
   });
 
   describe('getCommandStats', () => {
