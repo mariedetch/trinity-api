@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Request } from 'express';
 import { CartsController } from './carts.controller';
 import { CartsService } from './carts.service';
-import { AddToCartDto } from './dto/add-to-cart.dto';
+import { CreateCartItemDto } from './dto/create-cart-item.dto';
 import { UpdateCartItemDto } from './dto/update-cart-item.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { AuthGuard } from 'src/core/guards/auth.guard';
@@ -57,7 +57,7 @@ describe('CartsController', () => {
   describe('addToCart', () => {
     it('doit ajouter un produit au panier', async () => {
       // Assure-toi d'utiliser le nom de propriété correct (ex: product_id si tel est le DTO)
-      const addToCartDto: AddToCartDto = {
+      const addToCartDto: CreateCartItemDto = {
         product_id: uuidv4(),
         quantity: 2,
       };

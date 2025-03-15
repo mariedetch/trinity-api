@@ -1,4 +1,5 @@
 import {
+  BeforeInsert,
   Column,
   Entity,
   JoinColumn,
@@ -11,6 +12,7 @@ import { CommandProduct } from './command-product.entity';
 import { CommandStatus } from './enums';
 import { User } from '../users/user.entity';
 import { Addresse, CommandMetaData } from 'src/core/interfaces/app.interface';
+import { v4 as uuidv4 } from 'uuid';
 
 @Entity('commands')
 export class Command extends BaseEntity {

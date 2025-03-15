@@ -2,23 +2,22 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
-  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Command } from '../commands/command.entity';
 import { CommandProduct } from '../commands/command-product.entity';
 import { Product } from '../products/product.entity';
-import { AddToCartDto } from './dto/add-to-cart.dto';
+import { CreateCartItemDto, UpdateCartItemDto } from './dto/create-cart-item.dto';
 import { CommandStatus } from '../commands/enums';
 import { v4 as uuidv4 } from 'uuid';
-import { plainToClass } from 'class-transformer';
+import { plainToClass, plainToInstance } from 'class-transformer';
 import {
   JsonResponse,
   successResponse,
 } from 'src/common/helpers/json-response.helper';
-import { CartItem, CartResponseDto } from './dto/cart-response.dto';
-import { UpdateCartItemDto } from './dto/update-cart-item.dto';
+import { CartItemDto } from './dto/cart-item.dto';
+import { CommandDto } from '../commands/dto/command-detail.dto';
 
 @Injectable()
 export class CartsService {
@@ -33,76 +32,28 @@ export class CartsService {
 
   private TVA = 1.18;
 
-  private async convertToDtoWithProducts(
-    command: Command,
-    commandProducts: CommandProduct[],
-  ): Promise<CartResponseDto> {
-    return {
-      command_id: command.id,
-      reference: command.reference,
-      status: command.status,
-      products: commandProducts.map((cp) => ({
-        commandProduct_id: cp.id,
-        id: cp.product_id,
-        name: cp.product.name,
-        picture: cp.product.picture,
-        selling_price: cp.product.selling_price,
-        quantity: cp.quantity,
-      })),
-    };
-  }
-
   // Récupérer le panier d'un user
-  async getCart(userId: string): Promise<JsonResponse<CartResponseDto>> {
-    const command = await this.commandRepository.findOne({
+  async getCart(userId: string): Promise<JsonResponse<CartItemDto[]>> {
+    const command = await this.commandRepository.findOneOrFail({
       where: {
         user_id: userId,
         status: CommandStatus.INITIATED,
       },
+      relations: ['command_products', 'command_products.product'],
     });
-
-    if (!command) {
-      return successResponse(
-        {
-          command_id: null,
-          reference: null,
-          status: null,
-          products: [],
-        },
-        'No active cart found',
-        200,
-      );
-    }
-
-    // Récupérer les produits de la commande
-    const commandProducts = await this.commandProductRepository.find({
-      where: { command_id: command.id },
-      relations: ['product'],
-    });
-
-    const cartDto = await this.convertToDtoWithProducts(
-      command,
-      commandProducts,
-    );
+    const cartDto = plainToInstance(CartItemDto, command.command_products);
 
     return successResponse(cartDto, 'Cart retrieved successfully', 200);
   }
 
   // Route pour ajouter un produit au panier d'un user
   async addToCart(
-    userId: string,
-    addToCartDto: AddToCartDto,
-  ): Promise<JsonResponse<CartItem>> {
+    userId: string, addToCartDto: CreateCartItemDto
+  ): Promise<JsonResponse<CartItemDto>> {
     // Vérifier si le produit existe
-    const product = await this.productRepository.findOne({
+    const product = await this.productRepository.findOneOrFail({
       where: { id: addToCartDto.product_id },
     });
-
-    if (!product) {
-      throw new NotFoundException(
-        `Product with ID ${addToCartDto.product_id} not found`,
-      );
-    }
 
     // Recherche d'une commande existante avec le statut INITIATED
     let command = await this.commandRepository.findOne({
@@ -142,85 +93,25 @@ export class CartsService {
 
     // Ajout du produit dans la commande (insertion dans la table command_products)
     const newProduct = await this.commandProductRepository.save({
+      product: product,
       command_id: command.id,
-      product_id: addToCartDto.product_id,
       quantity: addToCartDto.quantity,
     });
 
     // Retourner le panier mis à jour
-    return successResponse(
-      {
-        commandProduct_id: newProduct.id,
-        id: newProduct.product_id,
-        name: product.name,
-        picture: product.picture,
-        selling_price: product.selling_price,
-        quantity: newProduct.quantity,
-      },
-      'Product added successfully',
-    );
-  }
-
-  // Update d'un produit dans un panier
-  async updateCartItem(
-    userId: string,
-    commandProductId: string,
-    updateCartItemDto: UpdateCartItemDto,
-  ): Promise<JsonResponse<CartItem>> {
-    // Vérifier que le produit existe dans le panier
-    const commandProduct = await this.commandProductRepository.findOne({
-      where: { id: commandProductId },
-      relations: ['command', 'product'],
-    });
-
-    if (!commandProduct) {
-      throw new NotFoundException(
-        `Product with id ${commandProductId} not found in cart`,
-      );
-    }
-
-    // Vérifier que le panier appartient à l'utilisateur
-    if (commandProduct.command.user_id !== userId) {
-      throw new ForbiddenException('You do not have access to this cart item');
-    }
-
-    // Si la quantité est 0, supprimer le produit
-    if (updateCartItemDto.quantity === 0) {
-      await this.commandProductRepository.remove(commandProduct);
-    } else {
-      await this.commandProductRepository.update(commandProductId, {
-        quantity: updateCartItemDto.quantity,
-      });
-    }
-
-    // Récupérer le panier mis à jour
-    return successResponse(
-      {
-        commandProduct_id: commandProduct.id,
-        id: commandProduct.product_id,
-        name: commandProduct.product.name,
-        picture: commandProduct.product.picture,
-        selling_price: commandProduct.product.selling_price,
-        quantity: updateCartItemDto.quantity,
-      },
-      'Product updated successfully',
-    );
+    return successResponse(plainToClass(CartItemDto, newProduct), 'Product added successfully');
   }
 
   // Route pour valider un panier avant payement
-  async validateCart(userId: string): Promise<JsonResponse<CartResponseDto>> {
+  async validateCart(userId: string): Promise<JsonResponse<CommandDto>> {
     // Recherche d'une commande existante avec le statut INITIATED
-    const command = await this.commandRepository.findOne({
+    const command = await this.commandRepository.findOneOrFail({
       where: {
         user_id: userId,
         status: CommandStatus.INITIATED,
       },
       relations: ['command_products'], // Charger les produits associés
     });
-
-    if (!command) {
-      throw new NotFoundException(`Cart Empty`);
-    }
 
     command.command_products.forEach(async (commandItem) => {
       const product = await this.productRepository.findOne({
@@ -247,9 +138,75 @@ export class CartsService {
     const updatedCommand = await this.commandRepository.save(command);
 
     return successResponse(
-      plainToClass(CartResponseDto, updatedCommand),
+      plainToClass(CommandDto, updatedCommand),
       'Cart Validated successfully',
     );
+  }
+
+  async syncCart(
+    userId: string, cartItems: UpdateCartItemDto[]
+  ): Promise<JsonResponse<void>> {
+    const command = await this.commandRepository.findOne({
+      where: {
+        user_id: userId,
+        status: CommandStatus.INITIATED,
+      },
+      relations: ['command_products', 'command_products.product'],
+    });
+
+    if (!command) {
+      const command = await this.commandRepository.save({
+        user_id: userId,
+        reference: `CMD-${uuidv4()}`,
+        status: CommandStatus.INITIATED,
+      })
+
+      const items = cartItems.map(item => {
+        return {
+          command_id: command.id,
+          ...item
+        }
+      })
+
+      await this.commandProductRepository.save(items)
+    }
+
+    else {
+      const existingItemsMap = new Map(
+        command.command_products.map((item) => [item.product.id, item])
+      );
+
+      const updatedItems: CommandProduct[] = [];
+
+      for (const item of cartItems) {
+        const commandProduct = command.command_products.find(
+          cmdProduct => cmdProduct.product_id === item.product_id
+        )
+
+        if (existingItemsMap.has(item.product_id)) {
+          commandProduct.quantity = item.quantity;
+          updatedItems.push(commandProduct);
+        } else {
+          const newItem = this.commandProductRepository.create({
+            command,
+            product_id: item.product_id,
+            quantity: item.quantity
+          });
+          updatedItems.push(newItem);
+        }
+      }
+
+      // Suppression des éléments non présents dans la nouvelle liste
+      const itemsToRemove = Array.from(existingItemsMap.values());
+      if (itemsToRemove.length > 0) {
+        await this.commandProductRepository.remove(itemsToRemove);
+      }
+
+      // Sauvegarde des nouvelles données
+      await this.commandProductRepository.save(updatedItems);
+    }
+
+    return successResponse(null, 'Cart synchronize successfully')
   }
 
   // Supprimer un produit du panier
@@ -257,16 +214,11 @@ export class CartsService {
     userId: string,
     commandProductId: string,
   ): Promise<JsonResponse<void>> {
-    const commandProduct = await this.commandProductRepository.findOne({
+    const commandProduct = await this.commandProductRepository.findOneOrFail({
       where: { id: commandProductId },
       relations: ['command'],
     });
 
-    if (!commandProduct) {
-      throw new NotFoundException(
-        `Product with id ${commandProductId} not found in cart`,
-      );
-    }
     if (commandProduct.command.user_id !== userId) {
       throw new ForbiddenException('You do not have access to this cart item');
     }

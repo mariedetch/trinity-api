@@ -11,13 +11,13 @@ import {
   Delete,
 } from '@nestjs/common';
 import { CartsService } from './carts.service';
-import { AddToCartDto } from './dto/add-to-cart.dto';
+import { CreateCartItemDto, UpdateCartItemDto } from './dto/create-cart-item.dto';
 import { AuthGuard } from 'src/core/guards/auth.guard';
 import { Request } from 'express';
 import { JsonResponse } from 'src/common/helpers/json-response.helper';
-import { CartItem, CartResponseDto } from './dto/cart-response.dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { UpdateCartItemDto } from './dto/update-cart-item.dto';
+import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
+import { CartItemDto } from './dto/cart-item.dto';
+import { CommandDto } from '../commands/dto/command-detail.dto';
 
 @Controller({ path: 'carts', version: '1' })
 @ApiTags('carts')
@@ -29,7 +29,7 @@ export class CartsController {
   @Get()
   async getCart(
     @Req() request: Request,
-  ): Promise<JsonResponse<CartResponseDto>> {
+  ): Promise<JsonResponse<CartItemDto[]>> {
     const userId = request['user'].sub;
     return this.cartsService.getCart(userId);
   }
@@ -37,32 +37,28 @@ export class CartsController {
   @Post('add')
   async addToCart(
     @Req() request: Request,
-    @Body() addToCartDto: AddToCartDto,
-  ): Promise<JsonResponse<CartItem>> {
+    @Body() addToCartDto: CreateCartItemDto,
+  ): Promise<JsonResponse<CartItemDto>> {
     const userId = request['user'].sub;
     return await this.cartsService.addToCart(userId, addToCartDto);
+  }
+
+  @Post('sync')
+  @ApiBody({ type: [UpdateCartItemDto] })
+  async syncCart(
+    @Req() request: Request,
+    @Body() cartItems: Array<UpdateCartItemDto>,
+  ): Promise<JsonResponse<void>> {
+    const userId = request['user'].sub;
+    return await this.cartsService.syncCart(userId, cartItems);
   }
 
   @Put('validate')
   async validateCart(
     @Req() request: Request,
-  ): Promise<JsonResponse<CartResponseDto>> {
+  ): Promise<JsonResponse<CommandDto>> {
     const userId = request['user'].sub;
     return await this.cartsService.validateCart(userId);
-  }
-
-  @Put('item/:id')
-  async updateCartItem(
-    @Req() request: Request,
-    @Param('id', ParseUUIDPipe) commandProductId: string,
-    @Body() updateCartItemDto: UpdateCartItemDto,
-  ): Promise<JsonResponse<CartItem>> {
-    const userId = request['user'].sub;
-    return this.cartsService.updateCartItem(
-      userId,
-      commandProductId,
-      updateCartItemDto,
-    );
   }
 
   @Delete('item/:id')
