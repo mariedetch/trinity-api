@@ -11,6 +11,7 @@ import { StatsModule } from './Stats/stats.module';
 import { SuppliesModule } from './supplies/supplies.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { PaymentsModule } from './payments/payment.module';
+import { FavoritesModule } from './favorites/favorites.module';
 
 @Module({
   imports: [
@@ -25,7 +26,8 @@ import { PaymentsModule } from './payments/payment.module';
     StatsModule,
     SuppliesModule,
     NotificationsModule,
-    PaymentsModule
+    PaymentsModule,
+    FavoritesModule
   ],
   providers: [],
 })
