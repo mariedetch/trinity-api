@@ -20,4 +20,16 @@ export class ApiConfigService {
   get pagination() {
     return this.configService.get('api.pagination');
   }
+
+  get paypalApiUrl() {
+    return this.configService.get('api.aggregators.paypal.api_url');
+  }
+
+  get paypalClientId() {
+    return this.configService.get('api.aggregators.paypal.client_id');
+  }
+
+  get paypalSecretKey() {
+    return this.configService.get('api.aggregators.paypal.secret_key');
+  }
 }

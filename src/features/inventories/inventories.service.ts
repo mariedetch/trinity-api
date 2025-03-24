@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeepPartial, Repository, In, DataSource } from 'typeorm';
+import { DeepPartial, Repository, In } from 'typeorm';
 import { Inventory } from './inventory.entity';
 import { InventoryProduct } from './inventory-product.entity';
 import { Product } from 'src/features/products/product.entity';
@@ -11,7 +11,7 @@ import {
 } from 'src/common/helpers/json-response.helper';
 import { InventoryDto } from './dto/inventory.dto';
 import { UpdateInventoryDto } from './dto/update-inventory.dto';
-import { plainToClass } from 'class-transformer';
+import { plainToClass, plainToInstance } from 'class-transformer';
 import { PaginationResource } from 'src/core/interfaces/pagination-resource.interface';
 import { ProductDto } from 'src/features/products/dto/product.dto';
 import { AbstractCrudService } from 'src/core/services/abstract-crud.service';
@@ -28,6 +28,17 @@ export class InventoriesService
   implements
     CrudService<Inventory, InventoryDto, CreateInventoryDto, UpdateInventoryDto>
 {
+  constructor(
+    @InjectRepository(Inventory)
+    private inventoryRepository: Repository<Inventory>,
+    @InjectRepository(InventoryProduct)
+    private inventoryProductRepository: Repository<InventoryProduct>,
+    @InjectRepository(Product)
+    private productRepository: Repository<Product>
+  ) {
+    super(inventoryRepository);
+  }
+
   /**
    * The name of the entity, used for generating dynamic messages and responses.
    */
@@ -44,28 +55,6 @@ export class InventoriesService
   }
 
   /**
-   * Converts an product or a list of products to their corresponding Data Transfer Object (DTO) representation.
-   *
-   * @param {Product | Product[]} product - The product or list of products to be converted to DTO(s).
-   * @returns {any} - The DTO or list of DTOs corresponding to the provided product/products.
-   */
-  convertPToDto(product: Product | Product[]): any {
-    return plainToClass(ProductDto, product);
-  }
-
-  constructor(
-    @InjectRepository(Inventory)
-    private inventoryRepository: Repository<Inventory>,
-    @InjectRepository(InventoryProduct)
-    private inventoryProductRepository: Repository<InventoryProduct>,
-    @InjectRepository(Product)
-    private productRepository: Repository<Product>,
-    private dataSource: DataSource,
-  ) {
-    super(inventoryRepository);
-  }
-
-  /**
    * Creates a new resource based on the provided createDto data.
    *
    * @param createDto The data required to create the new resource.
@@ -74,7 +63,7 @@ export class InventoriesService
   async createInventory(
     createInventoryDto: CreateInventoryDto,
   ): Promise<JsonResponse<InventoryDto>> {
-    const queryRunner = this.dataSource.createQueryRunner();
+    const queryRunner = this.inventoryRepository.queryRunner;
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
@@ -86,14 +75,12 @@ export class InventoriesService
           today.getDate().toString().padStart(2, '0'),
         10,
       );
-      const inventory = queryRunner.manager.create(Inventory, {
+      const inventory = await queryRunner.manager.save(Inventory, {
         numero: numeroInventory,
         ...(createInventoryDto as DeepPartial<Inventory>),
       });
-      await queryRunner.manager.save(inventory);
 
       const products = await queryRunner.manager.find(Product);
-
       const inventoryProducts = await Promise.all(
         products.map(async (product) => {
           const inventoryProduct = queryRunner.manager.create(
@@ -149,7 +136,7 @@ export class InventoriesService
       where: { id: In(productIds) },
     });
     const result: PaginationResource<ProductDto> = {
-      items: this.convertPToDto(entities),
+      items: plainToInstance(ProductDto, entities),
       currentPage: page,
       perPage,
       total,

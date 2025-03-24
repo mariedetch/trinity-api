@@ -18,7 +18,10 @@ export const CommandFactory = setSeederFactory(
       CommandStatus.SHIPPED,
       CommandStatus.DELIVERED,
     ]);
-    command.createdAt = faker.date.between({ from:"2024-04-01", to:"2025-02-16"});
+    command.createdAt = faker.date.between({
+      from: '2024-04-01',
+      to: '2025-02-16',
+    });
     command.updatedAt = command.createdAt;
 
     command.meta_data = {

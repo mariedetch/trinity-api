@@ -15,5 +15,12 @@ export default () => ({
         parseInt(process.env.API_PAGINATION_DEFAULT_LIMIT, 10) || 10,
       maxLimit: parseInt(process.env.API_PAGINATION_MAX_LIMIT, 10) || 50,
     },
+    aggregators: {
+      paypal: {
+        api_url: process.env.PAYPAL_API_URL,
+        client_id: process.env.PAYPAL_CLIENT_ID,
+        secret_key: process.env.PAYPAL_SECRET_KEY,
+      },
+    },
   },
 });

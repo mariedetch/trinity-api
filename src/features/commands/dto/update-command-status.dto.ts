@@ -1,4 +1,4 @@
-import { IsEnum, ValidateIf } from 'class-validator';
+import { IsEnum, IsNumber, ValidateIf } from 'class-validator';
 import { CommandStatus } from '../enums';
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
@@ -13,5 +13,6 @@ export class UpdateCommandStatusDto {
   @Expose()
   @ApiProperty()
   @ValidateIf((o) => o.new_status === CommandStatus.IN_PROGRESS)
+  @IsNumber()
   shipping_charge: number; // Optionel pour le passage de PAID à IN_PROGRESS
 }

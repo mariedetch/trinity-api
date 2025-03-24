@@ -9,7 +9,12 @@ import {
   UseGuards,
   Patch,
 } from '@nestjs/common';
-import { ApiTags, ApiQuery, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiQuery,
+  ApiOperation,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { ApiDefaultErrorResponse } from 'src/common/decorators/responses/api-default-error-response.decorator';
 import { JsonResponse } from 'src/common/helpers/json-response.helper';
 import { ApiSuccessResponse } from 'src/common/decorators/responses/api-success-response.decorator';
@@ -19,7 +24,12 @@ import { Role } from '../users/enum';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { RolesGuard } from 'src/core/guards/roles.guard';
 import { PaymentService } from './payment.service';
-import { PaymentDto } from './dto/payment.dto';
+import {
+  CapturePaymentDto,
+  InitiatePaymentDto,
+  PaymentDto,
+} from './dto/payment.dto';
+import { PayPalService } from 'src/core/aggregators/paypal/paypal.service';
 
 @Controller({ path: 'payments', version: '1' })
 @UseGuards(AuthGuard, RolesGuard)
@@ -27,6 +37,30 @@ import { PaymentDto } from './dto/payment.dto';
 @ApiBearerAuth('access-token')
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentService) {}
+
+  /**
+   * Route pour initier un paiement PayPal.
+   */
+  @Roles(Role.CUSTOMER)
+  @Post('paypal/initiate')
+  @ApiSuccessResponse({
+    model: PaymentDto,
+    description: 'The payments has been successfully initiated.',
+  })
+  async initiatePayment(@Body() body: InitiatePaymentDto) {
+    return this.paymentsService.initiatePaypalPayment(body.commandId);
+  }
+
+  /**
+   * Route pour capturer un paiement PayPal après validation.
+   */
+  @Post('paypal/capture')
+  async capturePayment(@Body() body: CapturePaymentDto) {
+    return this.paymentsService.capturePaypalPayment(
+      body.orderId,
+      body.commandId,
+    );
+  }
 
   @Get()
   @Roles(Role.MANAGER)

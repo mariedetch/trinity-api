@@ -14,7 +14,7 @@ describe('CommandsController', () => {
   const mockCommandsService = {
     getCommandStats: jest.fn(),
     getCommandById: jest.fn(),
-    getCommandProducts: jest.fn(),
+    getCommandItems: jest.fn(),
     updateCommandStatus: jest.fn(),
   };
 
@@ -99,7 +99,7 @@ describe('CommandsController', () => {
     });
   });
 
-  describe('getCommandProducts', () => {
+  describe('getCommandItems', () => {
     // Test de la récupération des produits d'une commande
     it("devrait retourner la liste des produits d'une commande", async () => {
       const commandId = 'command123';
@@ -121,13 +121,11 @@ describe('CommandsController', () => {
         ],
       };
 
-      mockCommandsService.getCommandProducts.mockResolvedValue(
-        expectedProducts,
-      );
+      mockCommandsService.getCommandItems.mockResolvedValue(expectedProducts);
 
-      const result = await controller.getCommandProducts(commandId);
+      const result = await controller.getCommandItems(commandId);
 
-      expect(service.getCommandProducts).toHaveBeenCalledWith(commandId);
+      expect(service.getCommandItems).toHaveBeenCalledWith(commandId);
       expect(result).toEqual(expectedProducts);
     });
   });

@@ -97,11 +97,13 @@ export class StatsService {
       });
     }
 
-    return months ;
+    return months;
   }
 
   // Route pour obtenir le total de commandes et le chiffre d'affaire pour chaque mois sur les 12 derniers mois ===========
-  async getMonthlyCommandAndRevenue(): Promise<JsonResponse<MonthlyStatsDto[]>> {
+  async getMonthlyCommandAndRevenue(): Promise<
+    JsonResponse<MonthlyStatsDto[]>
+  > {
     const commandResponse = await this.getMonthlyCommandStats();
     const revenueResponse = await this.getMonthlyRevenue();
 
@@ -111,7 +113,7 @@ export class StatsService {
       revenue: revenueResponse[index].revenue,
       orders_count: commandItem.orders_count,
     }));
-  
+
     return {
       status_code: 200,
       timestamp: new Date().toISOString(),
@@ -121,7 +123,9 @@ export class StatsService {
   }
 
   // Route pour avoir le nombre de nouveaux clients pour chaque mois sur les 12 derniers mois ============================
-  async getMonthlyNewCustomersStats(): Promise<JsonResponse<MonthlyStatsDto[]>> {
+  async getMonthlyNewCustomersStats(): Promise<
+    JsonResponse<MonthlyStatsDto[]>
+  > {
     const currentDate = new Date();
     const months = [];
 
@@ -168,9 +172,9 @@ export class StatsService {
     // Créer un Map pour compter les occurrences de chaque ville
     const cityCount = new Map<string, number>();
 
-    users.forEach(user => {
+    users.forEach((user) => {
       if (user.addresses && Array.isArray(user.addresses)) {
-        user.addresses.forEach(address => {
+        user.addresses.forEach((address) => {
           if (address.city) {
             const city = address.state.trim().toLowerCase();
             cityCount.set(city, (cityCount.get(city) || 0) + 1);
@@ -183,7 +187,7 @@ export class StatsService {
     const sortedCities = Array.from(cityCount.entries())
       .map(([city, count]) => ({
         city: city.charAt(0).toUpperCase() + city.slice(1), // Capitalize city name
-        customer_count: count
+        customer_count: count,
       }))
       .sort((a, b) => b.customer_count - a.customer_count)
       .slice(0, 6);
@@ -192,7 +196,7 @@ export class StatsService {
       status_code: 200,
       timestamp: new Date().toISOString(),
       message: 'Top 6 cities with most customers retrieved successfully',
-      data: sortedCities
+      data: sortedCities,
     };
   }
 
@@ -203,7 +207,7 @@ export class StatsService {
 
     for (let i = 0; i < 8; i++) {
       const date = new Date(currentDate);
-      date.setDate(date.getDate() - (i * 7));
+      date.setDate(date.getDate() - i * 7);
 
       // Calculer le début de la semaine (Lundi)
       const startOfWeek = new Date(date);
@@ -229,9 +233,11 @@ export class StatsService {
       // Formater la période pour l'affichage (ex: "13-19 Feb")
       const periodStart = startOfWeek.getDate();
       const periodEnd = endOfWeek.getDate();
-      const startMonth = startOfWeek.toLocaleString('en-US', { month: 'short' });
+      const startMonth = startOfWeek.toLocaleString('en-US', {
+        month: 'short',
+      });
       const endMonth = endOfWeek.toLocaleString('en-US', { month: 'short' });
-      
+
       let period: string;
 
       if (startMonth === endMonth) {
@@ -242,8 +248,8 @@ export class StatsService {
 
       weeks.push({
         period: period,
-        startDate: startOfWeek.toISOString().split('T')[0],  // Garde uniquement la date
-        endDate: endOfWeek.toISOString().split('T')[0],      // Garde uniquement la date
+        startDate: startOfWeek.toISOString().split('T')[0], // Garde uniquement la date
+        endDate: endOfWeek.toISOString().split('T')[0], // Garde uniquement la date
         year: startOfWeek.getFullYear(),
         orders_count: count,
       });
@@ -259,7 +265,7 @@ export class StatsService {
 
     for (let i = 0; i < 8; i++) {
       const date = new Date(currentDate);
-      date.setDate(date.getDate() - (i * 7));
+      date.setDate(date.getDate() - i * 7);
 
       const startOfWeek = new Date(date);
       startOfWeek.setDate(date.getDate() - ((date.getDay() + 6) % 7));
@@ -287,8 +293,8 @@ export class StatsService {
 
       weeks.push({
         period: `${periodStart}-${periodEnd} ${month}`,
-        startDate: startOfWeek.toISOString().split('T')[0],  // Garde uniquement la date
-        endDate: endOfWeek.toISOString().split('T')[0],      // Garde uniquement la date
+        startDate: startOfWeek.toISOString().split('T')[0], // Garde uniquement la date
+        endDate: endOfWeek.toISOString().split('T')[0], // Garde uniquement la date
         year: startOfWeek.getFullYear(),
         revenue: Number(result.revenue),
       });
@@ -319,9 +325,6 @@ export class StatsService {
     };
   }
 
-
-
-  
   // Fonction pour avoir le chiffre d'affaire hebdomadaire, mensuel et annuel =================================================
   async getGlobalRevenue(): Promise<GlobalStatsDto> {
     const currentDate = new Date();
@@ -504,7 +507,7 @@ export class StatsService {
     // Calculer les dates pour la semaine
     const startOfWeek = new Date(currentDate);
     startOfWeek.setDate(
-      currentDate.getDate() - ((currentDate.getDay() + 6) % 7)
+      currentDate.getDate() - ((currentDate.getDay() + 6) % 7),
     );
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(startOfWeek.getDate() + 6);
@@ -586,7 +589,7 @@ export class StatsService {
     const revenueResponse = await this.getGlobalRevenue();
     const profitResponse = await this.getGlobalProfit();
     const ordersResponse = await this.getGlobalOrderCount();
-        
+
     const data: GlobalStatsDto = {
       weekly: {
         start_date: revenueResponse.weekly.start_date,

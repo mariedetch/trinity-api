@@ -13,7 +13,7 @@ export default class ProductSeeder implements Seeder {
 
     const currentPage = 1,
       fields = 'code,image_url,ingredients,nutriments,product_name',
-      url = `https://world.openfoodfacts.org/api/v2/search?page=${currentPage}&page_size=10&fields=${fields}`;
+      url = `https://world.openfoodfacts.org/api/v2/product/{barcode}?page=${currentPage}&page_size=10&fields=${fields}`;
 
     for (const category of PRODUCT_CATEGORIES) {
       const response = await axios.get<FoodFactResponse>(

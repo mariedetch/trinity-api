@@ -5,7 +5,6 @@ import { Notification } from './notification.entity';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { plainToClass } from 'class-transformer';
 import { NotificationDto } from './dto/notification.dto';
-import { NotFoundException } from '@nestjs/common';
 import {
   JsonResponse,
   successResponse,

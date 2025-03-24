@@ -23,10 +23,12 @@ import { LoginThrottlerGuard } from 'src/core/guards/throttler.guard';
     JwtModule.register({}),
     JwtConfigModule,
     CsrfConfigModule,
-    ThrottlerModule.forRoot([{
-      ttl: 60000,
-      limit: 15,
-    }]),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 15,
+      },
+    ]),
   ],
   controllers: [AuthController],
   providers: [

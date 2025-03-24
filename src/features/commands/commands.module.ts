@@ -7,6 +7,7 @@ import { CommandsService } from './commands.service';
 import { ProductsModule } from '../products/products.module';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../users/user.entity';
+import { CommandPaidListener } from './listeners/command-paid.listener';
 
 @Module({
   imports: [
@@ -15,6 +16,6 @@ import { User } from '../users/user.entity';
   ],
   exports: [CommandsService],
   controllers: [CommandsController],
-  providers: [CommandsService, JwtService],
+  providers: [CommandsService, CommandPaidListener, JwtService],
 })
 export class CommandsModule {}

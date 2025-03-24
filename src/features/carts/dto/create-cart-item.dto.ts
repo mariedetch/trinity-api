@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
-import { IsUUID, IsInt, Min } from 'class-validator';
+import { IsUUID, IsInt, Min, IsNumber } from 'class-validator';
 
 @Exclude()
 export class CreateCartItemDto {
@@ -20,17 +20,7 @@ export class CreateCartItemDto {
 export class UpdateCartItemDto {
   @Expose()
   @ApiProperty()
-  @IsUUID()
-  id: string;
-
-  @Expose()
-  @ApiProperty()
-  @IsUUID()
-  product_id: string;
-
-  @Expose()
-  @ApiProperty()
-  @IsInt()
+  @IsNumber()
   @Min(1)
   quantity: number;
 }

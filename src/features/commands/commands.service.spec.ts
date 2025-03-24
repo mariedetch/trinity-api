@@ -148,7 +148,7 @@ describe('CommandsService', () => {
     });
   });
 
-  describe('getCommandProducts', () => {
+  describe('getCommandItems', () => {
     it('should return products of a command', async () => {
       const sampleProducts = [
         {
@@ -163,7 +163,7 @@ describe('CommandsService', () => {
       ];
       commandProductRepository.find.mockResolvedValue(sampleProducts);
 
-      const response = await service.getCommandProducts('1');
+      const response = await service.getCommandItems('1');
 
       expect(commandProductRepository.find).toHaveBeenCalledWith({
         where: { command_id: '1' },

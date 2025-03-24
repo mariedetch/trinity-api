@@ -10,7 +10,6 @@ export default class UserSeeder implements Seeder {
   ): Promise<void> {
     // const userFactory = factoryManager.get(User);
     // await userFactory.saveMany(50);
-
     // const admin = await userFactory.make();
     // admin.role = Role.MANAGER
     // await userFactory.save(admin);

@@ -28,7 +28,7 @@ export class Payment extends BaseEntity {
   payment_method: PaymentMethod;
 
   @Column({ type: 'enum', enum: PaymentStatus, default: PaymentStatus.PENDING })
-  status: PaymentStatus
+  status: PaymentStatus;
 
   @ManyToOne(() => Command)
   @JoinColumn({ name: 'command_id' })

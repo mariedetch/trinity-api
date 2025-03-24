@@ -1543,6 +1543,91 @@ paths:
         '500':
           $ref: "#/components/responses/InternalServerError"
 
+  /payments/paypal/initiate:
+    post:
+      summary: Créer un ordre de paiement PayPal
+      description: |
+        Crée une commande PayPal et retourne un lien de redirection pour le paiement.
+      tags:
+        - Paiements
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount:
+                  type: number
+                  example: 100.00
+                currency:
+                  type: string
+                  example: "EUR"
+                description:
+                  type: string
+                  example: "Achat de produits électroniques"
+      responses:
+        "201":
+          description: Commande PayPal créée avec succès.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  orderId:
+                    type: string
+                    example: "5O190127TN364715T"
+                  approvalUrl:
+                    type: string
+                    example: "https://www.paypal.com/checkoutnow?token=5O190127TN364715T"
+        "400":
+          description: Requête invalide (paramètres manquants ou incorrects).
+        "500":
+          description: Erreur interne du serveur.
+  /payments/paypal/capture:
+    post:
+      summary: Capturer un paiement PayPal
+      description: |
+        Confirme et capture un paiement PayPal après validation par l'utilisateur.
+      tags:
+        - Paiements
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                orderId:
+                  type: string
+                  example: "5O190127TN364715T"
+      responses:
+        "200":
+          description: Paiement capturé avec succès.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transactionId:
+                    type: string
+                    example: "3TR23433KJ123456"
+                  status:
+                    type: string
+                    example: "COMPLETED"
+                  amount:
+                    type: number
+                    example: 100.00
+                  currency:
+                    type: string
+                    example: "EUR"
+        "400":
+          description: Requête invalide (paramètres manquants ou incorrects).
+        "404":
+          description: Paiement non trouvé ou déjà capturé.
+        "500":
+          description: Erreur interne du serveur.
+
   /notifications:
     get:
       summary: "List all notifications for the user"
