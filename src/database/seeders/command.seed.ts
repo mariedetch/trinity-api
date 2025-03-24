@@ -6,7 +6,10 @@ import { CommandProduct } from '../../features/commands/command-product.entity';
 import { User } from '../..//features/users/user.entity';
 import { Role } from 'src/features/users/enum';
 import { Payment } from 'src/features/payments/payment.entity';
-import { PaymentMethod, PaymentStatus } from 'src/features/payments/payment.enum';
+import {
+  PaymentMethod,
+  PaymentStatus,
+} from 'src/features/payments/payment.enum';
 import { PRODUCT_CATEGORIES } from 'src/common/utils/constants';
 
 export default class CommandProductSeeder implements Seeder {
@@ -62,7 +65,8 @@ export default class CommandProductSeeder implements Seeder {
         command_id: command.id,
         customer_id: customer.id,
         amount: command.total_price_incl,
-        payment_method: methodsPayment[Math.floor(Math.random() * methodsPayment.length)],
+        payment_method:
+          methodsPayment[Math.floor(Math.random() * methodsPayment.length)],
         status: PaymentStatus.PAID,
         createdAt: command.createdAt,
         updatedAt: command.updatedAt,

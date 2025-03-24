@@ -59,4 +59,25 @@ export class Command extends BaseEntity {
   @ManyToOne(() => User, (user) => user.commands)
   @JoinColumn({ name: 'user_id' }) // Associe explicitement user_id comme clé étrangère
   user: User;
+
+  canTransitTo(status: CommandStatus): boolean {
+    return (
+      (this.status === CommandStatus.PAID &&
+        status === CommandStatus.IN_PROGRESS) ||
+      (this.status === CommandStatus.IN_PROGRESS &&
+        status === CommandStatus.SHIPPED) ||
+      (this.status === CommandStatus.SHIPPED &&
+        status === CommandStatus.DELIVERED)
+    );
+  }
+
+  setMetaData(status: CommandStatus): void {
+    if (status === CommandStatus.IN_PROGRESS) {
+      this.meta_data.validated_at = new Date();
+    } else if (status === CommandStatus.SHIPPED) {
+      this.meta_data.shipped_at = new Date();
+    } else if (status === CommandStatus.DELIVERED) {
+      this.meta_data.delivered_at = new Date();
+    }
+  }
 }

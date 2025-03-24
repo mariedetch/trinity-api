@@ -6,9 +6,13 @@ import { Command } from '../commands/command.entity';
 import { CommandProduct } from '../commands/command-product.entity';
 import { JwtService } from '@nestjs/jwt';
 import { Product } from '../products/product.entity';
+import { CommandsModule } from '../commands/commands.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Command, CommandProduct, Product])],
+  imports: [
+    CommandsModule,
+    TypeOrmModule.forFeature([Command, CommandProduct, Product]),
+  ],
   controllers: [CartsController],
   providers: [CartsService, JwtService],
 })

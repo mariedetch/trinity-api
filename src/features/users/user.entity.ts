@@ -45,4 +45,8 @@ export class User extends BaseEntity {
     const salt = await bcrypt.genSalt();
     this.password = await bcrypt.hash(password || this.password, salt);
   }
+
+  getFullName() {
+    return this.first_name + ' ' + this.last_name;
+  }
 }

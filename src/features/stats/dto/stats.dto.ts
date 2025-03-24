@@ -7,9 +7,9 @@ export interface MonthlyStatsDto {
 
 // Interface pour les statistiques hebdomadaires
 export interface WeeklyStatsDto {
-  period: string;        // ex: "13-19 Feb"
-  startDate: string;     // Pour référence interne
-  endDate: string;       // Pour référence interne
+  period: string; // ex: "13-19 Feb"
+  startDate: string; // Pour référence interne
+  endDate: string; // Pour référence interne
   year: number;
   orders_count?: number;
   revenue?: number;

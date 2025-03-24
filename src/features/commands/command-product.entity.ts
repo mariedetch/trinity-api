@@ -4,12 +4,14 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  Unique,
 } from 'typeorm';
 import { BaseEntity } from '../../core/entities/base.entity';
 import { Command } from './command.entity';
 import { Product } from '../products/product.entity';
 
 @Entity('command_products')
+@Unique(['command_id', 'product_id'])
 export class CommandProduct extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -42,4 +44,11 @@ export class CommandProduct extends BaseEntity {
   @ManyToOne(() => Product)
   @JoinColumn({ name: 'product_id' })
   product: Product;
+
+  validate() {
+    this.unit_price_excl = this.product.selling_price;
+    this.unit_price_incl = this.product.selling_price * 1.8;
+    (this.total_price_excl = this.unit_price_excl * this.quantity),
+      (this.total_price_incl = this.unit_price_incl * this.quantity);
+  }
 }

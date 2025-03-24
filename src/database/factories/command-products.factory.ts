@@ -13,9 +13,9 @@ export const CommandProductFactory = setSeederFactory(
     commandProduct.unit_price_excl = meta.product.selling_price;
     commandProduct.unit_price_incl = meta.product.selling_price * 1.18;
     commandProduct.total_price_excl =
-    commandProduct.unit_price_excl * commandProduct.quantity;
+      commandProduct.unit_price_excl * commandProduct.quantity;
     commandProduct.total_price_incl =
-    commandProduct.unit_price_incl * commandProduct.quantity;
+      commandProduct.unit_price_incl * commandProduct.quantity;
 
     return commandProduct;
   },

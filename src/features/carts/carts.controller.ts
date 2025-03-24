@@ -11,7 +11,10 @@ import {
   Delete,
 } from '@nestjs/common';
 import { CartsService } from './carts.service';
-import { CreateCartItemDto, UpdateCartItemDto } from './dto/create-cart-item.dto';
+import {
+  CreateCartItemDto,
+  UpdateCartItemDto,
+} from './dto/create-cart-item.dto';
 import { AuthGuard } from 'src/core/guards/auth.guard';
 import { Request } from 'express';
 import { JsonResponse } from 'src/common/helpers/json-response.helper';
@@ -27,9 +30,7 @@ export class CartsController {
   constructor(private readonly cartsService: CartsService) {}
 
   @Get()
-  async getCart(
-    @Req() request: Request,
-  ): Promise<JsonResponse<CartItemDto[]>> {
+  async getCart(@Req() request: Request): Promise<JsonResponse<CartItemDto[]>> {
     const userId = request['user'].sub;
     return this.cartsService.getCart(userId);
   }
@@ -43,14 +44,18 @@ export class CartsController {
     return await this.cartsService.addToCart(userId, addToCartDto);
   }
 
-  @Post('sync')
-  @ApiBody({ type: [UpdateCartItemDto] })
-  async syncCart(
+  @Put('item/:id/')
+  async updateCartItem(
     @Req() request: Request,
-    @Body() cartItems: Array<UpdateCartItemDto>,
-  ): Promise<JsonResponse<void>> {
+    @Param('id', ParseUUIDPipe) commandProductId: string,
+    @Body() updateCartItemDto: UpdateCartItemDto,
+  ): Promise<JsonResponse<CartItemDto>> {
     const userId = request['user'].sub;
-    return await this.cartsService.syncCart(userId, cartItems);
+    return this.cartsService.updateCartItem(
+      userId,
+      commandProductId,
+      updateCartItemDto,
+    );
   }
 
   @Put('validate')

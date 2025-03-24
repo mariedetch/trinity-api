@@ -20,15 +20,19 @@ import { PaginationResource } from 'src/core/interfaces/pagination-resource.inte
 import { UpdateCommandStatusDto } from './dto/update-command-status.dto';
 import { CommandProductDto } from './dto/command-products.dto';
 import { SortDirection } from 'src/common/utils/constants';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { Role } from '../users/enum';
+import { RolesGuard } from 'src/core/guards/roles.guard';
 
 @Controller({ path: 'commands', version: '1' })
 @ApiTags('Commands')
-@UseGuards(AuthGuard) // Il s'applique à toutes les routes
+@UseGuards(AuthGuard, RolesGuard) // Il s'applique à toutes les routes
 @ApiBearerAuth('access-token')
 export class CommandsController {
   constructor(private readonly commandsService: CommandsService) {}
 
   @Get()
+  @Roles(Role.MANAGER)
   @ApiDefaultErrorResponse()
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'perPage', required: false })
@@ -65,6 +69,7 @@ export class CommandsController {
   }
 
   @Get('g/stats')
+  @Roles(Role.MANAGER)
   @ApiDefaultErrorResponse()
   async getCommandStats(): Promise<JsonResponse<CommandStatsDto>> {
     return await this.commandsService.getCommandStats();
@@ -79,13 +84,14 @@ export class CommandsController {
   }
 
   @Get(':id/products')
-  async getCommandProducts(
+  async getCommandItems(
     @Param('id') commandId: string,
   ): Promise<JsonResponse<CommandProductDto[]>> {
-    return await this.commandsService.getCommandProducts(commandId);
+    return await this.commandsService.getCommandItems(commandId);
   }
 
   @Put(':id')
+  @Roles(Role.MANAGER)
   async updateCommandStatus(
     @Param('id') commandId: string,
     @Body() updateDto: UpdateCommandStatusDto,
