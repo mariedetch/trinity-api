@@ -1,7 +1,11 @@
 import { IsString, IsPhoneNumber, IsEmail } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { PrimaryGeneratedColumn } from 'typeorm';
 
 export class Addresses {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
   @IsString()
   @ApiProperty({ example: 'Bénin', description: 'Your Country' })
   country: string;

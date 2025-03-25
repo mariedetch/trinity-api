@@ -26,14 +26,6 @@ export class User extends BaseEntity {
   password: string;
 
   @Column({ type: 'json', nullable: true })
-  payment_methods: {
-    card_number: string;
-    expiry_date: string;
-    holder_name: string;
-    security_code: string;
-  }[];
-
-  @Column({ type: 'json', nullable: true })
   addresses: Addresse[];
 
   // Relation avec Command

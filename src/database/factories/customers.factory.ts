@@ -16,6 +16,7 @@ export default setSeederFactory(User, async (faker) => {
   user.phonenumber = faker.phone.number('+229 01 ## ## ## ##');
   user.addresses = [
     {
+      id: faker.string.uuid(),
       country: faker.location.country(),
       address: faker.location.streetAddress(),
       city: faker.location.city(),
