@@ -14,7 +14,9 @@ import { CsrfConfigModule } from 'src/config/csrf/config.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { LoginThrottlerGuard } from 'src/core/guards/throttler.guard';
-
+import { ConfigModule } from '@nestjs/config';
+import { VerificationCodeModule } from '../verification-code/verification-code.module';
+import { MailService } from 'src/core/services/mail.service';
 @Module({
   imports: [
     UsersModule,
@@ -23,6 +25,8 @@ import { LoginThrottlerGuard } from 'src/core/guards/throttler.guard';
     JwtModule.register({}),
     JwtConfigModule,
     CsrfConfigModule,
+    VerificationCodeModule,
+    ConfigModule,
     ThrottlerModule.forRoot([
       {
         ttl: 60000,
@@ -36,6 +40,7 @@ import { LoginThrottlerGuard } from 'src/core/guards/throttler.guard';
     UsersService,
     CsrfConfigService,
     JwtConfigService,
+    MailService,
     {
       provide: APP_GUARD,
       useClass: LoginThrottlerGuard,

@@ -55,3 +55,24 @@ export class ProductDto {
   // @ApiProperty()
   // updatedAt: Date; // Date de dernière mise à jour
 }
+
+
+export class OpenFoodProductDto {
+  @ApiProperty({ description: 'Barcode of the product'})
+  bar_code: string;
+
+  @ApiProperty({ description: 'Product name' })
+  name: string;
+
+  @ApiProperty({ description: 'Product nutrients information'})
+  nutriments?: Record<string, any>;
+
+  @ApiProperty({ description: 'Product ingredients'})
+  ingredients?: string;
+
+  @ApiProperty({ description: 'Product image URL'})
+  picture?: string;
+
+  @ApiProperty({ description: 'Source of the data', example: 'openfood' })
+  source: string = 'Openfood';
+}

@@ -32,4 +32,24 @@ export class ApiConfigService {
   get paypalSecretKey() {
     return this.configService.get('api.aggregators.paypal.secret_key');
   }
+
+  get mailHost() {
+    return this.configService.get('api.mail.host')
+  }
+
+  get mailPort() {
+    return this.configService.get('api.mail.port')
+  }
+
+  get mailSecure() {
+    return this.configService.get('api.mail.secure')
+  }
+
+  get mailUser() {
+    return this.configService.get('api.mail.user')
+  }
+
+  get mailPassword() {
+    return this.configService.get('api.mail.password')
+  }
 }

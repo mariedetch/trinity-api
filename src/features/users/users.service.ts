@@ -3,6 +3,7 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { plainToClass } from 'class-transformer';
+import * as bcrypt from 'bcrypt';
 import { CrudService } from 'src/core/services/crud-service.interface';
 import { AbstractCrudService } from 'src/core/services/abstract-crud.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -50,5 +51,16 @@ export class UsersService
         'addresses',
       ],
     });
+  }
+
+  async updatePassword(userId: string, password: string) {
+
+    // Hasher le nouveau mot de passe
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    return await this.userRepository.update(
+      { id: userId },
+      { password: hashedPassword },
+    );
   }
 }
