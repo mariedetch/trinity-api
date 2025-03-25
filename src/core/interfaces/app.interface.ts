@@ -14,6 +14,7 @@ export interface CommandMetaData {
 }
 
 export interface Addresse {
+  id: string;
   country: string;
   address: string;
   city: string;

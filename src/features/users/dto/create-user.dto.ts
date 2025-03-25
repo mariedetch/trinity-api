@@ -13,7 +13,6 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { Role } from '../enum';
-import { PaymentMethod } from './payment-methods.dto';
 import { Addresses } from './addresses.dto';
 
 export class CreateUserDto {
@@ -53,15 +52,6 @@ export class CreateUserDto {
     message: 'password too weak',
   })
   password: string;
-
-  @ValidateNested({ each: true })
-  @IsOptional()
-  @Type(() => PaymentMethod)
-  @ApiProperty({
-    type: PaymentMethod,
-    isArray: true,
-  })
-  payment_methods: PaymentMethod[];
 
   @ValidateNested({ each: true })
   @IsOptional()

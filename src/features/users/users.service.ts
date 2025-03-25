@@ -47,7 +47,6 @@ export class UsersService
         'phonenumber',
         'email',
         'password',
-        'payment_methods',
         'addresses',
       ],
     });
