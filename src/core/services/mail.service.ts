@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
-import { ApiConfigService } from 'src/config/api/config.service';
-import { resetPasswordTemplate } from 'src/features/auth/templates/reset-password.template';
 import { logger } from '../logger/winston.logger';
+import { ConfigService } from '@nestjs/config';
 
 export interface MailData {
   from?: string,
@@ -16,15 +15,15 @@ export interface MailData {
 export class MailService {
   private transporter: nodemailer.Transporter;
 
-  constructor(private configService: ApiConfigService) {
+  constructor(private configService: ConfigService) {
     // Configurer nodemailer
     this.transporter = nodemailer.createTransport({
-      host: this.configService.mailHost,
-      port: this.configService.mailHost,
-      secure: this.configService.mailSecure,
+      host: this.configService.get('MAIL_HOST'),
+      port: this.configService.get('MAIL_PORT'),
+      secure: this.configService.get('MAIL_SECURE') === 'true',
       auth: {
-        user: this.configService.mailUser,
-        pass: this.configService.mailPassword,
+        user: this.configService.get('MAIL_USER'),
+        pass: this.configService.get('MAIL_PASS'),
       },
     });
   }
