@@ -9,6 +9,9 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { LoginThrottlerGuard } from 'src/core/guards/throttler.guard';
 import { Throttle } from '@nestjs/throttler';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { ForgotPasswordDto, ResetPasswordDto } from './dto/forgot-password.dto';
+import { VerifyCodeDto } from '../verification-code/dto/verify-code.dto';
 
 @Controller({ path: 'auth', version: '1' })
 @ApiTags('auth')
@@ -45,6 +48,39 @@ export class AuthController {
   async getAuthUser(@Req() req: ExpressRequest) {
     const payload = req['user'];
     return await this.authService.getAuthUser(payload);
+  }
+
+  @Post('change-password')
+  @ApiBearerAuth('access-token')
+  @UseGuards(AuthGuard)
+  async changePassword(
+    @Req() req: ExpressRequest,
+    @Body() changePasswordDto: ChangePasswordDto,
+  ): Promise<JsonResponse<null>> {
+    const user_id = req['user'].sub;
+    const user_email = req['user'].email;
+    return await this.authService.changePassword(user_id, user_email, changePasswordDto);
+  }
+
+  @Post('forgot-password')
+  async forgotPassword(
+    @Body() forgotPasswordDto: ForgotPasswordDto,
+  ): Promise<JsonResponse<null>> {
+    return await this.authService.sendResetPasswordEmail(forgotPasswordDto);
+  }
+  
+  @Post('verify-reset-code')
+  async verifyResetCode(
+    @Body() verifyCodeDto: VerifyCodeDto,
+  ): Promise<JsonResponse<null>> {
+    return await this.authService.verifyResetCode(verifyCodeDto);
+  }
+  
+  @Post('reset-password')
+  async setNewPassword(
+    @Body() resetPasswordDto: ResetPasswordDto,
+  ): Promise<JsonResponse<null>> {
+    return await this.authService.setNewPassword(resetPasswordDto);
   }
 
   @Post('logout')

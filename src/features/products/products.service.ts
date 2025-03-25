@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { AbstractCrudService } from 'src/core/services/abstract-crud.service';
 import { Product } from './product.entity';
-import { ProductDto } from './dto/product.dto';
+import { OpenFoodProductDto, ProductDto } from './dto/product.dto';
 import { plainToClass } from 'class-transformer';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
@@ -24,6 +24,7 @@ import { PriceJsonItem } from 'src/core/interfaces/app.interface';
 import { ProductStatsDto } from './dto/product-stats.dto';
 import { ProductOrderHistoryDto } from './dto/product-orders.dto';
 import { SortDirection } from 'src/common/utils/constants';
+import axios from 'axios';
 
 @Injectable()
 export class ProductsService
@@ -179,6 +180,67 @@ export class ProductsService
       `${this.entityName}s retrieved successfully`,
     );
   }
+
+  // Route pour trouver un produit par son barcode
+  async findByBarcode(barcode: string): Promise<JsonResponse<ProductDto | OpenFoodProductDto>> {
+    try {
+      // Search in database first
+      const entity = await this.repository.findOneBy({ bar_code: barcode } as any);
+      
+      if (entity) {
+        return successResponse(
+          this.convertToDto(entity),
+          `${this.entityName} retrieved successfully from database`,
+        );
+      }
+      
+      // If not found in database, search in OpenFood API
+      const openFoodProduct = await this.fetchFromOpenFood(barcode);
+      
+      if (openFoodProduct) {
+        return successResponse(
+          openFoodProduct,
+          `${this.entityName} retrieved from OpenFood API`,
+        );
+      }
+      
+      // If not found anywhere
+      throw new NotFoundException(`${this.entityName} with barcode ${barcode} not found`);
+      
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(`Error retrieving ${this.entityName}: ${error.message}`);
+    }
+  }
+
+  // Fonction pour trouver le produit le produit sur OpenFood grâce au barcode 
+  private async fetchFromOpenFood(barcode: string): Promise<OpenFoodProductDto | null> {
+    try {
+      const url = `https://world.openfoodfacts.org/api/v2/product/${barcode}?fields=code,product_name,nutriments,ingredients_text_en,ingredients_text,image_url`
+      const response = await axios.get(url);
+      
+      if (response.status === 200 && response.data.status === 1) {
+        const product = response.data.product;
+        
+        return {
+          bar_code: barcode,
+          name: product.product_name || 'Unknown product',
+          nutriments: product.nutriments || {},
+          ingredients: product.ingredients_text_en || product.ingredients_text || '',
+          picture: product.image_url || '',
+          source: 'Openfood'
+        };
+      }
+      
+      return null;
+    } catch (error) {
+      console.log(`Failed to fetch product from OpenFood API: ${error.message}`);
+      return null;
+    }
+  }
+
 
   // fonction pour avoir les statistiques des produits
   async getProductStats(): Promise<JsonResponse<ProductStatsDto>> {

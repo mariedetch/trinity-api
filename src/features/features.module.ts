@@ -11,11 +11,13 @@ import { StatsModule } from './stats/stats.module';
 import { SuppliesModule } from './supplies/supplies.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { PaymentsModule } from './payments/payment.module';
+import { VerificationCodeModule } from './verification-code/verification-code.module';
 import { FavoritesModule } from './favorites/favorites.module';
 
 @Module({
   imports: [
     ProductsModule,
+    VerificationCodeModule,
     AuthModule,
     UsersModule,
     ProfilesModule,

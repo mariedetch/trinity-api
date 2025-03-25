@@ -21,7 +21,7 @@ import {
 } from '@nestjs/swagger';
 import { ApiDefaultErrorResponse } from 'src/common/decorators/responses/api-default-error-response.decorator';
 import { ApiSuccessResponse } from 'src/common/decorators/responses/api-success-response.decorator';
-import { ProductDto } from './dto/product.dto';
+import { OpenFoodProductDto, ProductDto } from './dto/product.dto';
 import { JsonResponse } from 'src/common/helpers/json-response.helper';
 import { PaginationResource } from 'src/core/interfaces/pagination-resource.interface';
 import { ProductStatsDto } from './dto/product-stats.dto';
@@ -112,6 +112,21 @@ export class ProductsController {
     return this.productsService.findOne(id);
   }
 
+
+  @Get('barcode/:barcode')
+  @ApiDefaultErrorResponse()
+  @ApiSuccessResponse({
+    model: ProductDto,
+    description: 'The product has been successfully retrieved from database.',
+    type: 'object'
+  })
+  findByBarcode(
+    @Param('barcode') barcode: string,
+  ): Promise<JsonResponse<ProductDto | OpenFoodProductDto>> {
+    return this.productsService.findByBarcode(barcode);
+  }
+
+  
   @Put(':id')
   @Roles(Role.MANAGER)
   @ApiDefaultErrorResponse()

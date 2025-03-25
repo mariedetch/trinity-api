@@ -22,5 +22,12 @@ export default () => ({
         secret_key: process.env.PAYPAL_SECRET_KEY,
       },
     },
+    mail: {
+      host: process.env.MAIL_HOST,
+      port: parseInt(process.env.MAIL_HOST),
+      secure: process.env.MAIL_SECURE || true,
+      user: process.env.MAIL_USER,
+      password: process.env.MAIL_PASS,
+    }
   },
 });
