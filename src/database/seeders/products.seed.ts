@@ -52,7 +52,7 @@ export default class ProductSeeder implements Seeder {
           console.log(error);
         }
       }
-    } */
+    }
   }
 }
 
