@@ -20,11 +20,14 @@ import { JwtService } from '@nestjs/jwt';
 import { Request as ExpressRequest, Response } from 'express';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { ForgotPasswordDto, ResetPasswordDto } from './dto/forgot-password.dto';
+import { CompleteRegistrationDto, RegisterEmailDto, VerifyRegistrationCodeDto } from './dto/register-user.dto';
 import { VerifyCodeDto } from '../verification-code/dto/verify-code.dto';
 import { VerificationCodeService } from '../verification-code/verification-code.service';
 import { VerificationCodeType } from '../verification-code/verification-code.entity';
 import { MailService } from 'src/core/services/mail.service';
 import { resetPasswordTemplate } from './templates/reset-password.template';
+import { registrationVerificationTemplate } from './templates/registration.template';
+import { Role } from '../users/enum';
 
 
 @Injectable()
@@ -275,7 +278,6 @@ export class AuthService {
   }
 
 
-
   // Définir un nouveau mot de passe
   async setNewPassword(resetPasswordDto: ResetPasswordDto): Promise<JsonResponse<null>> {
     const { email, newPassword, confirmPassword } = resetPasswordDto;
@@ -314,6 +316,102 @@ export class AuthService {
       null,
       'Mot de passe réinitialisé avec succès',
       200,
+    );
+  }
+
+  // Envoyer un code de vérification par mail pour le register
+  async registerEmail(registerEmailDto: RegisterEmailDto): Promise<JsonResponse<null>> {
+    const { email } = registerEmailDto;
+    
+    // Vérifier que l'email n'est pas déjà utilisé
+    const existingUser = await this.usersService.findByEmail(email);
+    if (existingUser) {
+      return successResponse(
+        null,
+        'Un compte avec cet email existe déjà',
+        400,
+      );
+    }
+    
+    // Générer un code et le stocker avec une expiration (30 minutes)
+    const registrationCode = await this.verificationCodeService.createVerificationCode(
+      email,
+      VerificationCodeType.REGISTRATION
+    );
+    
+    const emailSent = await this.mailservice.sendMail({
+      to: email,
+      subject: 'Code de vérification pour votre inscription',
+      body: registrationVerificationTemplate(registrationCode)
+    });
+
+    if (!emailSent) {
+      throw new InternalServerErrorException("Échec lors de l'envoi de l'email");
+    }
+  
+    return successResponse(
+      undefined,
+      'Un code de vérification a été envoyé à votre adresse email',
+      200,
+    );
+  }
+
+  // Vérifier le code envoyé par mail pour le register
+  async verifyRegistrationCode(verifyRegistrationCodeDto: VerifyRegistrationCodeDto): Promise<JsonResponse<null>> {
+    const { email, code } = verifyRegistrationCodeDto;
+    
+    try {
+      await this.verificationCodeService.verifyCode(
+        email, 
+        code, 
+        VerificationCodeType.REGISTRATION
+      );
+
+      return successResponse(
+        null,
+        'Code de vérification validé',
+        200,
+      );
+    } catch (error) {
+      throw new UnauthorizedException('Code de vérification invalide ou expiré');
+    }
+  }
+
+  // Créer le user dans la table si le code est validé
+  async completeRegistration(completeRegistrationDto: CompleteRegistrationDto): Promise<JsonResponse<null>> {
+    const { email, last_name, first_name, phonenumber, password } = completeRegistrationDto;
+    
+    // Vérifier que le code a été validé
+    const isVerified = await this.verificationCodeService.isCodeVerified(
+      email,
+      VerificationCodeType.REGISTRATION
+    );
+    
+    if (!isVerified) {
+      throw new UnauthorizedException("Vous devez d'abord valider votre code d'inscription");
+    }
+    
+    // Créer l'utilisateur
+    await this.usersService.create({
+      last_name,
+      first_name,
+      email,
+      phonenumber,
+      password,
+      role: Role.CUSTOMER,
+      addresses: null
+    });
+    
+    // Supprimer le code de vérification
+    await this.verificationCodeService.removeVerifiedCode(
+      email,
+      VerificationCodeType.REGISTRATION
+    );
+    
+    return successResponse(
+      null,
+      'Inscription réussie',
+      201,
     );
   }
 
