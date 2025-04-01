@@ -12,6 +12,7 @@ import { Throttle } from '@nestjs/throttler';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { ForgotPasswordDto, ResetPasswordDto } from './dto/forgot-password.dto';
 import { VerifyCodeDto } from '../verification-code/dto/verify-code.dto';
+import { CompleteRegistrationDto, RegisterEmailDto, VerifyRegistrationCodeDto } from './dto/register-user.dto';
 
 @Controller({ path: 'auth', version: '1' })
 @ApiTags('auth')
@@ -81,6 +82,27 @@ export class AuthController {
     @Body() resetPasswordDto: ResetPasswordDto,
   ): Promise<JsonResponse<null>> {
     return await this.authService.setNewPassword(resetPasswordDto);
+  }
+
+  @Post('register/request-code')
+  async registerEmail(
+    @Body() registerEmailDto: RegisterEmailDto,
+  ): Promise<JsonResponse<null>> {
+    return await this.authService.registerEmail(registerEmailDto);
+  }
+
+  @Post('register/verify-code')
+  async verifyRegistrationCode(
+    @Body() verifyRegistrationCodeDto: VerifyRegistrationCodeDto,
+  ): Promise<JsonResponse<null>> {
+    return await this.authService.verifyRegistrationCode(verifyRegistrationCodeDto);
+  }
+
+  @Post('register/complete')
+  async completeRegistration(
+    @Body() completeRegistrationDto: CompleteRegistrationDto,
+  ): Promise<JsonResponse<null>> {
+    return await this.authService.completeRegistration(completeRegistrationDto);
   }
 
   @Post('logout')
