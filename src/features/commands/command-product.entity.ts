@@ -47,8 +47,8 @@ export class CommandProduct extends BaseEntity {
 
   validate() {
     this.unit_price_excl = this.product.selling_price;
-    this.unit_price_incl = this.product.selling_price * 1.8;
-    (this.total_price_excl = this.unit_price_excl * this.quantity),
-      (this.total_price_incl = this.unit_price_incl * this.quantity);
+    this.unit_price_incl = parseFloat((this.product.selling_price * 1.8).toFixed(2));
+    this.total_price_excl = parseFloat((this.unit_price_excl * this.quantity).toFixed(2));
+    this.total_price_incl = parseFloat((this.unit_price_incl * this.quantity).toFixed(2));
   }
 }
