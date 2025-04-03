@@ -46,7 +46,6 @@ export class CartsService {
     private datasource: DataSource
   ) {}
 
-  // convertToDto()
 
   /**
    * Retrieves the cart for a specific user.

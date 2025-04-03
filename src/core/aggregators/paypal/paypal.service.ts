@@ -40,11 +40,11 @@ export class PayPalService {
           custom_id: command.id,
           amount: {
             currency_code: 'USD',
-            value: command.total_price_incl,
+            value: parseFloat(command.total_price_incl.toFixed(2)),
             breakdown: {
               item_total: {
                 currency_code: 'USD',
-                value: command.total_price_incl,
+                value: parseFloat(command.total_price_incl.toFixed(2)),
               },
             },
           },
