@@ -12,8 +12,8 @@ export default class ProductSeeder implements Seeder {
     const productRepository = dataSource.getRepository(Product);
 
     const currentPage = 1,
-      fields = 'code,image_url,ingredients,nutriments,product_name',
-      url = `https://world.openfoodfacts.org/api/v2/search?page=${currentPage}&page_size=10&fields=${fields}`;
+      fields = 'code,image_url,ingredients,nutriments,product_name,product_name_en',
+      url = `https://world.openfoodfacts.org/api/v2/search?page=${currentPage}&page_size=10&lc=en&fields=${fields}`;
 
     for (const category of PRODUCT_CATEGORIES) {
       const response = await axios.get<FoodFactResponse>(
@@ -22,7 +22,7 @@ export default class ProductSeeder implements Seeder {
 
       for (const product of response.data.products) {
         try {
-          if (product.product_name) {
+          if (product.product_name_en) {
             const existantProduct = await productRepository.existsBy({
               bar_code: parseInt(product.code),
             });
@@ -34,7 +34,7 @@ export default class ProductSeeder implements Seeder {
 
               await productRepository.insert({
                 bar_code: parseInt(product.code),
-                name: product.product_name,
+                name: product.product_name_en,
                 category: category.name,
                 nutriments: product.nutriments ?? {},
                 ingredients: product.ingredients ?? [],
@@ -64,5 +64,6 @@ export interface FoodFactResponse {
     ingredients: [];
     nutriments: object;
     product_name: string;
+    product_name_en: string;
   }[];
 }

@@ -17,7 +17,7 @@ export default class CommandProductSeeder implements Seeder {
     dataSource: DataSource,
     factoryManager: SeederFactoryManager,
   ): Promise<void> {
-    const userRepository = dataSource.getRepository(User);
+    /* const userRepository = dataSource.getRepository(User);
     const productRepository = dataSource.getRepository(Product);
     const commandRepository = dataSource.getRepository(Command);
     const paymentRepository = dataSource.getRepository(Payment);
@@ -71,6 +71,6 @@ export default class CommandProductSeeder implements Seeder {
         createdAt: command.createdAt,
         updatedAt: command.updatedAt,
       });
-    }
+    } */
   }
 }
