@@ -32,7 +32,6 @@ export class CommandsController {
   constructor(private readonly commandsService: CommandsService) {}
 
   @Get()
-  @Roles(Role.MANAGER)
   @ApiDefaultErrorResponse()
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'perPage', required: false })

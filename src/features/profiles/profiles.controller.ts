@@ -33,7 +33,7 @@ export class ProfilesController {
   @UseGuards(AuthGuard)
   async getProfile(@Req() req: ExpressRequest) {
     const payload = req['user'];
-    return await this.profilesService.getProfile(payload);
+    return await this.profilesService.getProfile(payload.sub);
   }
 
   @Put()
